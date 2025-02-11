@@ -10,8 +10,8 @@ export default function MapScreen() {
   const [region, setRegion] = useState<Region>({
     latitude: 36.2048,
     longitude: 138.2529,
-    latitudeDelta: 0.02,
-    longitudeDelta: 0.02,
+    latitudeDelta: 0.001,
+    longitudeDelta: 0.001,
   })
   const [isFirstUpdate, setIsFirstUpdate] = useState(true); // ✅ 初回更新フラグ
 
