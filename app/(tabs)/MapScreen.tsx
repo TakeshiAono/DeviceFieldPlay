@@ -6,13 +6,15 @@ import { useState, useEffect, useMemo } from 'react';
 import * as Location from 'expo-location';
 import MapView, { Region } from 'react-native-maps';
 
+const initialJapanRegion = {
+  latitude: 36.2048,
+  longitude: 138.2529,
+  latitudeDelta: 0.001,
+  longitudeDelta: 0.001,
+}
+
 export default function MapScreen() {
-  const [region, setRegion] = useState<Region>({
-    latitude: 36.2048,
-    longitude: 138.2529,
-    latitudeDelta: 0.001,
-    longitudeDelta: 0.001,
-  })
+  const [region, setRegion] = useState<Region>(initialJapanRegion)
   const [isFirstUpdate, setIsFirstUpdate] = useState(true); // ✅ 初回更新フラグ
 
   useEffect(() => {
@@ -40,8 +42,8 @@ export default function MapScreen() {
 
           event.persist()
           setRegion({
-              latitude: event.nativeEvent.coordinate?.latitude ?? 36.2048,
-              longitude: event.nativeEvent.coordinate?.longitude ?? 138.2529,
+              latitude: event.nativeEvent.coordinate?.latitude ?? initialJapanRegion.latitude,
+              longitude: event.nativeEvent.coordinate?.longitude ?? initialJapanRegion.longitude,
               latitudeDelta: region.latitudeDelta,
               longitudeDelta: region.longitudeDelta,
             }
