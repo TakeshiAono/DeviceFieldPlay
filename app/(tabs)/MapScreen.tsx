@@ -1,4 +1,4 @@
-import { StyleSheet, Image, Platform, Text, View, Button } from "react-native";
+import { StyleSheet, Button } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useState, useEffect, useRef } from "react";
@@ -6,9 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import * as Location from "expo-location";
 import MapView, {
   LatLng,
-  MapPolygon,
   Marker,
-  Polygon,
   Polyline,
   Region,
 } from "react-native-maps";
