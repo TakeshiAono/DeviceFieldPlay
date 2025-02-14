@@ -1,4 +1,6 @@
-{
+import 'dotenv/config';
+
+export default {
   "expo": {
     "name": "DeviceFieldPlay",
     "slug": "DeviceFieldPlay",
@@ -8,6 +10,11 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "extra": {
+      "awsAccessKeyId": process.env.AWS_ACCESS_KEY_ID,
+      "awsSecretAccessKey": process.env.AWS_SECRET_ACCESS_KEY,
+      "awsRegion": process.env.AWS_REGION,
+    },
     "ios": {
       "supportsTablet": true
     },
