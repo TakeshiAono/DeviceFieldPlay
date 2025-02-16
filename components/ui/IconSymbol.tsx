@@ -13,13 +13,9 @@ const MAPPING = {
   'paperplane.fill': 'send',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
-  'map.fill': "location-pin"
-} as Partial<
-  Record<
-    import('expo-symbols').SymbolViewProps['name'],
-    React.ComponentProps<typeof MaterialIcons>['name']
-  >
->;
+  'map.fill': "location-pin",
+  'save.fill': "save-as"
+} as const;
 
 export type IconSymbolName = keyof typeof MAPPING;
 

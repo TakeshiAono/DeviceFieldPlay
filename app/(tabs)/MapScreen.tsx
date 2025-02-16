@@ -1,5 +1,6 @@
-import { StyleSheet, Button } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Button } from '@rneui/themed';
 
 import { useState, useEffect, useRef } from "react";
 
@@ -10,6 +11,10 @@ import MapView, {
   Polyline,
   Region,
 } from "react-native-maps";
+import { dynamoTagGamesPut } from "@/utils/APIs";
+import { IconSymbol } from "@/components/ui/IconSymbol";
+
+export type Marker = LatLng & { key: number }
 
 const initialJapanRegion = {
   latitude: 36.2048,
@@ -20,7 +25,8 @@ const initialJapanRegion = {
 
 export default function MapScreen() {
   const [region, setRegion] = useState<Region>(initialJapanRegion);
-  const [markers, setMarkers] = useState<(LatLng & { key: number })[]>([]);
+  const [markers, setMarkers] = useState<Marker[]>([]);
+  const [gameId, setGameId] = useState("");
   const i = useRef(1);
   const [isFirstUpdate, setIsFirstUpdate] = useState(true); // ✅ 初回更新フラグ
 
@@ -42,7 +48,17 @@ export default function MapScreen() {
 
   return (
     <SafeAreaView>
-      <Button title={"リセット"} onPress={resetMarkers} />
+      {/* TODO: 設定画面ができた時に移動させる */}
+      <View style={{position: "absolute", top: 100, right: 5, zIndex: 1}}>
+        <View style={{display: "flex", gap: 5}}>
+          <Button type="solid" onPress={async () => {
+            const gameId = await dynamoTagGamesPut(markers)
+            setGameId(gameId)
+          }}>
+            <IconSymbol size={28} name={"save.fill"} color={"white"} />
+          </Button>
+        </View>
+      </View>
       <MapView
         style={styles.map}
         showsUserLocation={true}
