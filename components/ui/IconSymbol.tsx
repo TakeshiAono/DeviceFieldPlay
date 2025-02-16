@@ -15,7 +15,8 @@ const MAPPING = {
   'chevron.right': 'chevron-right',
   'map.fill': "location-pin",
   'save.fill': "save-as",
-  'reset': "restart-alt"
+  'reset': "restart-alt",
+  'qr': "qr-code-2"
 } as const;
 
 export type IconSymbolName = keyof typeof MAPPING;

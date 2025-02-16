@@ -1,8 +1,8 @@
 import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from '@rneui/themed';
-
 import { useState, useEffect, useRef } from "react";
+import QRCode from "react-native-qrcode-svg";
 
 import * as Location from "expo-location";
 import MapView, {
@@ -13,6 +13,7 @@ import MapView, {
 } from "react-native-maps";
 import { dynamoTagGamesPut } from "@/utils/APIs";
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import ReactNativeModal from "react-native-modal";
 
 export type Marker = LatLng & { key: number }
 
@@ -27,8 +28,10 @@ export default function MapScreen() {
   const [region, setRegion] = useState<Region>(initialJapanRegion);
   const [markers, setMarkers] = useState<Marker[]>([]);
   const [gameId, setGameId] = useState("");
-  const i = useRef(1);
+  const [qrVisible, setQrVisible] = useState(false);
   const [isFirstUpdate, setIsFirstUpdate] = useState(true); // ✅ 初回更新フラグ
+
+  const i = useRef(1);
 
   useEffect(() => {
     async function confirmPermission() {
@@ -49,6 +52,23 @@ export default function MapScreen() {
   return (
     <SafeAreaView>
       {/* TODO: 設定画面ができた時に移動させる */}
+      <ReactNativeModal style={{margin: "auto"}} isVisible={qrVisible}>
+        <View style={{backgroundColor: "white", width: 330, padding: 20}}>
+          {gameId ? 
+            <>
+              <Text style={{fontSize: 30}}>参加QR</Text>
+              <Text>{"友達にスキャンしてもらい\nゲームに参加してもらいましょう"}</Text>
+              <View style={{alignItems: "center", marginVertical: 20}}>
+                <QRCode size={150} value={gameId} />
+              </View>
+            </>
+            : <></>}
+          <Button type="solid" color={"red"} onPress={() => {setQrVisible(false)}}>
+            閉じる
+          </Button>
+        </View>
+      </ReactNativeModal>
+      {/* TODO: 設定画面ができた時に移動させる */}
       <View style={{position: "absolute", top: 100, right: 5, zIndex: 1}}>
         <View style={{display: "flex", gap: 5}}>
           <Button type="solid" onPress={async () => {
@@ -59,6 +79,9 @@ export default function MapScreen() {
           </Button>
           <Button type="solid" onPress={resetMarkers}>
             <IconSymbol size={28} name={"reset"} color={"white"} />
+          </Button>
+          <Button type="solid" onPress={() => {setQrVisible(true)}}>
+            <IconSymbol size={28} name={"qr"} color={"white"} />
           </Button>
         </View>
       </View>
