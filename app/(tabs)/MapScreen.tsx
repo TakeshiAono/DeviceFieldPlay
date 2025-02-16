@@ -57,6 +57,9 @@ export default function MapScreen() {
           }}>
             <IconSymbol size={28} name={"save.fill"} color={"white"} />
           </Button>
+          <Button type="solid" onPress={resetMarkers}>
+            <IconSymbol size={28} name={"reset"} color={"white"} />
+          </Button>
         </View>
       </View>
       <MapView
