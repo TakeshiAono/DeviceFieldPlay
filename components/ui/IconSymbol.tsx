@@ -16,7 +16,8 @@ const MAPPING = {
   'map.fill': "location-pin",
   'save.fill': "save-as",
   'reset': "restart-alt",
-  'qr': "qr-code-2"
+  'qr': "qr-code-2",
+  'camera': "photo-camera",
 } as const;
 
 export type IconSymbolName = keyof typeof MAPPING;

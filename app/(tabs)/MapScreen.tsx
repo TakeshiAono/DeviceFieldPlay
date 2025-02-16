@@ -14,6 +14,7 @@ import MapView, {
 import { dynamoTagGamesPut } from "@/utils/APIs";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import ReactNativeModal from "react-native-modal";
+import { CameraView } from "expo-camera";
 
 export type Marker = LatLng & { key: number }
 
@@ -29,6 +30,7 @@ export default function MapScreen() {
   const [markers, setMarkers] = useState<Marker[]>([]);
   const [gameId, setGameId] = useState("");
   const [qrVisible, setQrVisible] = useState(false);
+  const [cameraVisible, setCameraVisible] = useState(false);
   const [isFirstUpdate, setIsFirstUpdate] = useState(true); // ✅ 初回更新フラグ
 
   const i = useRef(1);
@@ -52,23 +54,7 @@ export default function MapScreen() {
   return (
     <SafeAreaView>
       {/* TODO: 設定画面ができた時に移動させる */}
-      <ReactNativeModal style={{margin: "auto"}} isVisible={qrVisible}>
-        <View style={{backgroundColor: "white", width: 330, padding: 20}}>
-          {gameId ? 
-            <>
-              <Text style={{fontSize: 30}}>参加QR</Text>
-              <Text>{"友達にスキャンしてもらい\nゲームに参加してもらいましょう"}</Text>
-              <View style={{alignItems: "center", marginVertical: 20}}>
-                <QRCode size={150} value={gameId} />
-              </View>
-            </>
-            : <></>}
-          <Button type="solid" color={"red"} onPress={() => {setQrVisible(false)}}>
-            閉じる
-          </Button>
-        </View>
-      </ReactNativeModal>
-      {/* TODO: 設定画面ができた時に移動させる */}
+      <Text style={{color: "red"}}>{gameId}</Text>
       <View style={{position: "absolute", top: 100, right: 5, zIndex: 1}}>
         <View style={{display: "flex", gap: 5}}>
           <Button type="solid" onPress={async () => {
@@ -82,6 +68,9 @@ export default function MapScreen() {
           </Button>
           <Button type="solid" onPress={() => {setQrVisible(true)}}>
             <IconSymbol size={28} name={"qr"} color={"white"} />
+          </Button>
+          <Button type="solid" onPress={() => {setCameraVisible(true)}}>
+            <IconSymbol size={28} name={"camera"} color={"white"} />
           </Button>
         </View>
       </View>
@@ -144,6 +133,42 @@ export default function MapScreen() {
           strokeColor="blue" // 線の色
         />
       </MapView>
+      {/* TODO: 設定画面ができた時に移動させる */}
+      <ReactNativeModal style={{margin: "auto"}} isVisible={qrVisible}>
+        <View style={{backgroundColor: "white", width: 330, padding: 20}}>
+          {gameId ? 
+            <>
+              <Text style={{fontSize: 30}}>参加QR</Text>
+              <Text>{"友達にスキャンしてもらい\nゲームに参加してもらいましょう"}</Text>
+              <View style={{alignItems: "center", marginVertical: 20}}>
+                <QRCode size={150} value={gameId} />
+              </View>
+            </>
+            : <></>}
+          <Button type="solid" color={"red"} onPress={() => {setQrVisible(false)}}>
+            閉じる
+          </Button>
+        </View>
+      </ReactNativeModal>
+      <ReactNativeModal style={{margin: "auto"}} isVisible={cameraVisible}>
+        <View style={{backgroundColor: "white", width: 330, padding: 20}}>
+          <CameraView
+            style={{width: 250, height: 300, marginHorizontal: "auto", marginBottom: 20}}
+            barcodeScannerSettings={{
+              barcodeTypes: ["qr"],
+            }}
+            onBarcodeScanned={(scanningResult) => {
+              console.log(scanningResult.data)
+              setCameraVisible(false)
+              setGameId(scanningResult.data)
+            }}
+            facing={"back"}
+          />
+          <Button type="solid" color={"red"} onPress={() => {setCameraVisible(false)}}>
+            閉じる
+          </Button>
+        </View>
+      </ReactNativeModal>
     </SafeAreaView>
   );
 }
