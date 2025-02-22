@@ -58,13 +58,13 @@ export default function MapScreen() {
             const gameId = await dynamoTagGamesPut(markers)
             setGameId(gameId)
           }}>
-            <IconSymbol size={28} name={"save.fill"} color={"white"} />
+            <IconSymbol size={28} name={"mappin.and.ellipse"} color={"white"} />
           </Button>
           <Button type="solid" onPress={resetMarkers}>
-            <IconSymbol size={28} name={"reset"} color={"white"} />
+            <IconSymbol size={28} name={"arrow.counterclockwise"} color={"white"} />
           </Button>
           <Button type="solid" onPress={() => {setQrVisible(true)}}>
-            <IconSymbol size={28} name={"qr"} color={"white"} />
+            <IconSymbol size={28} name={'qrcode'} color={"white"} />
           </Button>
           <Button type="solid" onPress={() => {setCameraVisible(true)}}>
             <IconSymbol size={28} name={"camera"} color={"white"} />
