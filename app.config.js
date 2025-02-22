@@ -39,6 +39,20 @@ export default {
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "カメラの権限を許可してください"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "位置情報の取得を許可してください",
+          "locationWhenInUsePermission":  "位置情報の取得を許可してください",
+          "locationAlwaysPermission": "位置情報の取得を許可してください"
+        }
       ]
     ],
     "experiments": {

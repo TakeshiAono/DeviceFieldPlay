@@ -14,7 +14,7 @@ import MapView, {
 import { dynamoTagGamesPut } from "@/utils/APIs";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import ReactNativeModal from "react-native-modal";
-import { CameraView } from "expo-camera";
+import { CameraView, useCameraPermissions } from "expo-camera";
 
 export type Marker = LatLng & { key: number }
 
@@ -26,6 +26,8 @@ const initialJapanRegion = {
 };
 
 export default function MapScreen() {
+  const [permission, requestPermission] = useCameraPermissions();
+
   const [region, setRegion] = useState<Region>(initialJapanRegion);
   const [markers, setMarkers] = useState<Marker[]>([]);
   const [gameId, setGameId] = useState("");
@@ -36,15 +38,10 @@ export default function MapScreen() {
   const i = useRef(1);
 
   useEffect(() => {
-    async function confirmPermission() {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        return;
-      }
+    if(permission && !permission.granted) {
+      requestPermission()
     }
-
-    confirmPermission();
-  }, []);
+  }, [permission])
 
   const resetMarkers = () => {
     i.current = 1;
