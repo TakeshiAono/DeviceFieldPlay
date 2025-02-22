@@ -34,7 +34,7 @@ export default function Map({
   const pinCount = useRef(1);
 
   useEffect(() => {
-    if (gameId) return;
+    if (!gameId) return;
 
     dynamoTagGamesGet(gameId)
       .then((res) => {
