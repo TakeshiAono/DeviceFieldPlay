@@ -165,7 +165,9 @@ export default function Map({
               </View>
             </>
           ) : (
-            <></>
+            <View style={{height: 100}}>
+              <Text style={{ fontSize: 15 }}>{"ゲームグループQRを表示するためには\nゲームをスタートしてください"}</Text>
+            </View>
           )}
           <Button
             type="solid"
@@ -180,6 +182,7 @@ export default function Map({
       </ReactNativeModal>
       <ReactNativeModal style={{ margin: "auto" }} isVisible={cameraVisible}>
         <View style={{ backgroundColor: "white", width: 330, padding: 20 }}>
+          <Text style={{ fontSize: 18 }}>{"QRを読み込ませてもらって\nゲームグループに参加しましょう!!"}</Text>
           <CameraView
             style={{
               width: 250,
