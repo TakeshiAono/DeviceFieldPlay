@@ -9,11 +9,17 @@ import { OpaqueColorValue, StyleProp, ViewStyle } from 'react-native';
 const MAPPING = {
   // See MaterialIcons here: https://icons.expo.fyi
   // See SF Symbols in the SF Symbols app on Mac.
+  // keyはiOSで使用するSF Symbols 6のアイコン名を記入し(https://github.com/andrewtavis/sf-symbols-online)
+  // valueにはAndroidで使用するMaterial Symbolsのアイコン名を記入する。(https://fonts.google.com/icons?selected=Material+Symbols+Outlined:qr_code:FILL@0;wght@400;GRAD@0;opsz@24&icon.size=24&icon.color=%235f6368&icon.platform=ios)
   'house.fill': 'home',
   'paperplane.fill': 'send',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
-  'map.fill': "location-pin"
+  'map.fill': "location-pin",
+  'camera': "photo-camera",
+  'qrcode': "qr-code",
+  'arrow.counterclockwise': 'restart-alt',
+  "mappin.and.ellipse": "pin-drop"
 } as Partial<
   Record<
     import('expo-symbols').SymbolViewProps['name'],
