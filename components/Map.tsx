@@ -71,6 +71,7 @@ export default function Map({
               color={"white"}
             />
           </Button>
+          {/* TODO: MapコンポーネントにQR表示ボタンとカメラ起動ボタンがあるのは適切ではないため、Mapコンポーネント外に切りだす(マップ上に表示しない) */}
           <Button
             type="solid"
             onPress={() => {
@@ -150,6 +151,7 @@ export default function Map({
           />
         </MapView>
       )}
+      {/* TODO: MapコンポーネントにQR表示ボタンとカメラ起動ボタンの移動に伴いQRモーダルとカメラモーダルも移設する */}
       <ReactNativeModal style={{ margin: "auto" }} isVisible={qrVisible}>
         <View style={{ backgroundColor: "white", width: 330, padding: 20 }}>
           {gameId ? (
