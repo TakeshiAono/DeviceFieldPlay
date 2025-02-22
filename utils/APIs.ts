@@ -30,7 +30,7 @@ export const dynamoTagGamesGet = async (id: string) => {
     });
     const response = await docClient.send(command);
     console.log("dynamoTagGamesGet:", response);
-    return response;
+    return response.Item;
   } catch (error) {
     console.log(error);
     throw error

@@ -50,10 +50,8 @@ export default {
         "expo-location",
         {
           "locationAlwaysAndWhenInUsePermission": "位置情報の取得を許可してください",
-          "locationWhenInUsePermission":  "位置情報の取得を許可してください",
-          "locationAlwaysPermission": "位置情報の取得を許可してください"
         }
-      ]
+      ],
     ],
     "experiments": {
       "typedRoutes": true
