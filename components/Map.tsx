@@ -43,7 +43,7 @@ export default function Map({ mapVisible = true, deviceId }: Props) {
         array.pop();
         setMarkers(array);
       })
-      .catch((e) => console.log(e));
+      .catch((e) => console.error(e));
   }, [gameId]);
 
   const resetMarkers = () => {
@@ -78,7 +78,7 @@ export default function Map({ mapVisible = true, deviceId }: Props) {
               .then(() => {
                 console.log("通知設定をdynamoへセット完了")
               })
-              .catch((e) => console.log(e));
+              .catch((e) => console.error(e));
             }}
           >
             <IconSymbol size={28} name={"mappin.and.ellipse"} color={"white"} />

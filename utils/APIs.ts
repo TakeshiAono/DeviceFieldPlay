@@ -37,7 +37,7 @@ export const getTagGames = async (id: string) => {
     console.log("getTagGames:", response);
     return response.Item;
   } catch (error) {
-    console.log("getTagGames:", error);
+    console.error("getTagGames:", error);
     throw error;
   }
 };
@@ -57,7 +57,7 @@ export const putTagGames = async (item: Marker[]) => {
     console.log("putTagGames:", response);
     return gameId;
   } catch (error) {
-    console.log("putTagGames:", error);
+    console.error("putTagGames:", error);
     throw error;
   }
 };
@@ -76,7 +76,7 @@ export const putDevices = async (gameId: String, deviceId: String) => {
     console.log("putDevices:", response);
     return gameId;
   } catch (error) {
-    console.log("putDevices:", error);
+    console.error("putDevices:", error);
     throw error;
   }
 };
