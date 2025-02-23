@@ -6,13 +6,14 @@ import MapView, { LatLng, Marker, Polyline, Region } from "react-native-maps";
 import ReactNativeModal from "react-native-modal";
 import { CameraView } from "expo-camera";
 
-import { dynamoTagGamesGet, dynamoTagGamesPut } from "@/utils/APIs";
+import { getTagGames, patchDevices, putDevices, putTagGames } from "@/utils/APIs";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 
 export type Marker = LatLng & { key: number };
 export type Props = {
-  mapVisible?: boolean
-}
+  mapVisible?: boolean;
+  deviceId?: string;
+};
 
 const initialJapanRegion = {
   latitude: 36.2048,
@@ -21,9 +22,7 @@ const initialJapanRegion = {
   longitudeDelta: 0.001,
 };
 
-export default function Map({
-  mapVisible = true
-}: Props) {
+export default function Map({ mapVisible = true, deviceId }: Props) {
   const [region, setRegion] = useState<Region>(initialJapanRegion);
   const [markers, setMarkers] = useState<Marker[]>([]);
   const [gameId, setGameId] = useState("");
@@ -32,11 +31,12 @@ export default function Map({
   const [isFirstUpdate, setIsFirstUpdate] = useState(true);
 
   const pinCount = useRef(1);
+  const firstScan = useRef(true);
 
   useEffect(() => {
     if (!gameId) return;
 
-    dynamoTagGamesGet(gameId)
+    getTagGames(gameId)
       .then((res) => {
         // TODO: 配列形式でdynamoに保存したはずが、取り出すとオブジェクト形式になっているため改善したい
         const array = Object.values(res as Object);
@@ -51,6 +51,18 @@ export default function Map({
     setMarkers([]);
   };
 
+  const setDataSettings = ({data}: {data: string}) => {
+    // NOTE: カメラモーダルを閉じた際にtrueに戻します。
+    // NOTE: QRが画面上にある限り廉造スキャンしてしまうので最初のスキャン以外は早期リターンしている
+    if(!firstScan.current || !deviceId) return
+
+    firstScan.current = false
+    console.log(data);
+    setCameraVisible(false);
+    setGameId(data);
+    patchDevices(data, deviceId)
+  }
+
   return (
     <>
       <View style={{ position: "absolute", top: 150, right: 5, zIndex: 1 }}>
@@ -58,8 +70,15 @@ export default function Map({
           <Button
             type="solid"
             onPress={async () => {
-              const gameId = await dynamoTagGamesPut(markers);
+              const gameId = await putTagGames(markers);
               setGameId(gameId);
+
+              if(!deviceId) return
+              putDevices(gameId, deviceId)
+              .then(() => {
+                console.log("通知設定をdynamoへセット完了")
+              })
+              .catch((e) => console.log(e));
             }}
           >
             <IconSymbol size={28} name={"mappin.and.ellipse"} color={"white"} />
@@ -165,8 +184,12 @@ export default function Map({
               </View>
             </>
           ) : (
-            <View style={{height: 100}}>
-              <Text style={{ fontSize: 15 }}>{"ゲームグループQRを表示するためには\nゲームをスタートしてください"}</Text>
+            <View style={{ height: 100 }}>
+              <Text style={{ fontSize: 15 }}>
+                {
+                  "ゲームグループQRを表示するためには\nゲームをスタートしてください"
+                }
+              </Text>
             </View>
           )}
           <Button
@@ -182,7 +205,9 @@ export default function Map({
       </ReactNativeModal>
       <ReactNativeModal style={{ margin: "auto" }} isVisible={cameraVisible}>
         <View style={{ backgroundColor: "white", width: 330, padding: 20 }}>
-          <Text style={{ fontSize: 18 }}>{"QRを読み込ませてもらって\nゲームグループに参加しましょう!!"}</Text>
+          <Text style={{ fontSize: 18 }}>
+            {"QRを読み込ませてもらって\nゲームグループに参加しましょう!!"}
+          </Text>
           <CameraView
             style={{
               width: 250,
@@ -193,11 +218,7 @@ export default function Map({
             barcodeScannerSettings={{
               barcodeTypes: ["qr"],
             }}
-            onBarcodeScanned={(scanningResult) => {
-              console.log(scanningResult.data);
-              setCameraVisible(false);
-              setGameId(scanningResult.data);
-            }}
+            onBarcodeScanned={setDataSettings}
             facing={"back"}
           />
           <Button
@@ -205,6 +226,7 @@ export default function Map({
             color={"red"}
             onPress={() => {
               setCameraVisible(false);
+              firstScan.current = true
             }}
           >
             閉じる
@@ -212,7 +234,7 @@ export default function Map({
         </View>
       </ReactNativeModal>
     </>
-  )
+  );
 }
 
 const styles = StyleSheet.create({

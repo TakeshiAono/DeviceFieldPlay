@@ -1,13 +1,21 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import * as Location from "expo-location";
 import { useCameraPermissions } from "expo-camera";
+import * as Notifications from "expo-notifications";
 
 import Map from "@/components/Map";
 
 export default function MapScreen() {
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const [locationPermissionStatus, setLocationPermissionStatus] = useState("");
+
+  const deviceId = useRef("");
+
+  Notifications.getDevicePushTokenAsync().then(({ data }) => {
+    console.log("deviceId:", data);
+    deviceId.current = data;
+  });
 
   useEffect(() => {
     async function getCurrentLocation() {
@@ -39,7 +47,7 @@ export default function MapScreen() {
   return (
     <SafeAreaView>
       {/* TODO: 設定画面ができた時に設定画面にマップを出力させたい */}
-      <Map mapVisible={isDisplayMap()} />
+      <Map mapVisible={isDisplayMap()} deviceId={deviceId.current} />
     </SafeAreaView>
   );
 }

@@ -1,12 +1,17 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { PutCommand, DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
-import 'react-native-get-random-values';
-import { v4 as uuidv4 } from 'uuid';
+import {
+  PutCommand,
+  DynamoDBDocumentClient,
+  GetCommand,
+  UpdateCommand,
+} from "@aws-sdk/lib-dynamodb";
+import "react-native-get-random-values";
+import { v4 as uuidv4 } from "uuid";
 
-import Constants from 'expo-constants';
-import { Marker } from "@/app/(tabs)/MapScreen";
+import Constants from "expo-constants";
+import { Marker } from "@/components/Map";
 
-const AWS_ACCESS_KEY_ID = Constants.expoConfig?.extra?.awsAccessKeyId
+const AWS_ACCESS_KEY_ID = Constants.expoConfig?.extra?.awsAccessKeyId;
 const AWS_SECRET_ACCESS_KEY = Constants.expoConfig?.extra?.awsSecretAccessKey;
 const AWS_REGION = Constants.expoConfig?.extra?.awsRegion;
 
@@ -15,12 +20,12 @@ const client = new DynamoDBClient({
     accessKeyId: AWS_ACCESS_KEY_ID,
     secretAccessKey: AWS_SECRET_ACCESS_KEY,
   },
-  region: AWS_REGION
+  region: AWS_REGION,
 });
 
 const docClient = DynamoDBDocumentClient.from(client);
 
-export const dynamoTagGamesGet = async (id: string) => {
+export const getTagGames = async (id: string) => {
   try {
     const command = new GetCommand({
       TableName: "tagGames",
@@ -29,30 +34,74 @@ export const dynamoTagGamesGet = async (id: string) => {
       },
     });
     const response = await docClient.send(command);
-    console.log("dynamoTagGamesGet:", response);
+    console.log("getTagGames:", response);
     return response.Item;
   } catch (error) {
-    console.log(error);
-    throw error
+    console.log("getTagGames:", error);
+    throw error;
   }
 };
 
-export const dynamoTagGamesPut = async (item: Marker[]) => {
+export const putTagGames = async (item: Marker[]) => {
   try {
-    const gameId = uuidv4()
+    const gameId = uuidv4();
     const command = new PutCommand({
       TableName: "tagGames",
       Item: {
         id: gameId,
-        ...item
+        ...item,
       },
     });
-  
+
     const response = await docClient.send(command);
-    console.log("dynamoTagGamesPut",response);
+    console.log("putTagGames:", response);
     return gameId;
   } catch (error) {
-    console.log(error)
-    throw error
+    console.log("putTagGames:", error);
+    throw error;
+  }
+};
+
+export const putDevices = async (gameId: String, deviceId: String) => {
+  try {
+    const command = new PutCommand({
+      TableName: "devices",
+      Item: {
+        gameId: gameId,
+        deviceIds: [deviceId],
+      },
+    });
+
+    const response = await docClient.send(command);
+    console.log("putDevices:", response);
+    return gameId;
+  } catch (error) {
+    console.log("putDevices:", error);
+    throw error;
+  }
+};
+
+export const patchDevices = async (gameId: string, deviceId: string) => {
+  try {
+    const command = new UpdateCommand({
+      TableName: "devices",
+      Key: { gameId: gameId }, // 🔹 更新対象のキー
+      UpdateExpression: "SET #deviceIds = list_append(if_not_exists(#deviceIds, :emptyList), :newDevice)",
+      ExpressionAttributeNames: {
+        "#deviceIds": "deviceIds", // 🔹 予約語を回避
+      },
+      ExpressionAttributeValues: {
+        ":newDevice": [deviceId], // 🔹 追加する `deviceId`
+        ":emptyList": [],         // 🔹 `deviceIds` が未定義なら空リストをセット
+      },
+      ReturnValues: "UPDATED_NEW",
+    });
+
+    const response = await docClient.send(command);
+    console.log("patchDevices:", response);
+    return response;
+  } catch (error) {
+    console.error("patchDevices:", error);
+    throw error;
   }
 };
