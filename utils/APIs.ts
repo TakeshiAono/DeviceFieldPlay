@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import Constants from "expo-constants";
 import { Marker } from "@/components/Map";
+import { Platform } from "react-native";
 
 const AWS_ACCESS_KEY_ID = Constants.expoConfig?.extra?.awsAccessKeyId;
 const AWS_SECRET_ACCESS_KEY = Constants.expoConfig?.extra?.awsSecretAccessKey;
@@ -62,15 +63,19 @@ export const putTagGames = async (item: Marker[]) => {
   }
 };
 
-export const putDevices = async (gameId: String, deviceId: String) => {
+export const putDevices = async (gameId: string, deviceId: string) => {
+  const [iOSDeviceList, androidDeviceList] = getIdsByPlatform(deviceId)
+
   try {
     const command = new PutCommand({
       TableName: "devices",
       Item: {
         gameId: gameId,
-        deviceIds: [deviceId],
+        iOSDeviceIds: iOSDeviceList,
+        androidDeviceIds: androidDeviceList,
+        },
       },
-    });
+    );
 
     const response = await docClient.send(command);
     console.log("putDevices:", response);
@@ -82,13 +87,15 @@ export const putDevices = async (gameId: String, deviceId: String) => {
 };
 
 export const patchDevices = async (gameId: string, deviceId: string) => {
+  const platformKey = Platform.OS === "ios" ? "iOSDeviceIds" : "androidDeviceIds";
+
   try {
     const command = new UpdateCommand({
       TableName: "devices",
       Key: { gameId: gameId }, // 🔹 更新対象のキー
-      UpdateExpression: "SET #deviceIds = list_append(if_not_exists(#deviceIds, :emptyList), :newDevice)",
+      UpdateExpression: `SET #deviceIds = list_append(if_not_exists(#deviceIds, :emptyList), :newDevice)`,
       ExpressionAttributeNames: {
-        "#deviceIds": "deviceIds", // 🔹 予約語を回避
+        "#deviceIds": platformKey, // 🔹 iOSかAndroidのキーを動的に指定
       },
       ExpressionAttributeValues: {
         ":newDevice": [deviceId], // 🔹 追加する `deviceId`
@@ -105,3 +112,15 @@ export const patchDevices = async (gameId: string, deviceId: string) => {
     throw error;
   }
 };
+
+const getIdsByPlatform = (deviceId: string) => {
+  const iOSDeviceList = []
+  const androidDeviceList = []
+  if(Platform.OS === "ios") {
+    iOSDeviceList.push(deviceId)
+  } else {
+    androidDeviceList.push(deviceId)
+  }
+
+  return [iOSDeviceList, androidDeviceList]
+}
