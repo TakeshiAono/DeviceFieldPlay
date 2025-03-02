@@ -14,15 +14,26 @@ export default {
       "awsAccessKeyId": process.env.AWS_ACCESS_KEY_ID,
       "awsSecretAccessKey": process.env.AWS_SECRET_ACCESS_KEY,
       "awsRegion": process.env.AWS_REGION,
+      "eas": {
+        "projectId": process.env.PROJECT_ID
+      }
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.aonot.devicefield"
     },
     "android": {
+      "config": {
+        "googleMaps": {
+          "apiKey": process.env.GOOGLE_MAPS_API_KEY,
+        },
+      },
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.aonot.devicefield",
+      "googleServicesFile": process.env.GOOGLE_SERVICES_JSON
     },
     "web": {
       "bundler": "metro",
@@ -50,6 +61,14 @@ export default {
         "expo-location",
         {
           "locationAlwaysAndWhenInUsePermission": "位置情報の取得を許可してください",
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#ffffff",
+          "defaultChannel": "default",
+          "enableBackgroundRemoteNotifications": true
         }
       ],
     ],
