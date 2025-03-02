@@ -29,7 +29,7 @@ const firebaseConfig = {
 
 // Lambda ハンドラー
 export const handler = async (event) => {
-  const gameId = event.Records[0].dynamodb.Keys.gameId.S; 
+  const gameId = event.Records[0].dynamodb.Keys.id.S; 
   try {
     const command = new GetCommand({
       TableName: "devices",
@@ -67,11 +67,9 @@ export const handler = async (event) => {
       });
     });
 
-    console.log("FCM Response:", response.data);
-
     return {
       statusCode: 200,
-      body: JSON.stringify({ success: true, response: response.data }),
+      body: JSON.stringify({ success: true }),
     };
   } catch (error) {
     console.error(
