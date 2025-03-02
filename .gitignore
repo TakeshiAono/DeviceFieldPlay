@@ -38,3 +38,6 @@ yarn-error.*
 app-example
 
 .env
+*.zip
+service-account.json
+google-services.json
