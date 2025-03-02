@@ -29,7 +29,7 @@ const firebaseConfig = {
 
 // Lambda ハンドラー
 export const handler = async (event) => {
-  const gameId = event.Records[0].dynamodb.Keys.id.S; 
+  const gameId = event.Records[0].dynamodb.Keys.gameId.S; 
   try {
     const command = new GetCommand({
       TableName: "devices",
