@@ -10,7 +10,7 @@
     "web": "expo start --web",
     "test": "jest --watchAll",
     "lint": "expo lint",
-    "fmt": "prettier --write 'app/**/*.{tsx,ts}'"
+    "fmt": "prettier --write '{app,components}/**/*.{tsx,ts}'"
   },
   "jest": {
     "preset": "jest-expo"
