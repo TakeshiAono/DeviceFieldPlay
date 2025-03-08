@@ -162,7 +162,7 @@ export const reviveUser = async (gameId: string, deviceId: string) => {
 };
 
 export const putDevices = async (gameId: string, deviceId: string) => {
-  const [iOSDeviceList, androidDeviceList] = getIdsByPlatform(deviceId)
+  const [iOSDeviceList, androidDeviceList] = _getIdsByPlatform(deviceId)
 
   try {
     const command = new PutCommand({
@@ -211,7 +211,7 @@ export const patchDevices = async (gameId: string, deviceId: string) => {
   }
 };
 
-const getIdsByPlatform = (deviceId: string) => {
+const _getIdsByPlatform = (deviceId: string) => {
   const iOSDeviceList = []
   const androidDeviceList = []
   if(Platform.OS === "ios") {
