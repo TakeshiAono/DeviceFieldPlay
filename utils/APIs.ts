@@ -63,6 +63,28 @@ export const putTagGames = async (item: Marker[]) => {
   }
 };
 
+export const joinUser = async (gameId: string, deviceId: string) => {
+  try {
+    const command = new UpdateCommand({
+      TableName: "tagGames",
+      Key: { id: gameId },
+      UpdateExpression: `SET liveUser = list_append(if_not_exists(liveUser, :emptyList), :newDevice)`,
+      ExpressionAttributeValues: {
+        ":newDevice": [deviceId],
+        ":emptyList": [],
+      },
+      ReturnValues: "UPDATED_NEW",
+    });
+
+    const response = await docClient.send(command);
+    console.log("joinUser:", response);
+    return response;
+  } catch (error) {
+    console.error("joinUser:", error);
+    throw error;
+  }
+};
+
 export const putDevices = async (gameId: string, deviceId: string) => {
   const [iOSDeviceList, androidDeviceList] = getIdsByPlatform(deviceId)
 
