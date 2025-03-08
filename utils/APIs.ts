@@ -92,11 +92,11 @@ export const rejectUser = async (gameId: string, deviceId: string) => {
     const getCommand = new GetCommand({
       TableName: "tagGames",
       Key: { id: gameId },
-      ProjectionExpression: "liveUser"
+      ProjectionExpression: "liveUser",
     });
     const currentData = await docClient.send(getCommand);
     const liveUserList = currentData.Item?.liveUser || [];
-    
+
     const deviceIndex = liveUserList.indexOf(deviceId);
     if (deviceIndex === -1) {
       throw new Error("Device ID not found in liveUser list");
@@ -131,7 +131,7 @@ export const reviveUser = async (gameId: string, deviceId: string) => {
     const getCommand = new GetCommand({
       TableName: "tagGames",
       Key: { id: gameId },
-      ProjectionExpression: "rejectUser"
+      ProjectionExpression: "rejectUser",
     });
     const currentData = await docClient.send(getCommand);
     const rejectUserList = currentData.Item?.rejectUser || [];
@@ -140,7 +140,7 @@ export const reviveUser = async (gameId: string, deviceId: string) => {
     if (deviceIndex === -1) {
       throw new Error("Device ID not found in rejectUser list");
     }
-    
+
     const command = new UpdateCommand({
       TableName: "tagGames",
       Key: { id: gameId },
@@ -162,7 +162,7 @@ export const reviveUser = async (gameId: string, deviceId: string) => {
 };
 
 export const putDevices = async (gameId: string, deviceId: string) => {
-  const [iOSDeviceList, androidDeviceList] = _getIdsByPlatform(deviceId)
+  const [iOSDeviceList, androidDeviceList] = _getIdsByPlatform(deviceId);
 
   try {
     const command = new PutCommand({
@@ -171,9 +171,8 @@ export const putDevices = async (gameId: string, deviceId: string) => {
         gameId: gameId,
         iOSDeviceIds: iOSDeviceList,
         androidDeviceIds: androidDeviceList,
-        },
       },
-    );
+    });
 
     const response = await docClient.send(command);
     console.log("putDevices:", response);
@@ -185,7 +184,8 @@ export const putDevices = async (gameId: string, deviceId: string) => {
 };
 
 export const patchDevices = async (gameId: string, deviceId: string) => {
-  const platformKey = Platform.OS === "ios" ? "iOSDeviceIds" : "androidDeviceIds";
+  const platformKey =
+    Platform.OS === "ios" ? "iOSDeviceIds" : "androidDeviceIds";
 
   try {
     const command = new UpdateCommand({
@@ -197,7 +197,7 @@ export const patchDevices = async (gameId: string, deviceId: string) => {
       },
       ExpressionAttributeValues: {
         ":newDevice": [deviceId], // 🔹 追加する `deviceId`
-        ":emptyList": [],         // 🔹 `deviceIds` が未定義なら空リストをセット
+        ":emptyList": [], // 🔹 `deviceIds` が未定義なら空リストをセット
       },
       ReturnValues: "UPDATED_NEW",
     });
@@ -212,13 +212,13 @@ export const patchDevices = async (gameId: string, deviceId: string) => {
 };
 
 const _getIdsByPlatform = (deviceId: string) => {
-  const iOSDeviceList = []
-  const androidDeviceList = []
-  if(Platform.OS === "ios") {
-    iOSDeviceList.push(deviceId)
+  const iOSDeviceList = [];
+  const androidDeviceList = [];
+  if (Platform.OS === "ios") {
+    iOSDeviceList.push(deviceId);
   } else {
-    androidDeviceList.push(deviceId)
+    androidDeviceList.push(deviceId);
   }
 
-  return [iOSDeviceList, androidDeviceList]
-}
+  return [iOSDeviceList, androidDeviceList];
+};

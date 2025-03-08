@@ -7,7 +7,14 @@ import ReactNativeModal from "react-native-modal";
 import { CameraView } from "expo-camera";
 import { booleanPointInPolygon, point, polygon } from "@turf/turf";
 
-import { getTagGames, joinUser, patchDevices, putDevices, putTagGames, rejectUser, reviveUser } from "@/utils/APIs";
+import {
+  getTagGames,
+  joinUser,
+  patchDevices,
+  putDevices,
+  putTagGames,
+  rejectUser,
+} from "@/utils/APIs";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 
 export type Marker = LatLng & { key: number };
@@ -23,8 +30,8 @@ const initialJapanRegion = {
   longitudeDelta: 0.001,
 };
 
-type latitude = number
-type longitude = number
+type latitude = number;
+type longitude = number;
 
 export default function Map({ mapVisible = true, deviceId }: Props) {
   const [region, setRegion] = useState<Region>(initialJapanRegion);
@@ -45,54 +52,59 @@ export default function Map({ mapVisible = true, deviceId }: Props) {
     getTagGames(gameId)
       .then((res) => {
         setMarkers(res?.areas);
-        gameStart()
+        gameStart();
       })
       .catch((e) => console.error(e));
   }, [gameId]);
 
   const onChangeCurrentPosition = async (position: [longitude, latitude]) => {
-    if (markers.length === 0 || !isSetDoneArea) return
+    if (markers.length === 0 || !isSetDoneArea) return;
 
-    const targetPolygon = markers.map(marker => [marker.longitude, marker.latitude])
-    const targetPoint = point(position)
+    const targetPolygon = markers.map((marker) => [
+      marker.longitude,
+      marker.latitude,
+    ]);
+    const targetPoint = point(position);
 
     // TODO: areaを毎回計算するのはパフォーマンス効率が悪いため、エリア変更時にuseRefで保存するように変更する
     const area = polygon([targetPolygon]);
     const isInside: boolean = booleanPointInPolygon(targetPoint, area);
 
-    if(!deviceId) return
+    if (!deviceId) return;
 
-    if(!isInside) {
-      if(isCurrentLive === false) return
+    if (!isInside) {
+      if (isCurrentLive === false) return;
 
-      await rejectUser(gameId, deviceId)
-      setIsCurrentLive(false)
-      Alert.alert('脱落通知', 'エリア外に出たため脱落となりました。', [{text: 'OK'},])
+      await rejectUser(gameId, deviceId);
+      setIsCurrentLive(false);
+      Alert.alert("脱落通知", "エリア外に出たため脱落となりました。", [
+        { text: "OK" },
+      ]);
     }
-  }
+  };
 
   const gameStart = () => {
     // TODO: ゲームスタート時はエリアの中にいることが前提なので、エリア外にいる場合は警告を出す
     // TODO: 初期値はtrueだが念のため代入する
-    setIsCurrentLive(true)
-  }
+    setIsCurrentLive(true);
+  };
 
   const resetMarkers = () => {
     pinCount.current = 1;
     setMarkers([]);
   };
 
-  const setDataSettings = ({data}: {data: string}) => {
+  const setDataSettings = ({ data }: { data: string }) => {
     // NOTE: カメラモーダルを閉じた際にtrueに戻します。
     // NOTE: QRが画面上にある限り廉造スキャンしてしまうので最初のスキャン以外は早期リターンしている
-    if(!firstScan.current || !deviceId) return
+    if (!firstScan.current || !deviceId) return;
 
-    firstScan.current = false
+    firstScan.current = false;
     console.log(data);
     setCameraVisible(false);
     setGameId(data);
-    patchDevices(data, deviceId)
-  }
+    patchDevices(data, deviceId);
+  };
 
   return (
     <>
@@ -104,15 +116,15 @@ export default function Map({ mapVisible = true, deviceId }: Props) {
             onPress={async () => {
               const gameId = await putTagGames(markers);
               setGameId(gameId);
-              setIsSetDoneArea(true)
+              setIsSetDoneArea(true);
 
-              if(!deviceId) return
-              await joinUser(gameId, deviceId)
+              if (!deviceId) return;
+              await joinUser(gameId, deviceId);
               putDevices(gameId, deviceId)
-              .then(() => {
-                console.log("通知設定をdynamoへセット完了")
-              })
-              .catch((e) => console.error(e));
+                .then(() => {
+                  console.log("通知設定をdynamoへセット完了");
+                })
+                .catch((e) => console.error(e));
             }}
           >
             <IconSymbol size={28} name={"mappin.and.ellipse"} color={"white"} />
@@ -158,9 +170,12 @@ export default function Map({ mapVisible = true, deviceId }: Props) {
             pinCount.current += 1;
           }}
           onUserLocationChange={(event) => {
-            if(!event.nativeEvent.coordinate) return
-            const currentPosition: [number, number] = [event.nativeEvent.coordinate.longitude, event.nativeEvent.coordinate.latitude]
-            onChangeCurrentPosition(currentPosition)
+            if (!event.nativeEvent.coordinate) return;
+            const currentPosition: [number, number] = [
+              event.nativeEvent.coordinate.longitude,
+              event.nativeEvent.coordinate.latitude,
+            ];
+            onChangeCurrentPosition(currentPosition);
 
             // NOTE: 初期マップ表示の時にだけ発火し、現在位置の表示範囲に書き換える
             if (!isFirstUpdate) return;
@@ -263,7 +278,7 @@ export default function Map({ mapVisible = true, deviceId }: Props) {
             color={"red"}
             onPress={() => {
               setCameraVisible(false);
-              firstScan.current = true
+              firstScan.current = true;
             }}
           >
             閉じる
