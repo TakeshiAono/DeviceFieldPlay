@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
 import { Button } from "@rneui/themed";
 import { useState, useEffect, useRef } from "react";
 import QRCode from "react-native-qrcode-svg";
@@ -7,7 +7,7 @@ import ReactNativeModal from "react-native-modal";
 import { CameraView } from "expo-camera";
 import { booleanPointInPolygon, point, polygon } from "@turf/turf";
 
-import { getTagGames, patchDevices, putDevices, putTagGames } from "@/utils/APIs";
+import { getTagGames, joinUser, patchDevices, putDevices, putTagGames, rejectUser, reviveUser } from "@/utils/APIs";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 
 export type Marker = LatLng & { key: number };
@@ -30,40 +30,52 @@ export default function Map({ mapVisible = true, deviceId }: Props) {
   const [region, setRegion] = useState<Region>(initialJapanRegion);
   const [markers, setMarkers] = useState<Marker[]>([]);
   const [gameId, setGameId] = useState("");
+  const [isSetDoneArea, setIsSetDoneArea] = useState(false);
   const [qrVisible, setQrVisible] = useState(false);
   const [cameraVisible, setCameraVisible] = useState(false);
   const [isFirstUpdate, setIsFirstUpdate] = useState(true);
+  const [isCurrentLive, setIsCurrentLive] = useState(false);
 
   const pinCount = useRef(1);
   const firstScan = useRef(true);
-  const currentPosition = useRef<[longitude, latitude]>([0, 0]);
-  const isUserInside = useRef<boolean | undefined>(undefined);
 
   useEffect(() => {
     if (!gameId) return;
 
     getTagGames(gameId)
       .then((res) => {
-        // TODO: 配列形式でdynamoに保存したはずが、取り出すとオブジェクト形式になっているため改善したい
-        const array = Object.values(res as Object);
-        array.pop();
-        setMarkers(array);
+        setMarkers(res?.areas);
+        gameStart()
       })
       .catch((e) => console.error(e));
   }, [gameId]);
 
-  useEffect(() => {
-    if (markers.length === 0) return
+  const onChangeCurrentPosition = async (position: [longitude, latitude]) => {
+    if (markers.length === 0 || !isSetDoneArea) return
 
     const targetPolygon = markers.map(marker => [marker.longitude, marker.latitude])
-    const targetPoint = point(currentPosition.current)
+    const targetPoint = point(position)
 
-    // TODO: areaをuseEffectで毎回計算するのはパフォーマンス効率が悪いため、エリア変更時にuseRefで保存するように変更する
+    // TODO: areaを毎回計算するのはパフォーマンス効率が悪いため、エリア変更時にuseRefで保存するように変更する
     const area = polygon([targetPolygon]);
     const isInside: boolean = booleanPointInPolygon(targetPoint, area);
-    isUserInside.current = isInside
 
-  }, [currentPosition]);
+    if(!deviceId) return
+
+    if(!isInside) {
+      if(isCurrentLive === false) return
+
+      await rejectUser(gameId, deviceId)
+      setIsCurrentLive(false)
+      Alert.alert('脱落通知', 'エリア外に出たため脱落となりました。', [{text: 'OK'},])
+    }
+  }
+
+  const gameStart = () => {
+    // TODO: ゲームスタート時はエリアの中にいることが前提なので、エリア外にいる場合は警告を出す
+    // TODO: 初期値はtrueだが念のため代入する
+    setIsCurrentLive(true)
+  }
 
   const resetMarkers = () => {
     pinCount.current = 1;
@@ -88,11 +100,14 @@ export default function Map({ mapVisible = true, deviceId }: Props) {
         <View style={{ display: "flex", gap: 5 }}>
           <Button
             type="solid"
+            color={!!isSetDoneArea ? "success" : "primary"}
             onPress={async () => {
               const gameId = await putTagGames(markers);
               setGameId(gameId);
+              setIsSetDoneArea(true)
 
               if(!deviceId) return
+              await joinUser(gameId, deviceId)
               putDevices(gameId, deviceId)
               .then(() => {
                 console.log("通知設定をdynamoへセット完了")
@@ -144,9 +159,10 @@ export default function Map({ mapVisible = true, deviceId }: Props) {
           }}
           onUserLocationChange={(event) => {
             if(!event.nativeEvent.coordinate) return
-            // NOTE: 初期マップ表示の時にだけ発火し、現在位置の表示範囲に書き換える
-            currentPosition.current = [event.nativeEvent.coordinate.longitude, event.nativeEvent.coordinate.latitude]
+            const currentPosition: [number, number] = [event.nativeEvent.coordinate.longitude, event.nativeEvent.coordinate.latitude]
+            onChangeCurrentPosition(currentPosition)
 
+            // NOTE: 初期マップ表示の時にだけ発火し、現在位置の表示範囲に書き換える
             if (!isFirstUpdate) return;
             event.persist();
             setRegion({

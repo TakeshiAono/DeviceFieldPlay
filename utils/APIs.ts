@@ -50,7 +50,7 @@ export const putTagGames = async (item: Marker[]) => {
       TableName: "tagGames",
       Item: {
         id: gameId,
-        ...item,
+        areas: item,
       },
     });
 
