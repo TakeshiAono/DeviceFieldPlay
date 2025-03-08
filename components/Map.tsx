@@ -5,6 +5,7 @@ import QRCode from "react-native-qrcode-svg";
 import MapView, { LatLng, Marker, Polyline, Region } from "react-native-maps";
 import ReactNativeModal from "react-native-modal";
 import { CameraView } from "expo-camera";
+import { booleanPointInPolygon, point, polygon } from "@turf/turf";
 
 import { getTagGames, patchDevices, putDevices, putTagGames } from "@/utils/APIs";
 import { IconSymbol } from "@/components/ui/IconSymbol";
@@ -22,6 +23,9 @@ const initialJapanRegion = {
   longitudeDelta: 0.001,
 };
 
+type latitude = number
+type longitude = number
+
 export default function Map({ mapVisible = true, deviceId }: Props) {
   const [region, setRegion] = useState<Region>(initialJapanRegion);
   const [markers, setMarkers] = useState<Marker[]>([]);
@@ -32,6 +36,8 @@ export default function Map({ mapVisible = true, deviceId }: Props) {
 
   const pinCount = useRef(1);
   const firstScan = useRef(true);
+  const currentPosition = useRef<[longitude, latitude]>([0, 0]);
+  const isUserInside = useRef<boolean | undefined>(undefined);
 
   useEffect(() => {
     if (!gameId) return;
@@ -45,6 +51,19 @@ export default function Map({ mapVisible = true, deviceId }: Props) {
       })
       .catch((e) => console.error(e));
   }, [gameId]);
+
+  useEffect(() => {
+    if (markers.length === 0) return
+
+    const targetPolygon = markers.map(marker => [marker.longitude, marker.latitude])
+    const targetPoint = point(currentPosition.current)
+
+    // TODO: areaをuseEffectで毎回計算するのはパフォーマンス効率が悪いため、エリア変更時にuseRefで保存するように変更する
+    const area = polygon([targetPolygon]);
+    const isInside: boolean = booleanPointInPolygon(targetPoint, area);
+    isUserInside.current = isInside
+
+  }, [currentPosition]);
 
   const resetMarkers = () => {
     pinCount.current = 1;
@@ -124,9 +143,11 @@ export default function Map({ mapVisible = true, deviceId }: Props) {
             pinCount.current += 1;
           }}
           onUserLocationChange={(event) => {
+            if(!event.nativeEvent.coordinate) return
             // NOTE: 初期マップ表示の時にだけ発火し、現在位置の表示範囲に書き換える
-            if (!isFirstUpdate || !event.nativeEvent.coordinate) return;
+            currentPosition.current = [event.nativeEvent.coordinate.longitude, event.nativeEvent.coordinate.latitude]
 
+            if (!isFirstUpdate) return;
             event.persist();
             setRegion({
               latitude:
