@@ -85,6 +85,82 @@ export const joinUser = async (gameId: string, deviceId: string) => {
   }
 };
 
+// TODO: 複数スマホで同時に実行すると自分じゃないuserをrejectしてしまう可能性があるため、
+// dynamoStreamのLambdaで同期対応させるようにする
+export const rejectUser = async (gameId: string, deviceId: string) => {
+  try {
+    const getCommand = new GetCommand({
+      TableName: "tagGames",
+      Key: { id: gameId },
+      ProjectionExpression: "liveUser"
+    });
+    const currentData = await docClient.send(getCommand);
+    const liveUserList = currentData.Item?.liveUser || [];
+    
+    const deviceIndex = liveUserList.indexOf(deviceId);
+    if (deviceIndex === -1) {
+      throw new Error("Device ID not found in liveUser list");
+    }
+
+    const command = new UpdateCommand({
+      TableName: "tagGames",
+      Key: { id: gameId },
+      UpdateExpression: `
+        SET rejectUser = list_append(if_not_exists(rejectUser, :emptyList), :newDevice)
+        REMOVE liveUser[${deviceIndex}]`,
+      ExpressionAttributeValues: {
+        ":newDevice": [deviceId],
+        ":emptyList": [],
+      },
+      ReturnValues: "UPDATED_NEW",
+    });
+
+    const response = await docClient.send(command);
+    console.log("rejectUser:", response);
+    return response;
+  } catch (error) {
+    console.error("rejectUser:", error);
+    throw error;
+  }
+};
+
+// TODO: スマホ側で同時に実行すると自分じゃないuserをreviveしてしまう可能性があるため、
+// dynamoStreamのLambdaで同期対応させるようにする
+export const reviveUser = async (gameId: string, deviceId: string) => {
+  try {
+    const getCommand = new GetCommand({
+      TableName: "tagGames",
+      Key: { id: gameId },
+      ProjectionExpression: "rejectUser"
+    });
+    const currentData = await docClient.send(getCommand);
+    const rejectUserList = currentData.Item?.rejectUser || [];
+
+    const deviceIndex = rejectUserList.indexOf(deviceId);
+    if (deviceIndex === -1) {
+      throw new Error("Device ID not found in rejectUser list");
+    }
+    
+    const command = new UpdateCommand({
+      TableName: "tagGames",
+      Key: { id: gameId },
+      UpdateExpression: `SET liveUser = list_append(if_not_exists(liveUser, :emptyList), :newDevice) REMOVE rejectUser[${deviceIndex}]`,
+      ExpressionAttributeValues: {
+        ":newDevice": [deviceId],
+        ":emptyList": [],
+      },
+      ReturnValues: "UPDATED_NEW",
+    });
+
+    const response = await docClient.send(command);
+    console.log("reviveUser:", response);
+    return response;
+  } catch (error) {
+    console.error("reviveUser:", error);
+    throw error;
+  }
+};
+
 export const putDevices = async (gameId: string, deviceId: string) => {
   const [iOSDeviceList, androidDeviceList] = getIdsByPlatform(deviceId)
 
