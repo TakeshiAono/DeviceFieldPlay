@@ -14,6 +14,7 @@ import {
   putDevices,
   putTagGames,
   rejectUser,
+  reviveUser,
 } from "@/utils/APIs";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 
@@ -41,7 +42,7 @@ export default function Map({ mapVisible = true, deviceId }: Props) {
   const [qrVisible, setQrVisible] = useState(false);
   const [cameraVisible, setCameraVisible] = useState(false);
   const [isFirstUpdate, setIsFirstUpdate] = useState(true);
-  const [isCurrentLive, setIsCurrentLive] = useState(false);
+  const [isCurrentUserLive, setIsCurrentUserLive] = useState(true);
 
   const pinCount = useRef(1);
   const firstScan = useRef(true);
@@ -73,10 +74,10 @@ export default function Map({ mapVisible = true, deviceId }: Props) {
     if (!deviceId) return;
 
     if (!isInside) {
-      if (isCurrentLive === false) return;
+      if (isCurrentUserLive === false) return;
 
       await rejectUser(gameId, deviceId);
-      setIsCurrentLive(false);
+      setIsCurrentUserLive(false);
       Alert.alert("脱落通知", "エリア外に出たため脱落となりました。", [
         { text: "OK" },
       ]);
@@ -86,7 +87,7 @@ export default function Map({ mapVisible = true, deviceId }: Props) {
   const gameStart = () => {
     // TODO: ゲームスタート時はエリアの中にいることが前提なので、エリア外にいる場合は警告を出す
     // TODO: 初期値はtrueだが念のため代入する
-    setIsCurrentLive(true);
+    setIsCurrentUserLive(true);
   };
 
   const resetMarkers = () => {
@@ -152,6 +153,28 @@ export default function Map({ mapVisible = true, deviceId }: Props) {
             }}
           >
             <IconSymbol size={28} name={"camera"} color={"white"} />
+          </Button>
+          <Button
+            type="solid"
+            color={isCurrentUserLive ? "gray" : "success"}
+            onPress={
+              isCurrentUserLive
+                ? undefined
+                : () => {
+                    Alert.alert("復活", "復活してもよいですか？", [
+                      {
+                        text: "OK",
+                        onPress: () => {
+                          if (!deviceId) return;
+
+                          reviveUser(gameId, deviceId);
+                        },
+                      },
+                    ]);
+                  }
+            }
+          >
+            <IconSymbol size={28} name={"person.badge.plus"} color={"white"} />
           </Button>
         </View>
       </View>

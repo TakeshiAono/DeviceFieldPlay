@@ -20,6 +20,7 @@ const MAPPING = {
   qrcode: "qr-code",
   "arrow.counterclockwise": "restart-alt",
   "mappin.and.ellipse": "pin-drop",
+  "person.badge.plus": "person-add",
 } as Partial<
   Record<
     import("expo-symbols").SymbolViewProps["name"],
