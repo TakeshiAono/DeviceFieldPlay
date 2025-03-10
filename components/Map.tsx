@@ -171,7 +171,7 @@ function Map({ mapVisible = true, userStore }: Props) {
           </Button>
           <Button
             type="solid"
-            color={isCurrentUserLive ? "gray" : "success"}
+            color={isCurrentUserLive ? "gray" : "warning"}
             onPress={
               isCurrentUserLive
                 ? undefined
@@ -179,10 +179,15 @@ function Map({ mapVisible = true, userStore }: Props) {
                     Alert.alert("復活", "復活してもよいですか？", [
                       {
                         text: "OK",
-                        onPress: () => {
+                        onPress: async () => {
                           if (!userStore?.getCurrentUser()?.getDeviceId()) return;
 
-                          reviveUser(gameId, userStore?.getCurrentUser()?.getDeviceId() as string);
+                          try {
+                            await reviveUser(gameId, userStore?.getCurrentUser()?.getDeviceId() as string);
+                            setIsCurrentUserLive(true)
+                          } catch (error) {
+                            console.error(error)
+                          }
                         },
                       },
                     ]);
