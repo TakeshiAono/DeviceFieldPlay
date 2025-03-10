@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from "uuid";
 import Constants from "expo-constants";
 import { Marker } from "@/components/Map";
 import { Platform } from "react-native";
+import UserModel from "@/models/UserModel";
 
 const AWS_ACCESS_KEY_ID = Constants.expoConfig?.extra?.awsAccessKeyId;
 const AWS_SECRET_ACCESS_KEY = Constants.expoConfig?.extra?.awsSecretAccessKey;
@@ -81,6 +82,27 @@ export const joinUser = async (gameId: string, deviceId: string) => {
     return response;
   } catch (error) {
     console.error("joinUser:", error);
+    throw error;
+  }
+};
+
+export const putUser = async (gameId: string, user: UserModel) => {
+  try {
+    const command = new PutCommand({
+      TableName: "users",
+      Item: {
+        gameId: gameId,
+        userId: user.getId(),
+        deviceId: user.getDeviceId(),
+        name: user.getName(),
+      },
+    });
+
+    const response = await docClient.send(command);
+    console.log("putUser:", response);
+    return response;
+  } catch (error) {
+    console.error("putUser:", error);
     throw error;
   }
 };

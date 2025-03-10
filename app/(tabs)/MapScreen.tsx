@@ -5,8 +5,14 @@ import { useCameraPermissions } from "expo-camera";
 import * as Notifications from "expo-notifications";
 
 import Map from "@/components/Map";
+import UserStore from "@/stores/UserStore";
+import { inject, observer } from "mobx-react";
 
-export default function MapScreen() {
+interface Props {
+  userStore?: UserStore;
+}
+
+function MapScreen(props: Props) {
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const [locationPermissionStatus, setLocationPermissionStatus] = useState("");
 
@@ -15,6 +21,7 @@ export default function MapScreen() {
   Notifications.getDevicePushTokenAsync().then(({ data }) => {
     console.log("deviceId:", data);
     deviceId.current = data;
+    props.userStore?.currentUser?.setDeviceId(data);
   });
 
   useEffect(() => {
@@ -47,7 +54,9 @@ export default function MapScreen() {
   return (
     <SafeAreaView>
       {/* TODO: 設定画面ができた時に設定画面にマップを出力させたい */}
-      <Map mapVisible={isDisplayMap()} deviceId={deviceId.current} />
+      <Map mapVisible={isDisplayMap()} />
     </SafeAreaView>
   );
 }
+
+export default inject("userStore")(observer(MapScreen));

@@ -13,15 +13,20 @@ import {
   patchDevices,
   putDevices,
   putTagGames,
+  putUser,
   rejectUser,
   reviveUser,
 } from "@/utils/APIs";
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import UserStore from "@/stores/UserStore";
+import { inject, observer } from "mobx-react";
+import UserModel from "@/models/UserModel";
 
 export type Marker = LatLng & { key: number };
 export type Props = {
   mapVisible?: boolean;
   deviceId?: string;
+  userStore?: UserStore;
 };
 
 const initialJapanRegion = {
@@ -34,7 +39,7 @@ const initialJapanRegion = {
 type latitude = number;
 type longitude = number;
 
-export default function Map({ mapVisible = true, deviceId }: Props) {
+function Map({ mapVisible = true, userStore }: Props) {
   const [region, setRegion] = useState<Region>(initialJapanRegion);
   const [markers, setMarkers] = useState<Marker[]>([]);
   const [gameId, setGameId] = useState("");
@@ -71,12 +76,12 @@ export default function Map({ mapVisible = true, deviceId }: Props) {
     const area = polygon([targetPolygon]);
     const isInside: boolean = booleanPointInPolygon(targetPoint, area);
 
-    if (!deviceId) return;
+    if (!userStore?.getCurrentUser()?.getDeviceId()) return;
 
     if (!isInside) {
       if (isCurrentUserLive === false) return;
 
-      await rejectUser(gameId, deviceId);
+      await rejectUser(gameId, userStore?.getCurrentUser()?.getDeviceId() as string);
       setIsCurrentUserLive(false);
       Alert.alert("脱落通知", "エリア外に出たため脱落となりました。", [
         { text: "OK" },
@@ -98,13 +103,13 @@ export default function Map({ mapVisible = true, deviceId }: Props) {
   const setDataSettings = ({ data }: { data: string }) => {
     // NOTE: カメラモーダルを閉じた際にtrueに戻します。
     // NOTE: QRが画面上にある限り廉造スキャンしてしまうので最初のスキャン以外は早期リターンしている
-    if (!firstScan.current || !deviceId) return;
+    if (!firstScan.current || !userStore?.getCurrentUser()?.getDeviceId()) return;
 
     firstScan.current = false;
     console.log(data);
     setCameraVisible(false);
     setGameId(data);
-    patchDevices(data, deviceId);
+    patchDevices(data, userStore?.getCurrentUser()?.getDeviceId() as string);
   };
 
   return (
@@ -119,9 +124,10 @@ export default function Map({ mapVisible = true, deviceId }: Props) {
               setGameId(gameId);
               setIsSetDoneArea(true);
 
-              if (!deviceId) return;
-              await joinUser(gameId, deviceId);
-              putDevices(gameId, deviceId)
+              if (!userStore?.getCurrentUser()?.getDeviceId()) return;
+              await joinUser(gameId, userStore?.getCurrentUser()?.getDeviceId() as string);
+              await putUser(gameId, userStore?.getCurrentUser() as UserModel);
+              await putDevices(gameId, userStore?.getCurrentUser()?.getDeviceId() as string)
                 .then(() => {
                   console.log("通知設定をdynamoへセット完了");
                 })
@@ -165,9 +171,9 @@ export default function Map({ mapVisible = true, deviceId }: Props) {
                       {
                         text: "OK",
                         onPress: () => {
-                          if (!deviceId) return;
+                          if (!userStore?.getCurrentUser()?.getDeviceId()) return;
 
-                          reviveUser(gameId, deviceId);
+                          reviveUser(gameId, userStore?.getCurrentUser()?.getDeviceId() as string);
                         },
                       },
                     ]);
@@ -318,3 +324,5 @@ const styles = StyleSheet.create({
     height: "100%",
   },
 });
+
+export default inject("userStore")(observer(Map));
