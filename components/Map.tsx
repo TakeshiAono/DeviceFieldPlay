@@ -6,6 +6,10 @@ import MapView, { LatLng, Marker, Polyline, Region } from "react-native-maps";
 import ReactNativeModal from "react-native-modal";
 import { CameraView } from "expo-camera";
 import { booleanPointInPolygon, point, polygon } from "@turf/turf";
+import 'react-native-get-random-values';
+import * as Crypto from "expo-crypto";
+import _ from "lodash";
+import { inject, observer } from "mobx-react";
 
 import {
   getTagGames,
@@ -19,13 +23,11 @@ import {
 } from "@/utils/APIs";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import UserStore from "@/stores/UserStore";
-import { inject, observer } from "mobx-react";
 import UserModel from "@/models/UserModel";
 
 export type Marker = LatLng & { key: number };
 export type Props = {
   mapVisible?: boolean;
-  deviceId?: string;
   userStore?: UserStore;
 };
 
@@ -112,6 +114,18 @@ function Map({ mapVisible = true, userStore }: Props) {
     patchDevices(data, userStore?.getCurrentUser()?.getDeviceId() as string);
   };
 
+  const storeGameStartSetting = async (gameId: string) => {
+    try {
+      await joinUser(gameId, userStore?.getCurrentUser()?.getDeviceId() as string);
+      await putUser(gameId, userStore?.getCurrentUser() as UserModel);
+      await putDevices(gameId, userStore?.getCurrentUser()?.getDeviceId() as string)
+
+      console.log("通知設定をdynamoへセット完了");
+    } catch (error) {
+      console.log(error)
+    }
+}
+
   return (
     <>
       <View style={{ position: "absolute", top: 150, right: 5, zIndex: 1 }}>
@@ -120,18 +134,13 @@ function Map({ mapVisible = true, userStore }: Props) {
             type="solid"
             color={!!isSetDoneArea ? "success" : "primary"}
             onPress={async () => {
-              const gameId = await putTagGames(markers);
-              setGameId(gameId);
+              const targetGameId = _.isEmpty(gameId) ? Crypto.randomUUID() : gameId
+              await putTagGames(targetGameId, markers);
+              setGameId(targetGameId);
               setIsSetDoneArea(true);
 
               if (!userStore?.getCurrentUser()?.getDeviceId()) return;
-              await joinUser(gameId, userStore?.getCurrentUser()?.getDeviceId() as string);
-              await putUser(gameId, userStore?.getCurrentUser() as UserModel);
-              await putDevices(gameId, userStore?.getCurrentUser()?.getDeviceId() as string)
-                .then(() => {
-                  console.log("通知設定をdynamoへセット完了");
-                })
-                .catch((e) => console.error(e));
+              await storeGameStartSetting(targetGameId)
             }}
           >
             <IconSymbol size={28} name={"mappin.and.ellipse"} color={"white"} />

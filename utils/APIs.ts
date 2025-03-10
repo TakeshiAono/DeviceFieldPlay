@@ -5,8 +5,6 @@ import {
   GetCommand,
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
-import "react-native-get-random-values";
-import { v4 as uuidv4 } from "uuid";
 
 import Constants from "expo-constants";
 import { Marker } from "@/components/Map";
@@ -44,9 +42,8 @@ export const getTagGames = async (id: string) => {
   }
 };
 
-export const putTagGames = async (item: Marker[]) => {
+export const putTagGames = async (gameId: string, item: Marker[]) => {
   try {
-    const gameId = uuidv4();
     const command = new PutCommand({
       TableName: "tagGames",
       Item: {
