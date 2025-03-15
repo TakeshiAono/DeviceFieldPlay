@@ -46,17 +46,25 @@ export const handler = async (event) => {
 
     const accessToken = await getAccessToken();
     const fcmUrl = `https://fcm.googleapis.com/v1/projects/${firebaseConfig.project_id}/messages:send`;
-
-    const androidMessages = androidDeviceIds.map((token) => ({
-      message: {
-        token,
-        notification: {
-          title: "エリア変更通知",
-          body: "エリアが変更されました",
+    const androidMessages = androidDeviceIds.map((token) => {
+      return {
+        message: {
+          token,
+          notification: {
+            title: "エリア変更通知",
+            body: "エリアが変更されました",
+          },
+          data: {},
+          android: { // ✅ ここで `priority: "high"` を設定
+            priority: "high", // 🚀 高優先度にする
+            notification: {
+              channelId: "high_priority", // 🚀 事前に `setNotificationChannelAsync()` で作成
+              sound: "default", // ✅ 音を鳴らす
+            },
+          },
         },
-        data: {},
-      },
-    }));
+      }
+    });
 
     androidMessages.forEach(message => {
       axios.post(fcmUrl, message, {
