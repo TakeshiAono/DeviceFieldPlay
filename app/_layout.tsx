@@ -13,6 +13,7 @@ import { Provider } from "mobx-react";
 import * as Crypto from "expo-crypto";
 import ReactNativeModal from "react-native-modal";
 import { Button, Text, TextInput, View } from "react-native";
+import Toast from "react-native-toast-message";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import UserStore from "@/stores/UserStore";
@@ -89,6 +90,7 @@ export default function RootLayout() {
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>
+      <Toast />
     </Provider>
   );
 }
