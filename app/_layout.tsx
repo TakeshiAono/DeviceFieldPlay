@@ -55,9 +55,10 @@ export default function RootLayout() {
             <Text>ゲームで使用する名前を入力してください</Text>
             <TextInput
               style={{
+                height: 40,
                 borderWidth: 1,
                 borderRadius: 10,
-                marginVertical: 30,
+                marginVertical: 15,
               }}
               placeholder="お名前を記入してください"
               onChangeText={(value) => {
