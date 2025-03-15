@@ -1,6 +1,6 @@
 import { Alert, StyleSheet, Text, View } from "react-native";
 import { Button } from "@rneui/themed";
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import QRCode from "react-native-qrcode-svg";
 import MapView, { LatLng, Marker, Polyline, Region } from "react-native-maps";
 import ReactNativeModal from "react-native-modal";
@@ -10,6 +10,11 @@ import 'react-native-get-random-values';
 import * as Crypto from "expo-crypto";
 import _ from "lodash";
 import { inject, observer } from "mobx-react";
+import Toast from 'react-native-toast-message';
+import * as Notifications from "expo-notifications";
+
+import * as TaskManager from "expo-task-manager";
+import * as Location from "expo-location";
 
 import {
   getTagGames,
@@ -54,8 +59,58 @@ function Map({ mapVisible = true, userStore }: Props) {
   const pinCount = useRef(1);
   const firstScan = useRef(true);
 
+  // const isRegistered = TaskManager.isTaskRegisteredAsync(LOCATION_TASK_NAME);
+
+  // useEffect(() => {
+  //   useCallback(()=>{
+
+  //     const requestBackgroundPermissions = async() =>{
+  //     const {status} = await Location.requestBackgroundPermissionsAsync()
+  //       if(status === 'granted'){
+  //         await Location.startLocationUpdatesAsync('firstTask',{
+  //           accuracy: Location.Accuracy.Balanced,
+  //     });
+  //   })
+  //   // ✅ バックグラウンドで位置情報を取得するタスクを定義
+  //   TaskManager.defineTask(LOCATION_TASK_NAME, ({ data, error }) => {
+  //     console.log(
+  //       "test12"
+  //     );
+  //     console.log(
+  //       "test22"
+  //     );
+  //   });
+  //   const checkTaskRegistration = async () => {
+  //     const isRegistered = await TaskManager.isTaskRegisteredAsync(
+  //       LOCATION_TASK_NAME
+  //     );
+  //     console.log("タスク登録済み？", isRegistered);
+  //   };
+
+  //   checkTaskRegistration();
+  //   TaskManager.getRegisteredTasksAsync().then(tasks => {
+  //     console.log("登録されているタスク:", tasks);
+  //   });
+
+  // }, []);
+  // console.log("確認", isRegistered);
   useEffect(() => {
     if (!gameId) return;
+
+    // エリア変更時の通知を受け取って自分の持っているエリア情報を更新する
+    const notificationListener = Notifications.addNotificationReceivedListener(async notification => {
+      Toast.show({
+        type: "info",
+        text1: notification.request.content.title as string,
+        text2: notification.request.content.body as string
+      });
+
+      getTagGames(gameId)
+        .then((res) => {
+          setMarkers(res?.areas);
+        })
+        .catch((e) => console.error(e));
+    });
 
     getTagGames(gameId)
       .then((res) => {
@@ -63,6 +118,11 @@ function Map({ mapVisible = true, userStore }: Props) {
         gameStart();
       })
       .catch((e) => console.error(e));
+
+    // gameIdが変わるたびに別のゲームのエリアで更新されてしまわないよう、イベントリスナーを削除し新規のイベントリスナーを生成する。
+    return () => {
+      notificationListener.remove();
+    };
   }, [gameId]);
 
   const onChangeCurrentPosition = async (position: [longitude, latitude]) => {
@@ -201,6 +261,18 @@ function Map({ mapVisible = true, userStore }: Props) {
           </Button>
         </View>
       </View>
+      {/* <Button
+        title={"te+"}
+        onPress={() => {
+          forcePositionx.current += 0.0001;
+        }}
+      ></Button>
+      <Button
+        title={"te-"}
+        onPress={() => {
+          forcePositionx.current -= 0.0001;
+        }}
+      ></Button> */}
       {mapVisible && (
         <MapView
           style={styles.map}
