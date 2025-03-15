@@ -14,6 +14,7 @@ import * as Crypto from "expo-crypto";
 import ReactNativeModal from "react-native-modal";
 import { Button, Text, TextInput, View } from "react-native";
 import Toast from "react-native-toast-message";
+import * as Notifications from "expo-notifications";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import UserStore from "@/stores/UserStore";
@@ -32,6 +33,24 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
+
+  useEffect(() => {
+    async function registerForPushNotificationsAsync() {
+      const { status } = await Notifications.requestPermissionsAsync();
+      if (status !== 'granted') {
+        return;
+      }
+
+      await Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+      });
+    }
+
+    registerForPushNotificationsAsync()
+  }, [])
 
   useEffect(() => {
     if (loaded) {
