@@ -145,7 +145,10 @@ function Map({ mapVisible = true, userStore }: Props) {
           >
             <IconSymbol size={28} name={"mappin.and.ellipse"} color={"white"} />
           </Button>
-          <Button type="solid" onPress={resetMarkers}>
+          <Button type="solid" onPress={() => {
+            resetMarkers()
+            setIsSetDoneArea(false);
+          }}>
             <IconSymbol
               size={28}
               name={"arrow.counterclockwise"}
