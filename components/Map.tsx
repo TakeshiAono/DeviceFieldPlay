@@ -13,9 +13,6 @@ import { inject, observer } from "mobx-react";
 import Toast from 'react-native-toast-message';
 import * as Notifications from "expo-notifications";
 
-import * as TaskManager from "expo-task-manager";
-import * as Location from "expo-location";
-
 import {
   getTagGames,
   joinUser,
@@ -59,41 +56,6 @@ function Map({ mapVisible = true, userStore }: Props) {
   const pinCount = useRef(1);
   const firstScan = useRef(true);
 
-  // const isRegistered = TaskManager.isTaskRegisteredAsync(LOCATION_TASK_NAME);
-
-  // useEffect(() => {
-  //   useCallback(()=>{
-
-  //     const requestBackgroundPermissions = async() =>{
-  //     const {status} = await Location.requestBackgroundPermissionsAsync()
-  //       if(status === 'granted'){
-  //         await Location.startLocationUpdatesAsync('firstTask',{
-  //           accuracy: Location.Accuracy.Balanced,
-  //     });
-  //   })
-  //   // ✅ バックグラウンドで位置情報を取得するタスクを定義
-  //   TaskManager.defineTask(LOCATION_TASK_NAME, ({ data, error }) => {
-  //     console.log(
-  //       "test12"
-  //     );
-  //     console.log(
-  //       "test22"
-  //     );
-  //   });
-  //   const checkTaskRegistration = async () => {
-  //     const isRegistered = await TaskManager.isTaskRegisteredAsync(
-  //       LOCATION_TASK_NAME
-  //     );
-  //     console.log("タスク登録済み？", isRegistered);
-  //   };
-
-  //   checkTaskRegistration();
-  //   TaskManager.getRegisteredTasksAsync().then(tasks => {
-  //     console.log("登録されているタスク:", tasks);
-  //   });
-
-  // }, []);
-  // console.log("確認", isRegistered);
   useEffect(() => {
     if (!gameId) return;
 
@@ -261,18 +223,6 @@ function Map({ mapVisible = true, userStore }: Props) {
           </Button>
         </View>
       </View>
-      {/* <Button
-        title={"te+"}
-        onPress={() => {
-          forcePositionx.current += 0.0001;
-        }}
-      ></Button>
-      <Button
-        title={"te-"}
-        onPress={() => {
-          forcePositionx.current -= 0.0001;
-        }}
-      ></Button> */}
       {mapVisible && (
         <MapView
           style={styles.map}
