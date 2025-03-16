@@ -1,18 +1,37 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
 import { Button } from "@rneui/themed";
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import QRCode from "react-native-qrcode-svg";
 import MapView, { LatLng, Marker, Polyline, Region } from "react-native-maps";
 import ReactNativeModal from "react-native-modal";
 import { CameraView } from "expo-camera";
+import { booleanPointInPolygon, point, polygon } from "@turf/turf";
+import 'react-native-get-random-values';
+import * as Crypto from "expo-crypto";
+import _ from "lodash";
+import { inject, observer } from "mobx-react";
+import Toast from 'react-native-toast-message';
+import * as Notifications from "expo-notifications";
 
-import { dynamoTagGamesGet, dynamoTagGamesPut } from "@/utils/APIs";
+import {
+  getTagGames,
+  joinUser,
+  patchDevices,
+  putDevices,
+  putTagGames,
+  putUser,
+  rejectUser,
+  reviveUser,
+} from "@/utils/APIs";
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import UserStore from "@/stores/UserStore";
+import UserModel from "@/models/UserModel";
 
 export type Marker = LatLng & { key: number };
 export type Props = {
-  mapVisible?: boolean
-}
+  mapVisible?: boolean;
+  userStore?: UserStore;
+};
 
 const initialJapanRegion = {
   latitude: 36.2048,
@@ -21,35 +40,128 @@ const initialJapanRegion = {
   longitudeDelta: 0.001,
 };
 
-export default function Map({
-  mapVisible = true
-}: Props) {
+type latitude = number;
+type longitude = number;
+
+function Map({ mapVisible = true, userStore }: Props) {
   const [region, setRegion] = useState<Region>(initialJapanRegion);
   const [markers, setMarkers] = useState<Marker[]>([]);
   const [gameId, setGameId] = useState("");
+  const [isSetDoneArea, setIsSetDoneArea] = useState(false);
   const [qrVisible, setQrVisible] = useState(false);
   const [cameraVisible, setCameraVisible] = useState(false);
   const [isFirstUpdate, setIsFirstUpdate] = useState(true);
+  const [isCurrentUserLive, setIsCurrentUserLive] = useState(true);
 
   const pinCount = useRef(1);
+  const firstScan = useRef(true);
 
   useEffect(() => {
     if (!gameId) return;
 
-    dynamoTagGamesGet(gameId)
+    // エリア変更時の通知を受け取って自分の持っているエリア情報を更新する
+    const changeAreaNotificationListener = Notifications.addNotificationReceivedListener(async notification => {
+      console.log("push通知",notification.request.content)
+      if(notification.request.content.data.notification_type !== "changeArea") return
+
+      Toast.show({
+        type: "info",
+        text1: notification.request.content.title as string,
+        text2: notification.request.content.body as string
+      });
+
+      getTagGames(gameId)
+        .then((res) => {
+          setMarkers(res?.areas);
+        })
+        .catch((e) => console.error(e));
+    });
+
+    const rejectUserNotificationListener = Notifications.addNotificationReceivedListener(async notification => {
+      console.log("push通知",notification.request.content)
+      if(notification.request.content.data.notification_type !== "rejectUser") return
+
+      Toast.show({
+        type: "info",
+        text1: notification.request.content.title as string,
+        text2: notification.request.content.body as string
+      });
+    });
+
+    getTagGames(gameId)
       .then((res) => {
-        // TODO: 配列形式でdynamoに保存したはずが、取り出すとオブジェクト形式になっているため改善したい
-        const array = Object.values(res as Object);
-        array.pop();
-        setMarkers(array);
+        setMarkers(res?.areas);
+        gameStart();
       })
-      .catch((e) => console.log(e));
+      .catch((e) => console.error(e));
+
+    // gameIdが変わるたびに別のゲームのエリアで更新されてしまわないよう、イベントリスナーを削除し新規のイベントリスナーを生成する。
+    return () => {
+      changeAreaNotificationListener.remove();
+      rejectUserNotificationListener.remove();
+    };
   }, [gameId]);
+
+  const onChangeCurrentPosition = async (position: [longitude, latitude]) => {
+    if (markers.length === 0 || !isSetDoneArea) return;
+
+    const targetPolygon = markers.map((marker) => [
+      marker.longitude,
+      marker.latitude,
+    ]);
+    const targetPoint = point(position);
+
+    // TODO: areaを毎回計算するのはパフォーマンス効率が悪いため、エリア変更時にuseRefで保存するように変更する
+    const area = polygon([targetPolygon]);
+    const isInside: boolean = booleanPointInPolygon(targetPoint, area);
+
+    if (!userStore?.getCurrentUser()?.getDeviceId()) return;
+
+    if (!isInside) {
+      if (isCurrentUserLive === false) return;
+
+      await rejectUser(gameId, userStore?.getCurrentUser()?.getDeviceId() as string);
+      setIsCurrentUserLive(false);
+      Alert.alert("脱落通知", "エリア外に出たため脱落となりました。", [
+        { text: "OK" },
+      ]);
+    }
+  };
+
+  const gameStart = () => {
+    // TODO: ゲームスタート時はエリアの中にいることが前提なので、エリア外にいる場合は警告を出す
+    // TODO: 初期値はtrueだが念のため代入する
+    setIsCurrentUserLive(true);
+  };
 
   const resetMarkers = () => {
     pinCount.current = 1;
     setMarkers([]);
   };
+
+  const setDataSettings = ({ data }: { data: string }) => {
+    // NOTE: カメラモーダルを閉じた際にtrueに戻します。
+    // NOTE: QRが画面上にある限り廉造スキャンしてしまうので最初のスキャン以外は早期リターンしている
+    if (!firstScan.current || !userStore?.getCurrentUser()?.getDeviceId()) return;
+
+    firstScan.current = false;
+    console.log(data);
+    setCameraVisible(false);
+    setGameId(data);
+    patchDevices(data, userStore?.getCurrentUser()?.getDeviceId() as string);
+  };
+
+  const storeGameStartSetting = async (gameId: string) => {
+    try {
+      await joinUser(gameId, userStore?.getCurrentUser()?.getDeviceId() as string);
+      await putUser(gameId, userStore?.getCurrentUser() as UserModel);
+      await putDevices(gameId, userStore?.getCurrentUser()?.getDeviceId() as string)
+
+      console.log("通知設定をdynamoへセット完了");
+    } catch (error) {
+      console.log(error)
+    }
+}
 
   return (
     <>
@@ -57,14 +169,23 @@ export default function Map({
         <View style={{ display: "flex", gap: 5 }}>
           <Button
             type="solid"
+            color={!!isSetDoneArea ? "success" : "primary"}
             onPress={async () => {
-              const gameId = await dynamoTagGamesPut(markers);
-              setGameId(gameId);
+              const targetGameId = _.isEmpty(gameId) ? Crypto.randomUUID() : gameId
+              await putTagGames(targetGameId, markers);
+              setGameId(targetGameId);
+              setIsSetDoneArea(true);
+
+              if (!userStore?.getCurrentUser()?.getDeviceId()) return;
+              await storeGameStartSetting(targetGameId)
             }}
           >
             <IconSymbol size={28} name={"mappin.and.ellipse"} color={"white"} />
           </Button>
-          <Button type="solid" onPress={resetMarkers}>
+          <Button type="solid" onPress={() => {
+            resetMarkers()
+            setIsSetDoneArea(false);
+          }}>
             <IconSymbol
               size={28}
               name={"arrow.counterclockwise"}
@@ -88,6 +209,33 @@ export default function Map({
           >
             <IconSymbol size={28} name={"camera"} color={"white"} />
           </Button>
+          <Button
+            type="solid"
+            color={isCurrentUserLive ? "gray" : "warning"}
+            onPress={
+              isCurrentUserLive
+                ? undefined
+                : () => {
+                    Alert.alert("復活", "復活してもよいですか？", [
+                      {
+                        text: "OK",
+                        onPress: async () => {
+                          if (!userStore?.getCurrentUser()?.getDeviceId()) return;
+
+                          try {
+                            await reviveUser(gameId, userStore?.getCurrentUser()?.getDeviceId() as string);
+                            setIsCurrentUserLive(true)
+                          } catch (error) {
+                            console.error(error)
+                          }
+                        },
+                      },
+                    ]);
+                  }
+            }
+          >
+            <IconSymbol size={28} name={"person.badge.plus"} color={"white"} />
+          </Button>
         </View>
       </View>
       {mapVisible && (
@@ -105,9 +253,15 @@ export default function Map({
             pinCount.current += 1;
           }}
           onUserLocationChange={(event) => {
-            // NOTE: 初期マップ表示の時にだけ発火し、現在位置の表示範囲に書き換える
-            if (!isFirstUpdate || !event.nativeEvent.coordinate) return;
+            if (!event.nativeEvent.coordinate) return;
+            const currentPosition: [number, number] = [
+              event.nativeEvent.coordinate.longitude,
+              event.nativeEvent.coordinate.latitude,
+            ];
+            onChangeCurrentPosition(currentPosition);
 
+            // NOTE: 初期マップ表示の時にだけ発火し、現在位置の表示範囲に書き換える
+            if (!isFirstUpdate) return;
             event.persist();
             setRegion({
               latitude:
@@ -165,8 +319,12 @@ export default function Map({
               </View>
             </>
           ) : (
-            <View style={{height: 100}}>
-              <Text style={{ fontSize: 15 }}>{"ゲームグループQRを表示するためには\nゲームをスタートしてください"}</Text>
+            <View style={{ height: 100 }}>
+              <Text style={{ fontSize: 15 }}>
+                {
+                  "ゲームグループQRを表示するためには\nゲームをスタートしてください"
+                }
+              </Text>
             </View>
           )}
           <Button
@@ -182,7 +340,9 @@ export default function Map({
       </ReactNativeModal>
       <ReactNativeModal style={{ margin: "auto" }} isVisible={cameraVisible}>
         <View style={{ backgroundColor: "white", width: 330, padding: 20 }}>
-          <Text style={{ fontSize: 18 }}>{"QRを読み込ませてもらって\nゲームグループに参加しましょう!!"}</Text>
+          <Text style={{ fontSize: 18 }}>
+            {"QRを読み込ませてもらって\nゲームグループに参加しましょう!!"}
+          </Text>
           <CameraView
             style={{
               width: 250,
@@ -193,11 +353,7 @@ export default function Map({
             barcodeScannerSettings={{
               barcodeTypes: ["qr"],
             }}
-            onBarcodeScanned={(scanningResult) => {
-              console.log(scanningResult.data);
-              setCameraVisible(false);
-              setGameId(scanningResult.data);
-            }}
+            onBarcodeScanned={setDataSettings}
             facing={"back"}
           />
           <Button
@@ -205,6 +361,7 @@ export default function Map({
             color={"red"}
             onPress={() => {
               setCameraVisible(false);
+              firstScan.current = true;
             }}
           >
             閉じる
@@ -212,7 +369,7 @@ export default function Map({
         </View>
       </ReactNativeModal>
     </>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -221,3 +378,5 @@ const styles = StyleSheet.create({
     height: "100%",
   },
 });
+
+export default inject("userStore")(observer(Map));

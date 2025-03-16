@@ -1,9 +1,9 @@
 // This file is a fallback for using MaterialIcons on Android and web.
 
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { SymbolWeight } from 'expo-symbols';
-import React from 'react';
-import { OpaqueColorValue, StyleProp, ViewStyle } from 'react-native';
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { SymbolWeight } from "expo-symbols";
+import React from "react";
+import { OpaqueColorValue, StyleProp, ViewStyle } from "react-native";
 
 // Add your SFSymbol to MaterialIcons mappings here.
 const MAPPING = {
@@ -11,19 +11,20 @@ const MAPPING = {
   // See SF Symbols in the SF Symbols app on Mac.
   // keyはiOSで使用するSF Symbols 6のアイコン名を記入し(https://github.com/andrewtavis/sf-symbols-online)
   // valueにはAndroidで使用するMaterial Symbolsのアイコン名を記入する。(https://fonts.google.com/icons?selected=Material+Symbols+Outlined:qr_code:FILL@0;wght@400;GRAD@0;opsz@24&icon.size=24&icon.color=%235f6368&icon.platform=ios)
-  'house.fill': 'home',
-  'paperplane.fill': 'send',
-  'chevron.left.forwardslash.chevron.right': 'code',
-  'chevron.right': 'chevron-right',
-  'map.fill': "location-pin",
-  'camera': "photo-camera",
-  'qrcode': "qr-code",
-  'arrow.counterclockwise': 'restart-alt',
-  "mappin.and.ellipse": "pin-drop"
+  "house.fill": "home",
+  "paperplane.fill": "send",
+  "chevron.left.forwardslash.chevron.right": "code",
+  "chevron.right": "chevron-right",
+  "map.fill": "location-pin",
+  camera: "photo-camera",
+  qrcode: "qr-code",
+  "arrow.counterclockwise": "restart-alt",
+  "mappin.and.ellipse": "pin-drop",
+  "person.badge.plus": "person-add",
 } as Partial<
   Record<
-    import('expo-symbols').SymbolViewProps['name'],
-    React.ComponentProps<typeof MaterialIcons>['name']
+    import("expo-symbols").SymbolViewProps["name"],
+    React.ComponentProps<typeof MaterialIcons>["name"]
   >
 >;
 
@@ -46,5 +47,12 @@ export function IconSymbol({
   style?: StyleProp<ViewStyle>;
   weight?: SymbolWeight;
 }) {
-  return <MaterialIcons color={color} size={size} name={MAPPING[name]} style={style} />;
+  return (
+    <MaterialIcons
+      color={color}
+      size={size}
+      name={MAPPING[name]}
+      style={style}
+    />
+  );
 }

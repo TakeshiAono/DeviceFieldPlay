@@ -1,0 +1,29 @@
+{
+  "cli": {
+    "version": ">= 14.5.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "GOOGLE_MAPS_API_KEY": "@project/GOOGLE_MAPS_API_KEY",
+        "GOOGLE_SERVICES_JSON": "@project/GOOGLE_SERVICES_JSON",
+        "AWS_ACCESS_KEY_ID": "@project/AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY": "@project/AWS_SECRET_ACCESS_KEY",
+        "AWS_REGION": "@project/AWS_REGION"
+      }
+
+    },
+    "preview": {
+      "distribution": "internal"
+    },
+    "production": {
+      "autoIncrement": true
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
