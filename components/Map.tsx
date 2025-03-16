@@ -61,6 +61,9 @@ function Map({ mapVisible = true, userStore }: Props) {
 
     // エリア変更時の通知を受け取って自分の持っているエリア情報を更新する
     const notificationListener = Notifications.addNotificationReceivedListener(async notification => {
+      console.log("push通知",notification.request.content)
+      if(notification.request.content.data.notification_type !== "changeArea") return
+
       Toast.show({
         type: "info",
         text1: notification.request.content.title as string,
