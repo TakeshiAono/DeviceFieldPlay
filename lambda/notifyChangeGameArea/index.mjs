@@ -29,6 +29,17 @@ const firebaseConfig = {
 
 // Lambda ハンドラー
 export const handler = async (event) => {
+  const oldAreas = JSON.stringify(event.Records[0].dynamodb.OldImage.areas);
+  const newAreas = JSON.stringify(event.Records[0].dynamodb.NewImage.areas);
+
+  if (oldAreas == newAreas) {
+    // エリア変更がない場合は早期リターンで処理を中断
+    return {
+      statusCode: 200,
+      body: "エリアの変更はありません",
+    };
+  }
+
   const gameId = event.Records[0].dynamodb.Keys.id.S; 
   try {
     const command = new GetCommand({
@@ -54,7 +65,7 @@ export const handler = async (event) => {
             title: "エリア変更通知",
             body: "エリアが変更されました",
           },
-          data: {},
+          data: {notification_type: "changeArea"},
           android: { // ✅ ここで `priority: "high"` を設定
             priority: "high", // 🚀 高優先度にする
             notification: {
