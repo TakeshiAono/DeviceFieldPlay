@@ -8,8 +8,11 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "GOOGLE_MAPS_API_KEY": "@env.GOOGLE_MAPS_API_KEY",
-        "GOOGLE_SERVICES_JSON": "@env.GOOGLE_SERVICES_JSON"
+        "GOOGLE_MAPS_API_KEY": "@project/GOOGLE_MAPS_API_KEY",
+        "GOOGLE_SERVICES_JSON": "@project/GOOGLE_SERVICES_JSON",
+        "AWS_ACCESS_KEY_ID": "@project/AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY": "@project/AWS_SECRET_ACCESS_KEY",
+        "AWS_REGION": "@project/AWS_REGION"
       }
 
     },
