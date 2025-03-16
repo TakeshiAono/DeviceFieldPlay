@@ -60,7 +60,7 @@ function Map({ mapVisible = true, userStore }: Props) {
     if (!gameId) return;
 
     // エリア変更時の通知を受け取って自分の持っているエリア情報を更新する
-    const notificationListener = Notifications.addNotificationReceivedListener(async notification => {
+    const changeAreaNotificationListener = Notifications.addNotificationReceivedListener(async notification => {
       console.log("push通知",notification.request.content)
       if(notification.request.content.data.notification_type !== "changeArea") return
 
@@ -77,6 +77,17 @@ function Map({ mapVisible = true, userStore }: Props) {
         .catch((e) => console.error(e));
     });
 
+    const rejectUserNotificationListener = Notifications.addNotificationReceivedListener(async notification => {
+      console.log("push通知",notification.request.content)
+      if(notification.request.content.data.notification_type !== "rejectUser") return
+
+      Toast.show({
+        type: "info",
+        text1: notification.request.content.title as string,
+        text2: notification.request.content.body as string
+      });
+    });
+
     getTagGames(gameId)
       .then((res) => {
         setMarkers(res?.areas);
@@ -86,7 +97,8 @@ function Map({ mapVisible = true, userStore }: Props) {
 
     // gameIdが変わるたびに別のゲームのエリアで更新されてしまわないよう、イベントリスナーを削除し新規のイベントリスナーを生成する。
     return () => {
-      notificationListener.remove();
+      changeAreaNotificationListener.remove();
+      rejectUserNotificationListener.remove();
     };
   }, [gameId]);
 
