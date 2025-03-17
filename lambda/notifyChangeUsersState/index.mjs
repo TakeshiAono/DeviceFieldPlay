@@ -31,14 +31,15 @@ const firebaseConfig = {
 // Lambda ハンドラー
 export const handler = async (event) => {
   console.log("イベント", event.Records)
+
   // 最初のrejectUserが生まれてからrejectUserのkeyが生成されるため、それまではundefinedとなる
-  if (event.Records[0].dynamodb.NewImage.rejectUser == undefined) {
+  if (event.Records[0].dynamodb.NewImage?.rejectUser == undefined) {
     return {
       statusCode: 200,
       body: "rejectUserは存在しません",
     };  
   }
-  const oldAreas = JSON.stringify(event.Records[0].dynamodb.NewImage.rejectUser);
+
   const oldRejectUsers = JSON.stringify(event.Records[0].dynamodb.OldImage.rejectUser);
   const newRejectUsers = JSON.stringify(event.Records[0].dynamodb.NewImage.rejectUser);
 
@@ -76,25 +77,25 @@ try {
             body: "ユーザーが脱落しました",
           },
           data: {notification_type: "rejectUser"},
-          android: { // ✅ ここで `priority: "high"` を設定
-            priority: "high", // 🚀 高優先度にする
+          android: {
+            priority: "high",
             notification: {
-              channelId: "high_priority", // 🚀 事前に `setNotificationChannelAsync()` で作成
-              sound: "default", // ✅ 音を鳴らす
+              channelId: "high_priority",
+              sound: "default",
             },
           },
         },
       }
     });
 
-    androidMessages.forEach(message => {
+    await Promise.all(androidMessages.map(message => 
       axios.post(fcmUrl, message, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
-      });
-    });
+      })
+    ));
 
     return {
       statusCode: 200,
