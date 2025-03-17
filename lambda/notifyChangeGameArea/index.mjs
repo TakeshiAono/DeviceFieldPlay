@@ -29,10 +29,20 @@ const firebaseConfig = {
 
 // Lambda ハンドラー
 export const handler = async (event) => {
-  const oldAreas = JSON.stringify(event.Records[0].dynamodb.OldImage.areas);
-  const newAreas = JSON.stringify(event.Records[0].dynamodb.NewImage.areas);
+  const oldAreas = event.Records[0].dynamodb.OldImage?.areas;
+  const newAreas = event.Records[0].dynamodb.NewImage?.areas;
+  if (!oldAreas) {
+    // エリア変更がない場合は早期リターンで処理を中断
+    return {
+      statusCode: 200,
+      body: "初期のエリア定義です",
+    };
+  }
 
-  if (oldAreas == newAreas) {
+  const oldAreasString = JSON.stringify(oldAreas);
+  const newAreasString = JSON.stringify(newAreas);
+
+  if (oldAreasString == newAreasString) {
     // エリア変更がない場合は早期リターンで処理を中断
     return {
       statusCode: 200,
@@ -77,14 +87,14 @@ export const handler = async (event) => {
       }
     });
 
-    androidMessages.forEach(message => {
-      axios.post(fcmUrl, message, {
+    await Promise.all(androidMessages.map(message => {
+      return axios.post(fcmUrl, message, {
         headers: {
           Authorization: `Bearer ${accessToken}`, // ✅ OAuth 2.0 アクセストークンを使用
           "Content-Type": "application/json",
         },
       });
-    });
+    }));
 
     return {
       statusCode: 200,
