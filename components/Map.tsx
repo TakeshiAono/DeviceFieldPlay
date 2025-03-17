@@ -82,10 +82,25 @@ function Map({ mapVisible = true, userStore }: Props) {
       if(notification.request.content.data.notification_type !== "rejectUser") return
 
       Toast.show({
-        type: "info",
+        type: "error",
         text1: notification.request.content.title as string,
         text2: notification.request.content.body as string
       });
+
+      getTagGames(gameId)
+    });
+
+    const reviveUserNotificationListener = Notifications.addNotificationReceivedListener(async notification => {
+      console.log("push通知",notification.request.content)
+      if(notification.request.content.data.notification_type !== "reviveUser") return
+
+      Toast.show({
+        type: "success",
+        text1: notification.request.content.title as string,
+        text2: notification.request.content.body as string
+      });
+
+      getTagGames(gameId)
     });
 
     getTagGames(gameId)
@@ -99,6 +114,7 @@ function Map({ mapVisible = true, userStore }: Props) {
     return () => {
       changeAreaNotificationListener.remove();
       rejectUserNotificationListener.remove();
+      reviveUserNotificationListener.remove();
     };
   }, [gameId]);
 

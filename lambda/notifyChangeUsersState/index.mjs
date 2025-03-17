@@ -27,7 +27,6 @@ const firebaseConfig = {
   project_id: process.env.FIREBASE_PROJECT_ID,
 };
 
-
 // Lambda ハンドラー
 export const handler = async (event) => {
   console.log("イベント", event.Records)
@@ -51,14 +50,14 @@ export const handler = async (event) => {
     };
   }
 
-const gameId = event.Records[0].dynamodb.Keys.id.S; 
-try {
-  const command = new GetCommand({
-    TableName: "devices",
-    Key: {
-        gameId: gameId,
-      },
-    });
+  const gameId = event.Records[0].dynamodb.Keys.id.S; 
+  try {
+    const command = new GetCommand({
+      TableName: "devices",
+      Key: {
+          gameId: gameId,
+        },
+      });
     const deviceResponse = await docClient.send(command);
     console.log("getDevices:", deviceResponse);
     
@@ -68,25 +67,49 @@ try {
     
     const accessToken = await getAccessToken();
     const fcmUrl = `https://fcm.googleapis.com/v1/projects/${firebaseConfig.project_id}/messages:send`;
-    const androidMessages = androidDeviceIds.map((token) => {
-      return {
-        message: {
-          token,
-          notification: {
-            title: "ユーザー通知",
-            body: "ユーザーが脱落しました",
-          },
-          data: {notification_type: "rejectUser"},
-          android: {
-            priority: "high",
+
+    let androidMessages = [];
+    if(event.Records[0].dynamodb.OldImage?.liveUser?.L.length < event.Records[0].dynamodb.NewImage?.liveUser?.L.length) {
+      androidMessages = androidDeviceIds.map((token) => {
+        return {
+          message: {
+            token,
             notification: {
-              channelId: "high_priority",
-              sound: "default",
+              title: "ユーザー通知",
+              body: "ユーザーが復活しました",
+            },
+            data: {notification_type: "reviveUser"},
+            android: {
+              priority: "high",
+              notification: {
+                channelId: "high_priority",
+                sound: "default",
+              },
             },
           },
-        },
-      }
-    });
+        }
+      });
+    } else {
+      androidMessages = androidDeviceIds.map((token) => {
+        return {
+          message: {
+            token,
+            notification: {
+              title: "ユーザー通知",
+              body: "ユーザーが脱落しました",
+            },
+            data: {notification_type: "rejectUser"},
+            android: {
+              priority: "high",
+              notification: {
+                channelId: "high_priority",
+                sound: "default",
+              },
+            },
+          },
+        }
+      });
+    }
 
     await Promise.all(androidMessages.map(message => 
       axios.post(fcmUrl, message, {
