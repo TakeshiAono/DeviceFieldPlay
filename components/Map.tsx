@@ -227,12 +227,13 @@ function Map({ mapVisible = true, userStore }: Props) {
           </Button>
           <Button
             type="solid"
-            color={isCurrentUserLive ? "gray" : "warning"}
+            color={isCurrentUserLive ? "gray" : "success"}
             onPress={
               isCurrentUserLive
                 ? undefined
                 : () => {
                     Alert.alert("復活", "復活してもよいですか？", [
+                      {text: 'Cancel', onPress: undefined},
                       {
                         text: "OK",
                         onPress: async () => {
