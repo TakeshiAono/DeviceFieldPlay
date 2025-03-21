@@ -37,20 +37,20 @@ export default function RootLayout() {
   useEffect(() => {
     async function registerForPushNotificationsAsync() {
       const { status } = await Notifications.requestPermissionsAsync();
-      if (status !== 'granted') {
+      if (status !== "granted") {
         return;
       }
 
-      await Notifications.setNotificationChannelAsync('default', {
-        name: 'default',
+      await Notifications.setNotificationChannelAsync("default", {
+        name: "default",
         importance: Notifications.AndroidImportance.MAX,
         vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#FF231F7C',
+        lightColor: "#FF231F7C",
       });
     }
 
-    registerForPushNotificationsAsync()
-  }, [])
+    registerForPushNotificationsAsync();
+  }, []);
 
   useEffect(() => {
     if (loaded) {

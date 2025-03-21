@@ -6,11 +6,11 @@ import MapView, { LatLng, Marker, Polyline, Region } from "react-native-maps";
 import ReactNativeModal from "react-native-modal";
 import { CameraView } from "expo-camera";
 import { booleanPointInPolygon, point, polygon } from "@turf/turf";
-import 'react-native-get-random-values';
+import "react-native-get-random-values";
 import * as Crypto from "expo-crypto";
 import _ from "lodash";
 import { inject, observer } from "mobx-react";
-import Toast from 'react-native-toast-message';
+import Toast from "react-native-toast-message";
 import * as Notifications from "expo-notifications";
 
 import {
@@ -60,48 +60,60 @@ function Map({ mapVisible = true, userStore }: Props) {
     if (!gameId) return;
 
     // エリア変更時の通知を受け取って自分の持っているエリア情報を更新する
-    const changeAreaNotificationListener = Notifications.addNotificationReceivedListener(async notification => {
-      console.log("push通知",notification.request.content)
-      if(notification.request.content.data.notification_type !== "changeArea") return
+    const changeAreaNotificationListener =
+      Notifications.addNotificationReceivedListener(async (notification) => {
+        console.log("push通知", notification.request.content);
+        if (
+          notification.request.content.data.notification_type !== "changeArea"
+        )
+          return;
 
-      Toast.show({
-        type: "info",
-        text1: notification.request.content.title as string,
-        text2: notification.request.content.body as string
+        Toast.show({
+          type: "info",
+          text1: notification.request.content.title as string,
+          text2: notification.request.content.body as string,
+        });
+
+        getTagGames(gameId)
+          .then((res) => {
+            setMarkers(res?.areas);
+          })
+          .catch((e) => console.error(e));
       });
 
-      getTagGames(gameId)
-        .then((res) => {
-          setMarkers(res?.areas);
-        })
-        .catch((e) => console.error(e));
-    });
+    const rejectUserNotificationListener =
+      Notifications.addNotificationReceivedListener(async (notification) => {
+        console.log("push通知", notification.request.content);
+        if (
+          notification.request.content.data.notification_type !== "rejectUser"
+        )
+          return;
 
-    const rejectUserNotificationListener = Notifications.addNotificationReceivedListener(async notification => {
-      console.log("push通知",notification.request.content)
-      if(notification.request.content.data.notification_type !== "rejectUser") return
+        Toast.show({
+          type: "error",
+          text1: notification.request.content.title as string,
+          text2: notification.request.content.body as string,
+        });
 
-      Toast.show({
-        type: "error",
-        text1: notification.request.content.title as string,
-        text2: notification.request.content.body as string
+        getTagGames(gameId);
       });
 
-      getTagGames(gameId)
-    });
+    const reviveUserNotificationListener =
+      Notifications.addNotificationReceivedListener(async (notification) => {
+        console.log("push通知", notification.request.content);
+        if (
+          notification.request.content.data.notification_type !== "reviveUser"
+        )
+          return;
 
-    const reviveUserNotificationListener = Notifications.addNotificationReceivedListener(async notification => {
-      console.log("push通知",notification.request.content)
-      if(notification.request.content.data.notification_type !== "reviveUser") return
+        Toast.show({
+          type: "success",
+          text1: notification.request.content.title as string,
+          text2: notification.request.content.body as string,
+        });
 
-      Toast.show({
-        type: "success",
-        text1: notification.request.content.title as string,
-        text2: notification.request.content.body as string
+        getTagGames(gameId);
       });
-
-      getTagGames(gameId)
-    });
 
     getTagGames(gameId)
       .then((res) => {
@@ -136,7 +148,10 @@ function Map({ mapVisible = true, userStore }: Props) {
     if (!isInside) {
       if (isCurrentUserLive === false) return;
 
-      await rejectUser(gameId, userStore?.getCurrentUser()?.getDeviceId() as string);
+      await rejectUser(
+        gameId,
+        userStore?.getCurrentUser()?.getDeviceId() as string,
+      );
       setIsCurrentUserLive(false);
       Alert.alert("脱落通知", "エリア外に出たため脱落となりました。", [
         { text: "OK" },
@@ -158,7 +173,8 @@ function Map({ mapVisible = true, userStore }: Props) {
   const setDataSettings = ({ data }: { data: string }) => {
     // NOTE: カメラモーダルを閉じた際にtrueに戻します。
     // NOTE: QRが画面上にある限り廉造スキャンしてしまうので最初のスキャン以外は早期リターンしている
-    if (!firstScan.current || !userStore?.getCurrentUser()?.getDeviceId()) return;
+    if (!firstScan.current || !userStore?.getCurrentUser()?.getDeviceId())
+      return;
 
     firstScan.current = false;
     console.log(data);
@@ -169,15 +185,21 @@ function Map({ mapVisible = true, userStore }: Props) {
 
   const storeGameStartSetting = async (gameId: string) => {
     try {
-      await joinUser(gameId, userStore?.getCurrentUser()?.getDeviceId() as string);
+      await joinUser(
+        gameId,
+        userStore?.getCurrentUser()?.getDeviceId() as string,
+      );
       await putUser(gameId, userStore?.getCurrentUser() as UserModel);
-      await putDevices(gameId, userStore?.getCurrentUser()?.getDeviceId() as string)
+      await putDevices(
+        gameId,
+        userStore?.getCurrentUser()?.getDeviceId() as string,
+      );
 
       console.log("通知設定をdynamoへセット完了");
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-}
+  };
 
   return (
     <>
@@ -187,21 +209,26 @@ function Map({ mapVisible = true, userStore }: Props) {
             type="solid"
             color={!!isSetDoneArea ? "success" : "primary"}
             onPress={async () => {
-              const targetGameId = _.isEmpty(gameId) ? Crypto.randomUUID() : gameId
+              const targetGameId = _.isEmpty(gameId)
+                ? Crypto.randomUUID()
+                : gameId;
               await putTagGames(targetGameId, markers);
               setGameId(targetGameId);
               setIsSetDoneArea(true);
 
               if (!userStore?.getCurrentUser()?.getDeviceId()) return;
-              await storeGameStartSetting(targetGameId)
+              await storeGameStartSetting(targetGameId);
             }}
           >
             <IconSymbol size={28} name={"mappin.and.ellipse"} color={"white"} />
           </Button>
-          <Button type="solid" onPress={() => {
-            resetMarkers()
-            setIsSetDoneArea(false);
-          }}>
+          <Button
+            type="solid"
+            onPress={() => {
+              resetMarkers();
+              setIsSetDoneArea(false);
+            }}
+          >
             <IconSymbol
               size={28}
               name={"arrow.counterclockwise"}
@@ -233,17 +260,23 @@ function Map({ mapVisible = true, userStore }: Props) {
                 ? undefined
                 : () => {
                     Alert.alert("復活", "復活してもよいですか？", [
-                      {text: 'Cancel', onPress: undefined},
+                      { text: "Cancel", onPress: undefined },
                       {
                         text: "OK",
                         onPress: async () => {
-                          if (!userStore?.getCurrentUser()?.getDeviceId()) return;
+                          if (!userStore?.getCurrentUser()?.getDeviceId())
+                            return;
 
                           try {
-                            await reviveUser(gameId, userStore?.getCurrentUser()?.getDeviceId() as string);
-                            setIsCurrentUserLive(true)
+                            await reviveUser(
+                              gameId,
+                              userStore
+                                ?.getCurrentUser()
+                                ?.getDeviceId() as string,
+                            );
+                            setIsCurrentUserLive(true);
                           } catch (error) {
-                            console.error(error)
+                            console.error(error);
                           }
                         },
                       },
@@ -261,17 +294,23 @@ function Map({ mapVisible = true, userStore }: Props) {
                 ? undefined
                 : () => {
                     Alert.alert("脱落", "脱落してもよいですか？", [
-                      {text: 'Cancel', onPress: undefined},
+                      { text: "Cancel", onPress: undefined },
                       {
                         text: "OK",
                         onPress: async () => {
-                          if (!userStore?.getCurrentUser()?.getDeviceId()) return;
+                          if (!userStore?.getCurrentUser()?.getDeviceId())
+                            return;
 
                           try {
-                            await rejectUser(gameId, userStore?.getCurrentUser()?.getDeviceId() as string);
-                            setIsCurrentUserLive(false)
+                            await rejectUser(
+                              gameId,
+                              userStore
+                                ?.getCurrentUser()
+                                ?.getDeviceId() as string,
+                            );
+                            setIsCurrentUserLive(false);
                           } catch (error) {
-                            console.error(error)
+                            console.error(error);
                           }
                         },
                       },
