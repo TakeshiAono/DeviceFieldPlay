@@ -82,10 +82,25 @@ function Map({ mapVisible = true, userStore }: Props) {
       if(notification.request.content.data.notification_type !== "rejectUser") return
 
       Toast.show({
-        type: "info",
+        type: "error",
         text1: notification.request.content.title as string,
         text2: notification.request.content.body as string
       });
+
+      getTagGames(gameId)
+    });
+
+    const reviveUserNotificationListener = Notifications.addNotificationReceivedListener(async notification => {
+      console.log("push通知",notification.request.content)
+      if(notification.request.content.data.notification_type !== "reviveUser") return
+
+      Toast.show({
+        type: "success",
+        text1: notification.request.content.title as string,
+        text2: notification.request.content.body as string
+      });
+
+      getTagGames(gameId)
     });
 
     getTagGames(gameId)
@@ -99,6 +114,7 @@ function Map({ mapVisible = true, userStore }: Props) {
     return () => {
       changeAreaNotificationListener.remove();
       rejectUserNotificationListener.remove();
+      reviveUserNotificationListener.remove();
     };
   }, [gameId]);
 
@@ -211,12 +227,13 @@ function Map({ mapVisible = true, userStore }: Props) {
           </Button>
           <Button
             type="solid"
-            color={isCurrentUserLive ? "gray" : "warning"}
+            color={isCurrentUserLive ? "gray" : "success"}
             onPress={
               isCurrentUserLive
                 ? undefined
                 : () => {
                     Alert.alert("復活", "復活してもよいですか？", [
+                      {text: 'Cancel', onPress: undefined},
                       {
                         text: "OK",
                         onPress: async () => {
@@ -235,6 +252,34 @@ function Map({ mapVisible = true, userStore }: Props) {
             }
           >
             <IconSymbol size={28} name={"person.badge.plus"} color={"white"} />
+          </Button>
+          <Button
+            type="solid"
+            color={!isCurrentUserLive || !gameId ? "gray" : "error"}
+            onPress={
+              !isCurrentUserLive || !gameId
+                ? undefined
+                : () => {
+                    Alert.alert("脱落", "脱落してもよいですか？", [
+                      {text: 'Cancel', onPress: undefined},
+                      {
+                        text: "OK",
+                        onPress: async () => {
+                          if (!userStore?.getCurrentUser()?.getDeviceId()) return;
+
+                          try {
+                            await rejectUser(gameId, userStore?.getCurrentUser()?.getDeviceId() as string);
+                            setIsCurrentUserLive(false)
+                          } catch (error) {
+                            console.error(error)
+                          }
+                        },
+                      },
+                    ]);
+                  }
+            }
+          >
+            <IconSymbol size={28} name={"person.badge.minus"} color={"white"} />
           </Button>
         </View>
       </View>

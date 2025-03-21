@@ -21,6 +21,7 @@ const MAPPING = {
   "arrow.counterclockwise": "restart-alt",
   "mappin.and.ellipse": "pin-drop",
   "person.badge.plus": "person-add",
+  "person.badge.minus": "person-remove",
 } as Partial<
   Record<
     import("expo-symbols").SymbolViewProps["name"],
