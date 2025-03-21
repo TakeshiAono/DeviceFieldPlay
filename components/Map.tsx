@@ -253,6 +253,34 @@ function Map({ mapVisible = true, userStore }: Props) {
           >
             <IconSymbol size={28} name={"person.badge.plus"} color={"white"} />
           </Button>
+          <Button
+            type="solid"
+            color={!isCurrentUserLive || !gameId ? "gray" : "error"}
+            onPress={
+              !isCurrentUserLive || !gameId
+                ? undefined
+                : () => {
+                    Alert.alert("脱落", "脱落してもよいですか？", [
+                      {text: 'Cancel', onPress: undefined},
+                      {
+                        text: "OK",
+                        onPress: async () => {
+                          if (!userStore?.getCurrentUser()?.getDeviceId()) return;
+
+                          try {
+                            await rejectUser(gameId, userStore?.getCurrentUser()?.getDeviceId() as string);
+                            setIsCurrentUserLive(false)
+                          } catch (error) {
+                            console.error(error)
+                          }
+                        },
+                      },
+                    ]);
+                  }
+            }
+          >
+            <IconSymbol size={28} name={"person.badge.minus"} color={"white"} />
+          </Button>
         </View>
       </View>
       {mapVisible && (
