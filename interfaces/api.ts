@@ -1,6 +1,6 @@
 type GameId = string;
 
-type DynamoTagGames = {
+export type DynamoTagGames = {
   id: GameId;
   areas: {
     key: number;
@@ -11,14 +11,14 @@ type DynamoTagGames = {
   rejectUsers: string[];
 }
 
-type DynamoUsers = {
+export type DynamoUsers = {
   gameId: GameId;
   deviceId: string;
   name: string;
   userId: string;
 }
 
-type DynamoDevices = {
+export type DynamoDevices = {
   gameId: GameId;
   androidDeviceIds: string[];
   iOSDeviceIds: string[];

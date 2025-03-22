@@ -10,6 +10,7 @@ import Constants from "expo-constants";
 import { Marker } from "@/components/Map";
 import { Platform } from "react-native";
 import UserModel from "@/models/UserModel";
+import { DynamoDevices, DynamoTagGames, DynamoUsers } from "@/interfaces/api";
 
 const AWS_ACCESS_KEY_ID = Constants.expoConfig?.extra?.awsAccessKeyId;
 const AWS_SECRET_ACCESS_KEY = Constants.expoConfig?.extra?.awsSecretAccessKey;
