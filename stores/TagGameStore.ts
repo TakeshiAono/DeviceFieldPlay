@@ -19,9 +19,6 @@ export default class TagGameStore {
   }
 
   public getTagGame() {
-    if (this.currentTagGame) {
-      return this.currentTagGame
-    }
-    return undefined
+    return this.currentTagGame
   }
 }
