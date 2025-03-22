@@ -66,7 +66,7 @@ export const joinUser = async (gameId: string, deviceId: string) => {
     const command = new UpdateCommand({
       TableName: "tagGames",
       Key: { id: gameId },
-      UpdateExpression: `SET liveUser = list_append(if_not_exists(liveUser, :emptyList), :newDevice)`,
+      UpdateExpression: `SET liveUsers = list_append(if_not_exists(liveUsers, :emptyList), :newDevice)`,
       ExpressionAttributeValues: {
         ":newDevice": [deviceId],
         ":emptyList": [],
@@ -111,22 +111,22 @@ export const rejectUser = async (gameId: string, deviceId: string) => {
     const getCommand = new GetCommand({
       TableName: "tagGames",
       Key: { id: gameId },
-      ProjectionExpression: "liveUser",
+      ProjectionExpression: "liveUsers",
     });
     const currentData = await docClient.send(getCommand);
-    const liveUserList = currentData.Item?.liveUser || [];
+    const liveUserList = currentData.Item?.liveUsers || [];
 
     const deviceIndex = liveUserList.indexOf(deviceId);
     if (deviceIndex === -1) {
-      throw new Error("Device ID not found in liveUser list");
+      throw new Error("Device ID not found in liveUsers list");
     }
 
     const command = new UpdateCommand({
       TableName: "tagGames",
       Key: { id: gameId },
       UpdateExpression: `
-        SET rejectUser = list_append(if_not_exists(rejectUser, :emptyList), :newDevice)
-        REMOVE liveUser[${deviceIndex}]`,
+        SET rejectUsers = list_append(if_not_exists(rejectUsers, :emptyList), :newDevice)
+        REMOVE liveUsers[${deviceIndex}]`,
       ExpressionAttributeValues: {
         ":newDevice": [deviceId],
         ":emptyList": [],
@@ -135,10 +135,10 @@ export const rejectUser = async (gameId: string, deviceId: string) => {
     });
 
     const response = await docClient.send(command);
-    console.log("rejectUser:", response);
+    console.log("rejectUsers:", response);
     return response;
   } catch (error) {
-    console.error("rejectUser:", error);
+    console.error("rejectUsers:", error);
     throw error;
   }
 };
@@ -150,20 +150,20 @@ export const reviveUser = async (gameId: string, deviceId: string) => {
     const getCommand = new GetCommand({
       TableName: "tagGames",
       Key: { id: gameId },
-      ProjectionExpression: "rejectUser",
+      ProjectionExpression: "rejectUsers",
     });
     const currentData = await docClient.send(getCommand);
-    const rejectUserList = currentData.Item?.rejectUser || [];
+    const rejectUserList = currentData.Item?.rejectUsers || [];
 
     const deviceIndex = rejectUserList.indexOf(deviceId);
     if (deviceIndex === -1) {
-      throw new Error("Device ID not found in rejectUser list");
+      throw new Error("Device ID not found in rejectUsers list");
     }
 
     const command = new UpdateCommand({
       TableName: "tagGames",
       Key: { id: gameId },
-      UpdateExpression: `SET liveUser = list_append(if_not_exists(liveUser, :emptyList), :newDevice) REMOVE rejectUser[${deviceIndex}]`,
+      UpdateExpression: `SET liveUsers = list_append(if_not_exists(liveUsers, :emptyList), :newDevice) REMOVE rejectUsers[${deviceIndex}]`,
       ExpressionAttributeValues: {
         ":newDevice": [deviceId],
         ":emptyList": [],
