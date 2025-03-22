@@ -10,7 +10,7 @@ import Constants from "expo-constants";
 import { Marker } from "@/components/Map";
 import { Platform } from "react-native";
 import UserModel from "@/models/UserModel";
-import { DynamoDevices, DynamoTagGames, DynamoUsers } from "@/interfaces/api";
+import { DynamoDevice, DynamoTagGame, DynamoUser } from "@/interfaces/api";
 
 const AWS_ACCESS_KEY_ID = Constants.expoConfig?.extra?.awsAccessKeyId;
 const AWS_SECRET_ACCESS_KEY = Constants.expoConfig?.extra?.awsSecretAccessKey;
@@ -26,7 +26,7 @@ const client = new DynamoDBClient({
 
 const docClient = DynamoDBDocumentClient.from(client);
 
-export const getTagGames = async <T extends DynamoTagGames> (id: T["id"]): Promise<DynamoTagGames> => {
+export const getTagGames = async <T extends DynamoTagGame> (id: T["id"]): Promise<DynamoTagGame> => {
   try {
     const command = new GetCommand({
       TableName: "tagGames",
@@ -36,14 +36,14 @@ export const getTagGames = async <T extends DynamoTagGames> (id: T["id"]): Promi
     });
     const response = await docClient.send(command);
     console.log("getTagGames:", response);
-    return response.Item as DynamoTagGames;
+    return response.Item as DynamoTagGame;
   } catch (error) {
     console.error("getTagGames:", error);
     throw error;
   }
 };
 
-export const putTagGames = async <T extends DynamoTagGames["id"]> (gameId: T, item: Marker[]): Promise<T> => {
+export const putTagGames = async <T extends DynamoTagGame["id"]> (gameId: T, item: Marker[]): Promise<T> => {
   try {
     const command = new PutCommand({
       TableName: "tagGames",
@@ -62,7 +62,7 @@ export const putTagGames = async <T extends DynamoTagGames["id"]> (gameId: T, it
   }
 };
 
-export const joinUser = async <T extends DynamoTagGames> (gameId: T["id"], deviceId: string): Promise<Pick<T, "liveUsers">> => {
+export const joinUser = async <T extends DynamoTagGame> (gameId: T["id"], deviceId: string): Promise<Pick<T, "liveUsers">> => {
   try {
     const command = new UpdateCommand({
       TableName: "tagGames",
@@ -84,7 +84,7 @@ export const joinUser = async <T extends DynamoTagGames> (gameId: T["id"], devic
   }
 };
 
-export const putUser = async <T extends DynamoUsers> (gameId: T["gameId"], user: UserModel): Promise< T | undefined> => {
+export const putUser = async <T extends DynamoUser> (gameId: T["gameId"], user: UserModel): Promise< T | undefined> => {
   try {
     const command = new PutCommand({
       TableName: "users",
@@ -108,7 +108,7 @@ export const putUser = async <T extends DynamoUsers> (gameId: T["gameId"], user:
 
 // TODO: 複数スマホで同時に実行すると自分じゃないuserをrejectしてしまう可能性があるため、
 // dynamoStreamのLambdaで同期対応させるようにする
-export const rejectUser = async <T extends DynamoTagGames> (gameId: T["id"], deviceId: string): Promise<Pick<T, "rejectUsers">> => {
+export const rejectUser = async <T extends DynamoTagGame> (gameId: T["id"], deviceId: string): Promise<Pick<T, "rejectUsers">> => {
   try {
     const getCommand = new GetCommand({
       TableName: "tagGames",
@@ -147,7 +147,7 @@ export const rejectUser = async <T extends DynamoTagGames> (gameId: T["id"], dev
 
 // TODO: スマホ側で同時に実行すると自分じゃないuserをreviveしてしまう可能性があるため、
 // dynamoStreamのLambdaで同期対応させるようにする
-export const reviveUser = async <T extends DynamoTagGames> (gameId: T["id"], deviceId: string): Promise<Pick<T, "liveUsers">> => {
+export const reviveUser = async <T extends DynamoTagGame> (gameId: T["id"], deviceId: string): Promise<Pick<T, "liveUsers">> => {
   try {
     const getCommand = new GetCommand({
       TableName: "tagGames",
@@ -182,7 +182,7 @@ export const reviveUser = async <T extends DynamoTagGames> (gameId: T["id"], dev
   }
 };
 
-export const putDevices = async <T extends DynamoDevices> (gameId: T["gameId"], deviceId: string) => {
+export const putDevices = async <T extends DynamoDevice> (gameId: T["gameId"], deviceId: string) => {
   const [iOSDeviceList, androidDeviceList] = _getIdsByPlatform(deviceId);
 
   try {
@@ -204,7 +204,7 @@ export const putDevices = async <T extends DynamoDevices> (gameId: T["gameId"], 
   }
 };
 
-export const patchDevices = async <T extends DynamoDevices>  (gameId: T["gameId"], deviceId: string): Promise<Pick<T, "androidDeviceIds">> => {
+export const patchDevices = async <T extends DynamoDevice>  (gameId: T["gameId"], deviceId: string): Promise<Pick<T, "androidDeviceIds">> => {
   const platformKey =
     Platform.OS === "ios" ? "iOSDeviceIds" : "androidDeviceIds";
 
