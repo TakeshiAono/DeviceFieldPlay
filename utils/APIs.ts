@@ -25,7 +25,7 @@ const client = new DynamoDBClient({
 
 const docClient = DynamoDBDocumentClient.from(client);
 
-export const getTagGames = async (id: string) => {
+export const getTagGames = async <T extends DynamoTagGames> (id: T["id"]): Promise<DynamoTagGames> => {
   try {
     const command = new GetCommand({
       TableName: "tagGames",
@@ -35,14 +35,14 @@ export const getTagGames = async (id: string) => {
     });
     const response = await docClient.send(command);
     console.log("getTagGames:", response);
-    return response.Item;
+    return response.Item as DynamoTagGames;
   } catch (error) {
     console.error("getTagGames:", error);
     throw error;
   }
 };
 
-export const putTagGames = async (gameId: string, item: Marker[]) => {
+export const putTagGames = async <T extends DynamoTagGames["id"]> (gameId: T, item: Marker[]): Promise<T> => {
   try {
     const command = new PutCommand({
       TableName: "tagGames",
@@ -61,7 +61,7 @@ export const putTagGames = async (gameId: string, item: Marker[]) => {
   }
 };
 
-export const joinUser = async (gameId: string, deviceId: string) => {
+export const joinUser = async <T extends DynamoTagGames> (gameId: T["id"], deviceId: string): Promise<Pick<T, "liveUsers">> => {
   try {
     const command = new UpdateCommand({
       TableName: "tagGames",
@@ -76,14 +76,14 @@ export const joinUser = async (gameId: string, deviceId: string) => {
 
     const response = await docClient.send(command);
     console.log("joinUser:", response);
-    return response;
+    return response.Attributes as Pick<T, "liveUsers">;
   } catch (error) {
     console.error("joinUser:", error);
     throw error;
   }
 };
 
-export const putUser = async (gameId: string, user: UserModel) => {
+export const putUser = async <T extends DynamoUsers> (gameId: T["gameId"], user: UserModel): Promise< T | undefined> => {
   try {
     const command = new PutCommand({
       TableName: "users",
@@ -93,11 +93,12 @@ export const putUser = async (gameId: string, user: UserModel) => {
         deviceId: user.getDeviceId(),
         name: user.getName(),
       },
+      ReturnValues: "ALL_OLD",
     });
 
     const response = await docClient.send(command);
     console.log("putUser:", response);
-    return response;
+    return response.Attributes as  T | undefined;
   } catch (error) {
     console.error("putUser:", error);
     throw error;
@@ -106,7 +107,7 @@ export const putUser = async (gameId: string, user: UserModel) => {
 
 // TODO: 複数スマホで同時に実行すると自分じゃないuserをrejectしてしまう可能性があるため、
 // dynamoStreamのLambdaで同期対応させるようにする
-export const rejectUser = async (gameId: string, deviceId: string) => {
+export const rejectUser = async <T extends DynamoTagGames> (gameId: T["id"], deviceId: string): Promise<Pick<T, "rejectUsers">> => {
   try {
     const getCommand = new GetCommand({
       TableName: "tagGames",
@@ -136,7 +137,7 @@ export const rejectUser = async (gameId: string, deviceId: string) => {
 
     const response = await docClient.send(command);
     console.log("rejectUsers:", response);
-    return response;
+    return response.Attributes as Pick<T, "rejectUsers">;
   } catch (error) {
     console.error("rejectUsers:", error);
     throw error;
@@ -145,7 +146,7 @@ export const rejectUser = async (gameId: string, deviceId: string) => {
 
 // TODO: スマホ側で同時に実行すると自分じゃないuserをreviveしてしまう可能性があるため、
 // dynamoStreamのLambdaで同期対応させるようにする
-export const reviveUser = async (gameId: string, deviceId: string) => {
+export const reviveUser = async <T extends DynamoTagGames> (gameId: T["id"], deviceId: string): Promise<Pick<T, "liveUsers">> => {
   try {
     const getCommand = new GetCommand({
       TableName: "tagGames",
@@ -173,14 +174,14 @@ export const reviveUser = async (gameId: string, deviceId: string) => {
 
     const response = await docClient.send(command);
     console.log("reviveUser:", response);
-    return response;
+    return response.Attributes as Pick<T, "liveUsers">;
   } catch (error) {
     console.error("reviveUser:", error);
     throw error;
   }
 };
 
-export const putDevices = async (gameId: string, deviceId: string) => {
+export const putDevices = async <T extends DynamoDevices> (gameId: T["gameId"], deviceId: string) => {
   const [iOSDeviceList, androidDeviceList] = _getIdsByPlatform(deviceId);
 
   try {
@@ -202,7 +203,7 @@ export const putDevices = async (gameId: string, deviceId: string) => {
   }
 };
 
-export const patchDevices = async (gameId: string, deviceId: string) => {
+export const patchDevices = async <T extends DynamoDevices>  (gameId: T["gameId"], deviceId: string): Promise<Pick<T, "androidDeviceIds">> => {
   const platformKey =
     Platform.OS === "ios" ? "iOSDeviceIds" : "androidDeviceIds";
 
@@ -223,7 +224,7 @@ export const patchDevices = async (gameId: string, deviceId: string) => {
 
     const response = await docClient.send(command);
     console.log("patchDevices:", response);
-    return response;
+    return response.Attributes as Pick<T, "androidDeviceIds">;
   } catch (error) {
     console.error("patchDevices:", error);
     throw error;
