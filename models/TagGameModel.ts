@@ -9,7 +9,7 @@ export default class TagGameModel {
   private areas: DynamoTagGame["areas"];
   private gameMasterDeviceId: DynamoTagGame["gameMasterDeviceId"];
 
-  constructor({ id, liveUsers, rejectUsers, areas, gameMasterDeviceId }: DynamoTagGame) {
+  constructor({ id = "", liveUsers, rejectUsers, areas, gameMasterDeviceId }: DynamoTagGame) {
     this.id = id;
     this.liveUsers = liveUsers;
     this.rejectUsers = rejectUsers;
@@ -62,5 +62,9 @@ export default class TagGameModel {
 
   setGameMasterDeviceId(gameMasterDeviceId: DynamoTagGame["gameMasterDeviceId"]): void {
     this.gameMasterDeviceId = gameMasterDeviceId;
+  }
+
+  isSetGame() {
+    return this.id != ""
   }
 }

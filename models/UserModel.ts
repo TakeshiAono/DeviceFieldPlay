@@ -1,5 +1,7 @@
 import { makeAutoObservable } from "mobx";
 
+import TagGameModel from "./TagGameModel";
+
 type Props = {
   id: string;
   name: string;
@@ -41,5 +43,9 @@ export default class UserModel {
 
   setDeviceId(deviceId: string) {
     this.deviceId = deviceId;
+  }
+
+  isCurrentGameMaster(targetTagGame: TagGameModel) {
+    return this.deviceId === targetTagGame.getGameMasterDeviceId()
   }
 }

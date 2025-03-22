@@ -51,6 +51,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
   const tagGameStore = _tagGameStore!;
 
   const [region, setRegion] = useState<Region>(initialJapanRegion);
+  // TODO: markersはtagGameStoreにstateを持たせているのでそれに置き換えたい
   const [markers, setMarkers] = useState<Marker[]>([]);
   const [gameId, setGameId] = useState("");
   const [isSetDoneArea, setIsSetDoneArea] = useState(false);
@@ -187,6 +188,16 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
     setCameraVisible(false);
     setGameId(data);
     patchDevices(data, userStore?.getCurrentUser()?.getDeviceId() as string);
+
+    const tagGame = new TagGameModel({
+      id: data,
+      areas: markers,
+      liveUsers: [(userStore.getCurrentUser() as UserModel).getDeviceId()],
+      rejectUsers: [],
+      // TODO: ゲームマスターを取得できるようにしたい。現状は自分がげーむマスターでないことしかわからない
+      gameMasterDeviceId: ""
+    })
+    tagGameStore.putTagGame(tagGame)
   };
 
   const storeGameStartSetting = async (gameId: string) => {
@@ -207,6 +218,11 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
     }
   };
 
+  const isGameMaster = () => {
+    return userStore.currentUser.isCurrentGameMaster(
+      tagGameStore.getTagGame())
+  }
+
   return (
     <>
       <View style={{ position: "absolute", top: 150, right: 5, zIndex: 1 }}>
@@ -214,6 +230,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
           <Button
             type="solid"
             color={!!isSetDoneArea ? "success" : "primary"}
+            disabled={!(isGameMaster() || !tagGameStore.getTagGame().isSetGame())}
             onPress={async () => {
               const targetGameId = _.isEmpty(gameId)
                 ? Crypto.randomUUID()
@@ -224,6 +241,14 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
 
               if (!userStore.getCurrentUser()?.getDeviceId()) return;
               await storeGameStartSetting(targetGameId);
+              const tagGame = new TagGameModel({
+                id: targetGameId,
+                areas: markers,
+                liveUsers: [(userStore.getCurrentUser() as UserModel).getDeviceId()],
+                rejectUsers: [],
+                gameMasterDeviceId: (userStore.getCurrentUser() as UserModel).getDeviceId()
+              })
+              tagGameStore.putTagGame(tagGame)
             }}
           >
             <IconSymbol size={28} name={"mappin.and.ellipse"} color={"white"} />
@@ -234,6 +259,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
               resetMarkers();
               setIsSetDoneArea(false);
             }}
+            disabled={!(isGameMaster() || !tagGameStore.getTagGame().isSetGame())}
           >
             <IconSymbol
               size={28}
@@ -247,6 +273,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
             onPress={() => {
               setQrVisible(true);
             }}
+            disabled={!(isGameMaster() || !tagGameStore.getTagGame().isSetGame())}
           >
             <IconSymbol size={28} name={"qrcode"} color={"white"} />
           </Button>
