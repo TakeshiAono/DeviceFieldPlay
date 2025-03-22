@@ -18,12 +18,14 @@ import * as Notifications from "expo-notifications";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import UserStore from "@/stores/UserStore";
+import TagGameStore from "@/stores/TagGameStore";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 const stores = {
-  userStore: new UserStore(),
+  _userStore: new UserStore(),
+  _tagGameStore: new TagGameStore(),
 };
 
 export default function RootLayout() {
@@ -92,7 +94,7 @@ export default function RootLayout() {
                 if (userName == undefined) return;
                 setModalView(false);
                 const randomBytes = await Crypto.getRandomBytesAsync(16);
-                stores.userStore.setCurrentUserIdAndName(
+                stores._userStore.setCurrentUserIdAndName(
                   [...randomBytes]
                     .map((b) => b.toString(16).padStart(2, "0"))
                     .join(""),

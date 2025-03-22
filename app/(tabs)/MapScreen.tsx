@@ -9,10 +9,12 @@ import UserStore from "@/stores/UserStore";
 import { inject, observer } from "mobx-react";
 
 interface Props {
-  userStore?: UserStore;
+  _userStore?: UserStore;
 }
 
-function MapScreen(props: Props) {
+function MapScreen({_userStore}: Props) {
+  const userStore = _userStore!
+
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const [locationPermissionStatus, setLocationPermissionStatus] = useState("");
 
@@ -21,7 +23,7 @@ function MapScreen(props: Props) {
   Notifications.getDevicePushTokenAsync().then(({ data }) => {
     console.log("deviceId:", data);
     deviceId.current = data;
-    props.userStore?.currentUser?.setDeviceId(data);
+    userStore.currentUser?.setDeviceId(data);
   });
 
   useEffect(() => {
@@ -59,4 +61,4 @@ function MapScreen(props: Props) {
   );
 }
 
-export default inject("userStore")(observer(MapScreen));
+export default inject("_userStore")(observer(MapScreen));

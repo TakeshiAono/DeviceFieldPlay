@@ -26,11 +26,14 @@ import {
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import UserStore from "@/stores/UserStore";
 import UserModel from "@/models/UserModel";
+import TagGameModel from "@/models/TagGameModel";
+import TagGameStore from "@/stores/TagGameStore";
 
 export type Marker = LatLng & { key: number };
 export type Props = {
   mapVisible?: boolean;
-  userStore?: UserStore;
+  _userStore?: UserStore;
+  _tagGameStore?: TagGameStore;
 };
 
 const initialJapanRegion = {
@@ -43,7 +46,10 @@ const initialJapanRegion = {
 type latitude = number;
 type longitude = number;
 
-function Map({ mapVisible = true, userStore }: Props) {
+function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
+  const userStore = _userStore!;
+  const tagGameStore = _tagGameStore!;
+
   const [region, setRegion] = useState<Region>(initialJapanRegion);
   const [markers, setMarkers] = useState<Marker[]>([]);
   const [gameId, setGameId] = useState("");
@@ -143,14 +149,14 @@ function Map({ mapVisible = true, userStore }: Props) {
     const area = polygon([targetPolygon]);
     const isInside: boolean = booleanPointInPolygon(targetPoint, area);
 
-    if (!userStore?.getCurrentUser()?.getDeviceId()) return;
+    if (!userStore.getCurrentUser()?.getDeviceId()) return;
 
     if (!isInside) {
       if (isCurrentUserLive === false) return;
 
       await rejectUser(
         gameId,
-        userStore?.getCurrentUser()?.getDeviceId() as string,
+        userStore.getCurrentUser()?.getDeviceId() as string,
       );
       setIsCurrentUserLive(false);
       Alert.alert("脱落通知", "エリア外に出たため脱落となりました。", [
@@ -216,7 +222,7 @@ function Map({ mapVisible = true, userStore }: Props) {
               setGameId(targetGameId);
               setIsSetDoneArea(true);
 
-              if (!userStore?.getCurrentUser()?.getDeviceId()) return;
+              if (!userStore.getCurrentUser()?.getDeviceId()) return;
               await storeGameStartSetting(targetGameId);
             }}
           >
@@ -463,4 +469,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default inject("userStore")(observer(Map));
+export default inject("_userStore", "_tagGameStore")(observer(Map));
