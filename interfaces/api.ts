@@ -9,6 +9,7 @@ export type DynamoTagGame = {
   }[];
   liveUsers: string[];
   rejectUsers: string[];
+  gameMasterDeviceId: string;
 }
 
 export type DynamoUser = {
