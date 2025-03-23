@@ -184,22 +184,27 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
     tagGameStore.putArea([]);
   };
 
-  const setDataSettings = ({ data }: { data: string }) => {
+  const setDataSettings = async ({ data: gameId }: { data: string }) => {
     // NOTE: カメラモーダルを閉じた際にtrueに戻します。
     // NOTE: QRが画面上にある限り廉造スキャンしてしまうので最初のスキャン以外は早期リターンしている
     if (!firstScan.current || !userStore?.getCurrentUser()?.getDeviceId())
       return;
 
     firstScan.current = false;
-    console.log(data);
+    console.log("ScanData: ",gameId);
     setCameraVisible(false);
-    tagGameStore.getTagGame().setId(data)
-    patchDevices(data, userStore?.getCurrentUser()?.getDeviceId() as string);
+    tagGameStore.getTagGame().setId(gameId)
+    await patchDevices(gameId, userStore.getCurrentUser().getDeviceId());
+
+    const updatedLiveUsers = await joinUser(
+      gameId,
+      userStore.getCurrentUser().getDeviceId()
+    );
 
     const tagGame = new TagGameModel({
-      id: data,
+      id: gameId,
       areas: tagGameStore.getTagGame().getAreas(),
-      liveUsers: [(userStore.getCurrentUser() as UserModel).getDeviceId()],
+      liveUsers: updatedLiveUsers.liveUsers,
       rejectUsers: [],
       // TODO: ゲームマスターを取得できるようにしたい。現状は自分がげーむマスターでないことしかわからない
       gameMasterDeviceId: ""
