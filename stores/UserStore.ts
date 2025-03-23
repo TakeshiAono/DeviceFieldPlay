@@ -2,8 +2,8 @@ import UserModel from "@/models/UserModel";
 import { action, observable } from "mobx";
 
 export default class UserStore {
-  @observable
-  currentUser!: UserModel;
+  @observable.deep
+  private currentUser!: UserModel;
 
   constructor() {
     this.initialize();
