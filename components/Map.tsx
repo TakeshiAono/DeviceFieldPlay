@@ -234,64 +234,68 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
     <>
       <View style={{ position: "absolute", top: 150, right: 5, zIndex: 1 }}>
         <View style={{ display: "flex", gap: 5 }}>
-          <Button
-            type="solid"
-            color={!!isSetDoneArea ? "success" : "primary"}
-            disabled={!(isGameMaster() || !tagGameStore.getTagGame().isSetGame())}
-            onPress={async () => {
-              const targetGameId = _.isEmpty(gameId)
-                ? Crypto.randomUUID()
-                : gameId;
-              await putTagGames(targetGameId, tagGameStore.getTagGame().getAreas());
-              setGameId(targetGameId);
-              setIsSetDoneArea(true);
+          {(isGameMaster() || !tagGameStore.getTagGame().isSetGame()) &&
+            <>
+              <Button
+                type="solid"
+                color={!!isSetDoneArea ? "success" : "primary"}
+                disabled={!(isGameMaster() || !tagGameStore.getTagGame().isSetGame())}
+                onPress={async () => {
+                  const targetGameId = _.isEmpty(gameId)
+                    ? Crypto.randomUUID()
+                    : gameId;
+                  await putTagGames(targetGameId, tagGameStore.getTagGame().getAreas());
+                  setGameId(targetGameId);
+                  setIsSetDoneArea(true);
 
-              if (!userStore.getCurrentUser()?.getDeviceId()) return;
-              await storeGameStartSetting(targetGameId);
-              const tagGame = new TagGameModel({
-                id: targetGameId,
-                areas: tagGameStore.getTagGame().getAreas(),
-                liveUsers: tagGameStore.getTagGame().getLiveUsers() ?? [],
-                rejectUsers: tagGameStore.getTagGame().getRejectUsers() ?? [],
-                gameMasterDeviceId: _.isEmpty(tagGameStore.getTagGame().getGameMasterDeviceId()) ? userStore.getCurrentUser().getDeviceId() : tagGameStore.getTagGame().getGameMasterDeviceId(),
-              });
-              tagGameStore.putTagGame(tagGame);
-            }}
-          >
-            <IconSymbol size={28} name={"mappin.and.ellipse"} color={"white"} />
-          </Button>
-          <Button
-            type="solid"
-            onPress={() => {
-              resetMarkers();
-              setIsSetDoneArea(false);
-            }}
-            disabled={!(isGameMaster() || !tagGameStore.getTagGame().isSetGame())}
-          >
-            <IconSymbol
-              size={28}
-              name={"arrow.counterclockwise"}
-              color={"white"}
-            />
-          </Button>
-          {/* TODO: MapコンポーネントにQR表示ボタンとカメラ起動ボタンがあるのは適切ではないため、Mapコンポーネント外に切りだす(マップ上に表示しない) */}
-          <Button
-            type="solid"
-            onPress={() => {
-              setQrVisible(true);
-            }}
-            disabled={!(isGameMaster() || !tagGameStore.getTagGame().isSetGame())}
-          >
-            <IconSymbol size={28} name={"qrcode"} color={"white"} />
-          </Button>
-          <Button
-            type="solid"
-            onPress={() => {
-              setCameraVisible(true);
-            }}
-          >
-            <IconSymbol size={28} name={"camera"} color={"white"} />
-          </Button>
+                  if (!userStore.getCurrentUser()?.getDeviceId()) return;
+                  await storeGameStartSetting(targetGameId);
+                  const tagGame = new TagGameModel({
+                    id: targetGameId,
+                    areas: tagGameStore.getTagGame().getAreas(),
+                    liveUsers: tagGameStore.getTagGame().getLiveUsers() ?? [],
+                    rejectUsers: tagGameStore.getTagGame().getRejectUsers() ?? [],
+                    gameMasterDeviceId: _.isEmpty(tagGameStore.getTagGame().getGameMasterDeviceId()) ? userStore.getCurrentUser().getDeviceId() : tagGameStore.getTagGame().getGameMasterDeviceId(),
+                  });
+                  tagGameStore.putTagGame(tagGame);
+                }}
+              >
+                <IconSymbol size={28} name={"mappin.and.ellipse"} color={"white"} />
+              </Button>
+              <Button
+                type="solid"
+                onPress={() => {
+                  resetMarkers();
+                  setIsSetDoneArea(false);
+                }}
+                disabled={!(isGameMaster() || !tagGameStore.getTagGame().isSetGame())}
+              >
+                <IconSymbol
+                  size={28}
+                  name={"arrow.counterclockwise"}
+                  color={"white"}
+                />
+              </Button>
+              {/* TODO: MapコンポーネントにQR表示ボタンとカメラ起動ボタンがあるのは適切ではないため、Mapコンポーネント外に切りだす(マップ上に表示しない) */}
+              <Button
+                type="solid"
+                onPress={() => {
+                  setQrVisible(true);
+                }}
+                disabled={!(isGameMaster() || !tagGameStore.getTagGame().isSetGame())}
+              >
+                <IconSymbol size={28} name={"qrcode"} color={"white"} />
+              </Button>
+              <Button
+                type="solid"
+                onPress={() => {
+                  setCameraVisible(true);
+                }}
+              >
+                <IconSymbol size={28} name={"camera"} color={"white"} />
+              </Button>
+            </>
+          }
           <Button
             type="solid"
             color={isCurrentUserLive ? "gray" : "success"}
