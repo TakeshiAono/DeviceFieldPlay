@@ -23,7 +23,7 @@ function MapScreen({_userStore}: Props) {
   Notifications.getDevicePushTokenAsync().then(({ data }) => {
     console.log("deviceId:", data);
     deviceId.current = data;
-    userStore.currentUser?.setDeviceId(data);
+    userStore.getCurrentUser().setDeviceId(data);
   });
 
   useEffect(() => {

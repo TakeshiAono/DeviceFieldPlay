@@ -157,14 +157,14 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
     const area = polygon([targetPolygon]);
     const isInside: boolean = booleanPointInPolygon(targetPoint, area);
 
-    if (!userStore.getCurrentUser()?.getDeviceId()) return;
+    if (!userStore.getCurrentUser().getDeviceId()) return;
 
     if (!isInside) {
       if (isCurrentUserLive === false) return;
 
       await rejectUser(
         tagGameStore.getTagGame().getId(),
-        userStore.getCurrentUser()?.getDeviceId() as string,
+        userStore.getCurrentUser().getDeviceId() as string,
       );
       setIsCurrentUserLive(false);
       Alert.alert("脱落通知", "エリア外に出たため脱落となりました。", [
@@ -187,7 +187,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
   const setDataSettings = async ({ data: gameId }: { data: string }) => {
     // NOTE: カメラモーダルを閉じた際にtrueに戻します。
     // NOTE: QRが画面上にある限り廉造スキャンしてしまうので最初のスキャン以外は早期リターンしている
-    if (!firstScan.current || !userStore?.getCurrentUser()?.getDeviceId())
+    if (!firstScan.current || !userStore.getCurrentUser().getDeviceId())
       return;
 
     firstScan.current = false;
@@ -216,12 +216,12 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
     try {
       await joinUser(
         gameId,
-        userStore?.getCurrentUser()?.getDeviceId() as string,
+        userStore.getCurrentUser().getDeviceId() as string,
       );
-      await putUser(gameId, userStore?.getCurrentUser() as UserModel);
+      await putUser(gameId, userStore.getCurrentUser() as UserModel);
       await putDevices(
         gameId,
-        userStore?.getCurrentUser()?.getDeviceId() as string,
+        userStore.getCurrentUser().getDeviceId() as string,
       );
 
       console.log("通知設定をdynamoへセット完了");
@@ -231,7 +231,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
   };
 
   const isGameMaster = () => {
-    return userStore.currentUser.isCurrentGameMaster(
+    return userStore.getCurrentUser().isCurrentGameMaster(
       tagGameStore.getTagGame())
   }
 
@@ -257,7 +257,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
                   await putTagGames(tagGame.toObject());
                   setIsSetDoneArea(true);
 
-                  if (!userStore.getCurrentUser()?.getDeviceId()) return;
+                  if (!userStore.getCurrentUser().getDeviceId()) return;
                   await storeGameStartSetting(tagGame.getId());
                 }}
               >
@@ -309,15 +309,15 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
                       {
                         text: "OK",
                         onPress: async () => {
-                          if (!userStore?.getCurrentUser()?.getDeviceId())
+                          if (!userStore.getCurrentUser().getDeviceId())
                             return;
 
                           try {
                             await reviveUser(
                               tagGameStore.getTagGame().getId(),
                               userStore
-                                ?.getCurrentUser()
-                                ?.getDeviceId() as string,
+                                .getCurrentUser()
+                                .getDeviceId(),
                             );
                             setIsCurrentUserLive(true);
                           } catch (error) {
@@ -343,15 +343,15 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
                       {
                         text: "OK",
                         onPress: async () => {
-                          if (!userStore?.getCurrentUser()?.getDeviceId())
+                          if (!userStore.getCurrentUser().getDeviceId())
                             return;
 
                           try {
                             await rejectUser(
                               tagGameStore.getTagGame().getId(),
                               userStore
-                                ?.getCurrentUser()
-                                ?.getDeviceId() as string,
+                                .getCurrentUser()
+                                .getDeviceId(),
                             );
                             setIsCurrentUserLive(false);
                           } catch (error) {
