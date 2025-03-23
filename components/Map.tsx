@@ -1,6 +1,6 @@
 import { Alert, StyleSheet, Text, View } from "react-native";
 import { Button } from "@rneui/themed";
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import QRCode from "react-native-qrcode-svg";
 import MapView, { LatLng, Marker, Polyline, Region } from "react-native-maps";
 import ReactNativeModal from "react-native-modal";
@@ -25,7 +25,6 @@ import {
 } from "@/utils/APIs";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import UserStore from "@/stores/UserStore";
-import UserModel from "@/models/UserModel";
 import TagGameModel from "@/models/TagGameModel";
 import TagGameStore from "@/stores/TagGameStore";
 
@@ -163,7 +162,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
 
       await rejectUser(
         tagGameStore.getTagGame().getId(),
-        userStore.getCurrentUser().getDeviceId() as string,
+        userStore.getCurrentUser().getDeviceId(),
       );
       setIsCurrentUserLive(false);
       Alert.alert("脱落通知", "エリア外に出たため脱落となりました。", [
@@ -214,9 +213,9 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
     try {
       await joinUser(
         gameId,
-        userStore.getCurrentUser().getDeviceId() as string,
+        userStore.getCurrentUser().getDeviceId(),
       );
-      await putUser(gameId, userStore.getCurrentUser() as UserModel);
+      await putUser(gameId, userStore.getCurrentUser());
       if(!isGameStartDone.current) await putDevices(gameId, userStore.getCurrentUser().getDeviceId());
 
       console.log("通知設定をdynamoへセット完了");
