@@ -5,12 +5,6 @@ export default class UserStore {
   @observable
   currentUser!: UserModel;
 
-  @observable.deep
-  liveUsers!: UserModel[];
-
-  @observable.deep
-  rejectUsers!: UserModel[];
-
   constructor() {
     this.initialize();
   }
@@ -18,8 +12,6 @@ export default class UserStore {
   @action
   public initialize() {
     this.currentUser = new UserModel({id: "", name: "", deviceId: ""});
-    this.liveUsers = [];
-    this.rejectUsers = [];
   }
 
   @action
@@ -30,10 +22,5 @@ export default class UserStore {
 
   public getCurrentUser() {
     return this.currentUser;
-  }
-
-  @action
-  public addUser(user: UserModel) {
-    this.tagUsers.push(user);
   }
 }
