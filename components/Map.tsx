@@ -59,6 +59,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
 
   const pinCount = useRef(1);
   const firstScan = useRef(true);
+  const isGameStartDone = useRef(false);
 
   useEffect(() => {
     const gameId = tagGameStore.getTagGame().getId();
@@ -216,12 +217,10 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
         userStore.getCurrentUser().getDeviceId() as string,
       );
       await putUser(gameId, userStore.getCurrentUser() as UserModel);
-      await putDevices(
-        gameId,
-        userStore.getCurrentUser().getDeviceId() as string,
-      );
+      if(!isGameStartDone.current) await putDevices(gameId, userStore.getCurrentUser().getDeviceId());
 
       console.log("通知設定をdynamoへセット完了");
+      isGameStartDone.current = true
     } catch (error) {
       console.log(error);
     }
