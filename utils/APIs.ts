@@ -124,11 +124,10 @@ export const rejectUser = async <T extends DynamoTagGame> (gameId: T["id"], devi
       TableName: "tagGames",
       Key: { id: gameId },
       UpdateExpression: `
-        SET rejectUsers = list_append(if_not_exists(rejectUsers, :emptyList), :newDevice)
+        SET rejectUsers = list_append(rejectUsers, :newDevice)
         REMOVE liveUsers[${deviceIndex}]`,
       ExpressionAttributeValues: {
         ":newDevice": [deviceId],
-        ":emptyList": [],
       },
       ReturnValues: "UPDATED_NEW",
     });

@@ -31,11 +31,11 @@ const firebaseConfig = {
 export const handler = async (event) => {
   console.log("イベント", event.Records)
 
-  // 最初のrejectUserが生まれてからrejectUsersのkeyが生成されるため、それまではundefinedとなる
-  if (event.Records[0].dynamodb.NewImage?.rejectUsers == undefined) {
+  // ゲームスタート時の最初の処理は早期リターンする
+  if (event.Records[0].dynamodb.OldImage == undefined || event.Records[0].dynamodb.NewImage == undefined) {
     return {
       statusCode: 200,
-      body: "rejectUsersは存在しません",
+      body: "",
     };  
   }
 
