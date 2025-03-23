@@ -251,11 +251,11 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
               const tagGame = new TagGameModel({
                 id: targetGameId,
                 areas: tagGameStore.getTagGame().getAreas(),
-                liveUsers: [(userStore.getCurrentUser() as UserModel).getDeviceId()],
-                rejectUsers: [],
-                gameMasterDeviceId: (userStore.getCurrentUser() as UserModel).getDeviceId()
-              })
-              tagGameStore.putTagGame(tagGame)
+                liveUsers: tagGameStore.getTagGame().getLiveUsers() ?? [],
+                rejectUsers: tagGameStore.getTagGame().getRejectUsers() ?? [],
+                gameMasterDeviceId: _.isEmpty(tagGameStore.getTagGame().getGameMasterDeviceId()) ? userStore.getCurrentUser().getDeviceId() : tagGameStore.getTagGame().getGameMasterDeviceId(),
+              });
+              tagGameStore.putTagGame(tagGame);
             }}
           >
             <IconSymbol size={28} name={"mappin.and.ellipse"} color={"white"} />
