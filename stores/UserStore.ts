@@ -3,7 +3,7 @@ import { action, observable } from "mobx";
 
 export default class UserStore {
   @observable
-  currentUser?: UserModel;
+  currentUser!: UserModel;
 
   @observable.deep
   liveUsers!: UserModel[];
@@ -17,15 +17,15 @@ export default class UserStore {
 
   @action
   public initialize() {
-    this.currentUser = undefined;
+    this.currentUser = new UserModel({id: "", name: "", deviceId: ""});
     this.liveUsers = [];
     this.rejectUsers = [];
   }
 
   @action
-  public setCurrentUserIdAndName(id: string, name: string) {
-    const user = new UserModel({ id: id, name: name, deviceId: "" });
-    this.currentUser = user;
+  public setCurrentUserIdAndName(deviceId: string, name: string) {
+    this.currentUser.setDeviceId(deviceId)
+    this.currentUser.setName(name)
   }
 
   public getCurrentUser() {
