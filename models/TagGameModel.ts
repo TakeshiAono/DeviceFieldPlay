@@ -1,5 +1,4 @@
-import { makeAutoObservable } from "mobx";
-
+import { makeAutoObservable, toJS } from "mobx";
 import { DynamoTagGame } from "@/interfaces/api";
 
 export default class TagGameModel {
@@ -30,7 +29,7 @@ export default class TagGameModel {
 
   // liveUsers
   getLiveUsers(): DynamoTagGame["liveUsers"] {
-    return this.liveUsers;
+    return toJS(this.liveUsers);
   }
 
   setLiveUsers(liveUsers: DynamoTagGame["liveUsers"]): void {
@@ -39,7 +38,7 @@ export default class TagGameModel {
 
   // rejectUsers
   getRejectUsers(): DynamoTagGame["rejectUsers"] | undefined {
-    return this.rejectUsers;
+    return toJS(this.rejectUsers);
   }
 
   setRejectUsers(rejectUsers: DynamoTagGame["rejectUsers"]): void {
@@ -48,7 +47,7 @@ export default class TagGameModel {
 
   // areas
   getAreas(): DynamoTagGame["areas"] {
-    return this.areas;
+    return toJS(this.areas);
   }
 
   setAreas(areas: DynamoTagGame["areas"]): void {
