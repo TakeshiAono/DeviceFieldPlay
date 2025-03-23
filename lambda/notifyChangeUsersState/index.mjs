@@ -31,22 +31,22 @@ const firebaseConfig = {
 export const handler = async (event) => {
   console.log("イベント", event.Records)
 
-  // 最初のrejectUserが生まれてからrejectUserのkeyが生成されるため、それまではundefinedとなる
-  if (event.Records[0].dynamodb.NewImage?.rejectUser == undefined) {
+  // ゲームスタート時の最初の処理は早期リターンする
+  if (event.Records[0].dynamodb.OldImage == undefined || event.Records[0].dynamodb.NewImage == undefined) {
     return {
       statusCode: 200,
-      body: "rejectUserは存在しません",
+      body: "",
     };  
   }
 
-  const oldRejectUsers = JSON.stringify(event.Records[0].dynamodb.OldImage.rejectUser);
-  const newRejectUsers = JSON.stringify(event.Records[0].dynamodb.NewImage.rejectUser);
+  const oldRejectUsers = JSON.stringify(event.Records[0].dynamodb.OldImage.rejectUsers);
+  const newRejectUsers = JSON.stringify(event.Records[0].dynamodb.NewImage.rejectUsers);
 
   if (oldRejectUsers == newRejectUsers) {
     // rejectUserの変更がない場合は早期リターンで処理を中断
     return {
       statusCode: 200,
-      body: "rejectUserの変更はありません",
+      body: "rejectUsersの変更はありません",
     };
   }
 
@@ -69,7 +69,10 @@ export const handler = async (event) => {
     const fcmUrl = `https://fcm.googleapis.com/v1/projects/${firebaseConfig.project_id}/messages:send`;
 
     let androidMessages = [];
-    if(event.Records[0].dynamodb.OldImage?.liveUser?.L.length < event.Records[0].dynamodb.NewImage?.liveUser?.L.length) {
+    const prevLiveUsersCount = event.Records[0].dynamodb.OldImage?.liveUsers?.L.length
+    const newLiveUsersCount = event.Records[0].dynamodb.NewImage?.liveUsers?.L.length
+    // liveUserの増減をみて復活通知、脱落通知をするか判断してFCMへ送信している。
+    if(prevLiveUsersCount < newLiveUsersCount) {
       androidMessages = androidDeviceIds.map((token) => {
         return {
           message: {

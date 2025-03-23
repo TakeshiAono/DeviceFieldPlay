@@ -10,6 +10,7 @@ import Constants from "expo-constants";
 import { Marker } from "@/components/Map";
 import { Platform } from "react-native";
 import UserModel from "@/models/UserModel";
+import { DynamoDevice, DynamoTagGame, DynamoUser } from "@/interfaces/api";
 
 const AWS_ACCESS_KEY_ID = Constants.expoConfig?.extra?.awsAccessKeyId;
 const AWS_SECRET_ACCESS_KEY = Constants.expoConfig?.extra?.awsSecretAccessKey;
@@ -25,7 +26,9 @@ const client = new DynamoDBClient({
 
 const docClient = DynamoDBDocumentClient.from(client);
 
-export const getTagGames = async (id: string) => {
+export const getTagGames = async <T extends DynamoTagGame>(
+  id: T["id"],
+): Promise<DynamoTagGame> => {
   try {
     const command = new GetCommand({
       TableName: "tagGames",
@@ -35,38 +38,40 @@ export const getTagGames = async (id: string) => {
     });
     const response = await docClient.send(command);
     console.log("getTagGames:", response);
-    return response.Item;
+    return response.Item as DynamoTagGame;
   } catch (error) {
     console.error("getTagGames:", error);
     throw error;
   }
 };
 
-export const putTagGames = async (gameId: string, item: Marker[]) => {
+export const putTagGames = async <T extends DynamoTagGame>(
+  item: T,
+): Promise<T> => {
   try {
     const command = new PutCommand({
       TableName: "tagGames",
-      Item: {
-        id: gameId,
-        areas: item,
-      },
+      Item: item,
     });
 
     const response = await docClient.send(command);
     console.log("putTagGames:", response);
-    return gameId;
+    return item;
   } catch (error) {
     console.error("putTagGames:", error);
     throw error;
   }
 };
 
-export const joinUser = async (gameId: string, deviceId: string) => {
+export const joinUser = async <T extends DynamoTagGame>(
+  gameId: T["id"],
+  deviceId: string,
+): Promise<Pick<T, "liveUsers">> => {
   try {
     const command = new UpdateCommand({
       TableName: "tagGames",
       Key: { id: gameId },
-      UpdateExpression: `SET liveUser = list_append(if_not_exists(liveUser, :emptyList), :newDevice)`,
+      UpdateExpression: `SET liveUsers = list_append(if_not_exists(liveUsers, :emptyList), :newDevice)`,
       ExpressionAttributeValues: {
         ":newDevice": [deviceId],
         ":emptyList": [],
@@ -76,14 +81,17 @@ export const joinUser = async (gameId: string, deviceId: string) => {
 
     const response = await docClient.send(command);
     console.log("joinUser:", response);
-    return response;
+    return response.Attributes as Pick<T, "liveUsers">;
   } catch (error) {
     console.error("joinUser:", error);
     throw error;
   }
 };
 
-export const putUser = async (gameId: string, user: UserModel) => {
+export const putUser = async <T extends DynamoUser>(
+  gameId: T["gameId"],
+  user: UserModel,
+): Promise<T | undefined> => {
   try {
     const command = new PutCommand({
       TableName: "users",
@@ -93,11 +101,12 @@ export const putUser = async (gameId: string, user: UserModel) => {
         deviceId: user.getDeviceId(),
         name: user.getName(),
       },
+      ReturnValues: "ALL_OLD",
     });
 
     const response = await docClient.send(command);
     console.log("putUser:", response);
-    return response;
+    return response.Attributes as T | undefined;
   } catch (error) {
     console.error("putUser:", error);
     throw error;
@@ -106,64 +115,69 @@ export const putUser = async (gameId: string, user: UserModel) => {
 
 // TODO: 複数スマホで同時に実行すると自分じゃないuserをrejectしてしまう可能性があるため、
 // dynamoStreamのLambdaで同期対応させるようにする
-export const rejectUser = async (gameId: string, deviceId: string) => {
+export const rejectUser = async <T extends DynamoTagGame>(
+  gameId: T["id"],
+  deviceId: string,
+): Promise<Pick<T, "rejectUsers">> => {
   try {
     const getCommand = new GetCommand({
       TableName: "tagGames",
       Key: { id: gameId },
-      ProjectionExpression: "liveUser",
+      ProjectionExpression: "liveUsers",
     });
     const currentData = await docClient.send(getCommand);
-    const liveUserList = currentData.Item?.liveUser || [];
+    const liveUserList = currentData.Item?.liveUsers || [];
 
     const deviceIndex = liveUserList.indexOf(deviceId);
     if (deviceIndex === -1) {
-      throw new Error("Device ID not found in liveUser list");
+      throw new Error("Device ID not found in liveUsers list");
     }
 
     const command = new UpdateCommand({
       TableName: "tagGames",
       Key: { id: gameId },
       UpdateExpression: `
-        SET rejectUser = list_append(if_not_exists(rejectUser, :emptyList), :newDevice)
-        REMOVE liveUser[${deviceIndex}]`,
+        SET rejectUsers = list_append(rejectUsers, :newDevice)
+        REMOVE liveUsers[${deviceIndex}]`,
       ExpressionAttributeValues: {
         ":newDevice": [deviceId],
-        ":emptyList": [],
       },
       ReturnValues: "UPDATED_NEW",
     });
 
     const response = await docClient.send(command);
-    console.log("rejectUser:", response);
-    return response;
+    console.log("rejectUsers:", response);
+    return response.Attributes as Pick<T, "rejectUsers">;
   } catch (error) {
-    console.error("rejectUser:", error);
+    console.error("rejectUsers:", error);
     throw error;
   }
 };
 
 // TODO: スマホ側で同時に実行すると自分じゃないuserをreviveしてしまう可能性があるため、
 // dynamoStreamのLambdaで同期対応させるようにする
-export const reviveUser = async (gameId: string, deviceId: string) => {
+export const reviveUser = async <T extends DynamoTagGame>(
+  gameId: T["id"],
+  deviceId: string,
+): Promise<Pick<T, "liveUsers">> => {
   try {
     const getCommand = new GetCommand({
       TableName: "tagGames",
       Key: { id: gameId },
-      ProjectionExpression: "rejectUser",
+      ProjectionExpression: "rejectUsers",
     });
     const currentData = await docClient.send(getCommand);
-    const rejectUserList = currentData.Item?.rejectUser || [];
+    const rejectUserList = currentData.Item?.rejectUsers || [];
 
     const deviceIndex = rejectUserList.indexOf(deviceId);
     if (deviceIndex === -1) {
-      throw new Error("Device ID not found in rejectUser list");
+      throw new Error("Device ID not found in rejectUsers list");
     }
 
     const command = new UpdateCommand({
       TableName: "tagGames",
       Key: { id: gameId },
-      UpdateExpression: `SET liveUser = list_append(if_not_exists(liveUser, :emptyList), :newDevice) REMOVE rejectUser[${deviceIndex}]`,
+      UpdateExpression: `SET liveUsers = list_append(if_not_exists(liveUsers, :emptyList), :newDevice) REMOVE rejectUsers[${deviceIndex}]`,
       ExpressionAttributeValues: {
         ":newDevice": [deviceId],
         ":emptyList": [],
@@ -173,14 +187,17 @@ export const reviveUser = async (gameId: string, deviceId: string) => {
 
     const response = await docClient.send(command);
     console.log("reviveUser:", response);
-    return response;
+    return response.Attributes as Pick<T, "liveUsers">;
   } catch (error) {
     console.error("reviveUser:", error);
     throw error;
   }
 };
 
-export const putDevices = async (gameId: string, deviceId: string) => {
+export const putDevices = async <T extends DynamoDevice>(
+  gameId: T["gameId"],
+  deviceId: string,
+) => {
   const [iOSDeviceList, androidDeviceList] = _getIdsByPlatform(deviceId);
 
   try {
@@ -202,7 +219,10 @@ export const putDevices = async (gameId: string, deviceId: string) => {
   }
 };
 
-export const patchDevices = async (gameId: string, deviceId: string) => {
+export const patchDevices = async <T extends DynamoDevice>(
+  gameId: T["gameId"],
+  deviceId: string,
+): Promise<Pick<T, "androidDeviceIds">> => {
   const platformKey =
     Platform.OS === "ios" ? "iOSDeviceIds" : "androidDeviceIds";
 
@@ -223,7 +243,7 @@ export const patchDevices = async (gameId: string, deviceId: string) => {
 
     const response = await docClient.send(command);
     console.log("patchDevices:", response);
-    return response;
+    return response.Attributes as Pick<T, "androidDeviceIds">;
   } catch (error) {
     console.error("patchDevices:", error);
     throw error;
