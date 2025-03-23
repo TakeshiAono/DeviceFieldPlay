@@ -43,19 +43,16 @@ export const getTagGames = async <T extends DynamoTagGame> (id: T["id"]): Promis
   }
 };
 
-export const putTagGames = async <T extends DynamoTagGame["id"]> (gameId: T, item: Marker[]): Promise<T> => {
+export const putTagGames = async <T extends DynamoTagGame> (item: T): Promise<T> => {
   try {
     const command = new PutCommand({
       TableName: "tagGames",
-      Item: {
-        id: gameId,
-        areas: item,
-      },
+      Item: item,
     });
 
     const response = await docClient.send(command);
     console.log("putTagGames:", response);
-    return gameId;
+    return item;
   } catch (error) {
     console.error("putTagGames:", error);
     throw error;

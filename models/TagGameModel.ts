@@ -66,4 +66,14 @@ export default class TagGameModel {
   isSetGame() {
     return this.id != ""
   }
+
+  toObject(): DynamoTagGame {
+    return {
+      id: this.id,
+      liveUsers: toJS(this.liveUsers),
+      rejectUsers: toJS(this.rejectUsers) ?? [],
+      areas: toJS(this.areas),
+      gameMasterDeviceId: this.gameMasterDeviceId,
+    };
+  }
 }

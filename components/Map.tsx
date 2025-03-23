@@ -51,7 +51,6 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
   const tagGameStore = _tagGameStore!;
 
   const [region, setRegion] = useState<Region>(initialJapanRegion);
-  const [gameId, setGameId] = useState("");
   const [isSetDoneArea, setIsSetDoneArea] = useState(false);
   const [qrVisible, setQrVisible] = useState(false);
   const [cameraVisible, setCameraVisible] = useState(false);
@@ -62,8 +61,9 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
   const firstScan = useRef(true);
 
   useEffect(() => {
+    const gameId = tagGameStore.getTagGame().getId()
     // TODO: このブロックの処理が新規作成時と更新時両方で発火し複雑なためリファクタリングが必要
-    if (!gameId) return;
+    if (_.isEmpty(gameId)) return;
 
     // エリア変更時の通知を受け取って自分の持っているエリア情報を更新する
     const changeAreaNotificationListener =
@@ -141,7 +141,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
       rejectUserNotificationListener.remove();
       reviveUserNotificationListener.remove();
     };
-  }, [gameId]);
+  }, [tagGameStore.getTagGame().getId()]);
 
   const onChangeCurrentPosition = async (position: [longitude, latitude]) => {
     if (tagGameStore.getTagGame().getAreas().length === 0 || !isSetDoneArea)
@@ -163,7 +163,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
       if (isCurrentUserLive === false) return;
 
       await rejectUser(
-        gameId,
+        tagGameStore.getTagGame().getId(),
         userStore.getCurrentUser()?.getDeviceId() as string,
       );
       setIsCurrentUserLive(false);
@@ -193,7 +193,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
     firstScan.current = false;
     console.log(data);
     setCameraVisible(false);
-    setGameId(data);
+    tagGameStore.getTagGame().setId(data)
     patchDevices(data, userStore?.getCurrentUser()?.getDeviceId() as string);
 
     const tagGame = new TagGameModel({
@@ -241,23 +241,19 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
                 color={!!isSetDoneArea ? "success" : "primary"}
                 disabled={!(isGameMaster() || !tagGameStore.getTagGame().isSetGame())}
                 onPress={async () => {
-                  const targetGameId = _.isEmpty(gameId)
-                    ? Crypto.randomUUID()
-                    : gameId;
-                  await putTagGames(targetGameId, tagGameStore.getTagGame().getAreas());
-                  setGameId(targetGameId);
+                  const tagGame = tagGameStore.getTagGame()
+                  if(_.isEmpty(tagGame.getId())) {
+                    tagGame.setId(Crypto.randomUUID())
+                  }
+                  if(_.isEmpty(tagGame.getGameMasterDeviceId())) {
+                    tagGame.setGameMasterDeviceId(userStore.getCurrentUser().getDeviceId())
+                  }
+
+                  await putTagGames(tagGame.toObject());
                   setIsSetDoneArea(true);
 
                   if (!userStore.getCurrentUser()?.getDeviceId()) return;
-                  await storeGameStartSetting(targetGameId);
-                  const tagGame = new TagGameModel({
-                    id: targetGameId,
-                    areas: tagGameStore.getTagGame().getAreas(),
-                    liveUsers: tagGameStore.getTagGame().getLiveUsers() ?? [],
-                    rejectUsers: tagGameStore.getTagGame().getRejectUsers() ?? [],
-                    gameMasterDeviceId: _.isEmpty(tagGameStore.getTagGame().getGameMasterDeviceId()) ? userStore.getCurrentUser().getDeviceId() : tagGameStore.getTagGame().getGameMasterDeviceId(),
-                  });
-                  tagGameStore.putTagGame(tagGame);
+                  await storeGameStartSetting(tagGame.getId());
                 }}
               >
                 <IconSymbol size={28} name={"mappin.and.ellipse"} color={"white"} />
@@ -313,7 +309,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
 
                           try {
                             await reviveUser(
-                              gameId,
+                              tagGameStore.getTagGame().getId(),
                               userStore
                                 ?.getCurrentUser()
                                 ?.getDeviceId() as string,
@@ -332,9 +328,9 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
           </Button>
           <Button
             type="solid"
-            color={!isCurrentUserLive || !gameId ? "gray" : "error"}
+            color={!isCurrentUserLive || !tagGameStore.getTagGame().getId() ? "gray" : "error"}
             onPress={
-              !isCurrentUserLive || !gameId
+              !isCurrentUserLive || !tagGameStore.getTagGame().getId()
                 ? undefined
                 : () => {
                     Alert.alert("脱落", "脱落してもよいですか？", [
@@ -347,7 +343,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
 
                           try {
                             await rejectUser(
-                              gameId,
+                              tagGameStore.getTagGame().getId(),
                               userStore
                                 ?.getCurrentUser()
                                 ?.getDeviceId() as string,
@@ -442,14 +438,14 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
       {/* TODO: MapコンポーネントにQR表示ボタンとカメラ起動ボタンの移動に伴いQRモーダルとカメラモーダルも移設する */}
       <ReactNativeModal style={{ margin: "auto" }} isVisible={qrVisible}>
         <View style={{ backgroundColor: "white", width: 330, padding: 20 }}>
-          {gameId ? (
+          {tagGameStore.getTagGame().getId() ? (
             <>
               <Text style={{ fontSize: 30 }}>参加QR</Text>
               <Text>
                 {"友達にスキャンしてもらい\nゲームに参加してもらいましょう"}
               </Text>
               <View style={{ alignItems: "center", marginVertical: 20 }}>
-                <QRCode size={150} value={gameId} />
+                <QRCode size={150} value={tagGameStore.getTagGame().getId()} />
               </View>
             </>
           ) : (
