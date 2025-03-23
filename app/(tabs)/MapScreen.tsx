@@ -12,8 +12,8 @@ interface Props {
   _userStore?: UserStore;
 }
 
-function MapScreen({_userStore}: Props) {
-  const userStore = _userStore!
+function MapScreen({ _userStore }: Props) {
+  const userStore = _userStore!;
 
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const [locationPermissionStatus, setLocationPermissionStatus] = useState("");

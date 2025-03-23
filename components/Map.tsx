@@ -61,7 +61,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
   const firstScan = useRef(true);
 
   useEffect(() => {
-    const gameId = tagGameStore.getTagGame().getId()
+    const gameId = tagGameStore.getTagGame().getId();
     // TODO: このブロックの処理が新規作成時と更新時両方で発火し複雑なためリファクタリングが必要
     if (_.isEmpty(gameId)) return;
 
@@ -73,18 +73,16 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
         )
           return;
         console.log("エリア変更push通知", notification.request.content);
-        
+
         Toast.show({
           type: "info",
           text1: notification.request.content.title as string,
           text2: notification.request.content.body as string,
         });
 
-
         try {
           const tagGame = await getTagGames(gameId);
           tagGameStore.putArea(tagGame.areas);
-
         } catch (error) {
           console.error("Error: ", error);
         }
@@ -134,7 +132,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
         }
       });
 
-      gameStart();
+    gameStart();
     // gameIdが変わるたびに別のゲームのエリアで更新されてしまわないよう、イベントリスナーを削除し新規のイベントリスナーを生成する。
     return () => {
       changeAreaNotificationListener.remove();
@@ -187,18 +185,17 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
   const setDataSettings = async ({ data: gameId }: { data: string }) => {
     // NOTE: カメラモーダルを閉じた際にtrueに戻します。
     // NOTE: QRが画面上にある限り廉造スキャンしてしまうので最初のスキャン以外は早期リターンしている
-    if (!firstScan.current || !userStore.getCurrentUser().getDeviceId())
-      return;
+    if (!firstScan.current || !userStore.getCurrentUser().getDeviceId()) return;
 
     firstScan.current = false;
-    console.log("ScanData: ",gameId);
+    console.log("ScanData: ", gameId);
     setCameraVisible(false);
-    tagGameStore.getTagGame().setId(gameId)
+    tagGameStore.getTagGame().setId(gameId);
     await patchDevices(gameId, userStore.getCurrentUser().getDeviceId());
 
     const updatedLiveUsers = await joinUser(
       gameId,
-      userStore.getCurrentUser().getDeviceId()
+      userStore.getCurrentUser().getDeviceId(),
     );
 
     const tagGame = new TagGameModel({
@@ -207,9 +204,9 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
       liveUsers: updatedLiveUsers.liveUsers,
       rejectUsers: [],
       // TODO: ゲームマスターを取得できるようにしたい。現状は自分がげーむマスターでないことしかわからない
-      gameMasterDeviceId: ""
-    })
-    tagGameStore.putTagGame(tagGame)
+      gameMasterDeviceId: "",
+    });
+    tagGameStore.putTagGame(tagGame);
   };
 
   const storeGameStartSetting = async (gameId: string) => {
@@ -231,27 +228,32 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
   };
 
   const isGameMaster = () => {
-    return userStore.getCurrentUser().isCurrentGameMaster(
-      tagGameStore.getTagGame())
-  }
+    return userStore
+      .getCurrentUser()
+      .isCurrentGameMaster(tagGameStore.getTagGame());
+  };
 
   return (
     <>
       <View style={{ position: "absolute", top: 150, right: 5, zIndex: 1 }}>
         <View style={{ display: "flex", gap: 5 }}>
-          {(isGameMaster() || !tagGameStore.getTagGame().isSetGame()) &&
+          {(isGameMaster() || !tagGameStore.getTagGame().isSetGame()) && (
             <>
               <Button
                 type="solid"
                 color={!!isSetDoneArea ? "success" : "primary"}
-                disabled={!(isGameMaster() || !tagGameStore.getTagGame().isSetGame())}
+                disabled={
+                  !(isGameMaster() || !tagGameStore.getTagGame().isSetGame())
+                }
                 onPress={async () => {
-                  const tagGame = tagGameStore.getTagGame()
-                  if(_.isEmpty(tagGame.getId())) {
-                    tagGame.setId(Crypto.randomUUID())
+                  const tagGame = tagGameStore.getTagGame();
+                  if (_.isEmpty(tagGame.getId())) {
+                    tagGame.setId(Crypto.randomUUID());
                   }
-                  if(_.isEmpty(tagGame.getGameMasterDeviceId())) {
-                    tagGame.setGameMasterDeviceId(userStore.getCurrentUser().getDeviceId())
+                  if (_.isEmpty(tagGame.getGameMasterDeviceId())) {
+                    tagGame.setGameMasterDeviceId(
+                      userStore.getCurrentUser().getDeviceId(),
+                    );
                   }
 
                   await putTagGames(tagGame.toObject());
@@ -261,7 +263,11 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
                   await storeGameStartSetting(tagGame.getId());
                 }}
               >
-                <IconSymbol size={28} name={"mappin.and.ellipse"} color={"white"} />
+                <IconSymbol
+                  size={28}
+                  name={"mappin.and.ellipse"}
+                  color={"white"}
+                />
               </Button>
               <Button
                 type="solid"
@@ -269,7 +275,9 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
                   resetMarkers();
                   setIsSetDoneArea(false);
                 }}
-                disabled={!(isGameMaster() || !tagGameStore.getTagGame().isSetGame())}
+                disabled={
+                  !(isGameMaster() || !tagGameStore.getTagGame().isSetGame())
+                }
               >
                 <IconSymbol
                   size={28}
@@ -283,7 +291,9 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
                 onPress={() => {
                   setQrVisible(true);
                 }}
-                disabled={!(isGameMaster() || !tagGameStore.getTagGame().isSetGame())}
+                disabled={
+                  !(isGameMaster() || !tagGameStore.getTagGame().isSetGame())
+                }
               >
                 <IconSymbol size={28} name={"qrcode"} color={"white"} />
               </Button>
@@ -296,7 +306,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
                 <IconSymbol size={28} name={"camera"} color={"white"} />
               </Button>
             </>
-          }
+          )}
           <Button
             type="solid"
             color={isCurrentUserLive ? "gray" : "success"}
@@ -309,15 +319,12 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
                       {
                         text: "OK",
                         onPress: async () => {
-                          if (!userStore.getCurrentUser().getDeviceId())
-                            return;
+                          if (!userStore.getCurrentUser().getDeviceId()) return;
 
                           try {
                             await reviveUser(
                               tagGameStore.getTagGame().getId(),
-                              userStore
-                                .getCurrentUser()
-                                .getDeviceId(),
+                              userStore.getCurrentUser().getDeviceId(),
                             );
                             setIsCurrentUserLive(true);
                           } catch (error) {
@@ -333,7 +340,11 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
           </Button>
           <Button
             type="solid"
-            color={!isCurrentUserLive || !tagGameStore.getTagGame().getId() ? "gray" : "error"}
+            color={
+              !isCurrentUserLive || !tagGameStore.getTagGame().getId()
+                ? "gray"
+                : "error"
+            }
             onPress={
               !isCurrentUserLive || !tagGameStore.getTagGame().getId()
                 ? undefined
@@ -343,15 +354,12 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
                       {
                         text: "OK",
                         onPress: async () => {
-                          if (!userStore.getCurrentUser().getDeviceId())
-                            return;
+                          if (!userStore.getCurrentUser().getDeviceId()) return;
 
                           try {
                             await rejectUser(
                               tagGameStore.getTagGame().getId(),
-                              userStore
-                                .getCurrentUser()
-                                .getDeviceId(),
+                              userStore.getCurrentUser().getDeviceId(),
                             );
                             setIsCurrentUserLive(false);
                           } catch (error) {
@@ -375,13 +383,13 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
           showsMyLocationButton={true}
           region={region}
           onLongPress={(event) => {
-            if(!(isGameMaster() || !tagGameStore.getTagGame().isSetGame())) return
+            if (!(isGameMaster() || !tagGameStore.getTagGame().isSetGame()))
+              return;
 
-            tagGameStore
-              .putArea([
-                ...tagGameStore.getTagGame().getAreas(),
-                { ...event.nativeEvent.coordinate, key: pinCount.current },
-              ])
+            tagGameStore.putArea([
+              ...tagGameStore.getTagGame().getAreas(),
+              { ...event.nativeEvent.coordinate, key: pinCount.current },
+            ]);
             pinCount.current += 1;
           }}
           onUserLocationChange={(event) => {

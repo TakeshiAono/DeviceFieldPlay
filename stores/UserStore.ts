@@ -11,13 +11,13 @@ export default class UserStore {
 
   @action
   public initialize() {
-    this.currentUser = new UserModel({id: "", name: "", deviceId: ""});
+    this.currentUser = new UserModel({ id: "", name: "", deviceId: "" });
   }
 
   @action
   public setCurrentUserIdAndName(deviceId: string, name: string) {
-    this.currentUser.setDeviceId(deviceId)
-    this.currentUser.setName(name)
+    this.currentUser.setDeviceId(deviceId);
+    this.currentUser.setName(name);
   }
 
   public getCurrentUser() {
