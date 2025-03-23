@@ -51,8 +51,6 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
   const tagGameStore = _tagGameStore!;
 
   const [region, setRegion] = useState<Region>(initialJapanRegion);
-  // TODO: markersはtagGameStoreにstateを持たせているのでそれに置き換えたい
-  const [markers, setMarkers] = useState<Marker[]>([]);
   const [gameId, setGameId] = useState("");
   const [isSetDoneArea, setIsSetDoneArea] = useState(false);
   const [qrVisible, setQrVisible] = useState(false);
@@ -64,6 +62,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
   const firstScan = useRef(true);
 
   useEffect(() => {
+    // TODO: このブロックの処理が新規作成時と更新時両方で発火し複雑なためリファクタリングが必要
     if (!gameId) return;
 
     // エリア変更時の通知を受け取って自分の持っているエリア情報を更新する
@@ -81,11 +80,14 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
           text2: notification.request.content.body as string,
         });
 
-        getTagGames(gameId)
-          .then((res) => {
-            setMarkers(res?.areas);
-          })
-          .catch((e) => console.error(e));
+
+        try {
+          const tagGame = await getTagGames(gameId);
+          tagGameStore.putArea(tagGame.areas);
+
+        } catch (error) {
+          console.error("Error: ", error);
+        }
       });
 
     const rejectUserNotificationListener =
@@ -101,6 +103,13 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
           text1: notification.request.content.title as string,
           text2: notification.request.content.body as string,
         });
+
+        try {
+          const tagGame = await getTagGames(gameId);
+          tagGameStore.putRejectUsers(tagGame.rejectUsers);
+        } catch (error) {
+          console.error("Error: ", error);
+        }
       });
 
     const reviveUserNotificationListener =
@@ -116,15 +125,16 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
           text1: notification.request.content.title as string,
           text2: notification.request.content.body as string,
         });
+
+        try {
+          const tagGame = await getTagGames(gameId);
+          tagGameStore.putLiveUsers(tagGame.liveUsers);
+        } catch (error) {
+          console.error("Error: ", error);
+        }
       });
 
-    getTagGames(gameId)
-      .then((res) => {
-        setMarkers(res?.areas);
-        gameStart();
-      })
-      .catch((e) => console.error(e));
-
+      gameStart();
     // gameIdが変わるたびに別のゲームのエリアで更新されてしまわないよう、イベントリスナーを削除し新規のイベントリスナーを生成する。
     return () => {
       changeAreaNotificationListener.remove();
@@ -134,12 +144,13 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
   }, [gameId]);
 
   const onChangeCurrentPosition = async (position: [longitude, latitude]) => {
-    if (markers.length === 0 || !isSetDoneArea) return;
+    if (tagGameStore.getTagGame().getAreas().length === 0 || !isSetDoneArea)
+      return;
 
-    const targetPolygon = markers.map((marker) => [
-      marker.longitude,
-      marker.latitude,
-    ]);
+    const targetPolygon = tagGameStore
+      .getTagGame()
+      .getAreas()
+      .map((marker) => [marker.longitude, marker.latitude]);
     const targetPoint = point(position);
 
     // TODO: areaを毎回計算するのはパフォーマンス効率が悪いため、エリア変更時にuseRefで保存するように変更する
@@ -170,7 +181,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
 
   const resetMarkers = () => {
     pinCount.current = 1;
-    setMarkers([]);
+    tagGameStore.putArea([]);
   };
 
   const setDataSettings = ({ data }: { data: string }) => {
@@ -187,7 +198,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
 
     const tagGame = new TagGameModel({
       id: data,
-      areas: markers,
+      areas: tagGameStore.getTagGame().getAreas(),
       liveUsers: [(userStore.getCurrentUser() as UserModel).getDeviceId()],
       rejectUsers: [],
       // TODO: ゲームマスターを取得できるようにしたい。現状は自分がげーむマスターでないことしかわからない
@@ -231,7 +242,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
               const targetGameId = _.isEmpty(gameId)
                 ? Crypto.randomUUID()
                 : gameId;
-              await putTagGames(targetGameId, markers);
+              await putTagGames(targetGameId, tagGameStore.getTagGame().getAreas());
               setGameId(targetGameId);
               setIsSetDoneArea(true);
 
@@ -239,7 +250,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
               await storeGameStartSetting(targetGameId);
               const tagGame = new TagGameModel({
                 id: targetGameId,
-                areas: markers,
+                areas: tagGameStore.getTagGame().getAreas(),
                 liveUsers: [(userStore.getCurrentUser() as UserModel).getDeviceId()],
                 rejectUsers: [],
                 gameMasterDeviceId: (userStore.getCurrentUser() as UserModel).getDeviceId()
@@ -359,10 +370,11 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
           showsMyLocationButton={true}
           region={region}
           onLongPress={(event) => {
-            setMarkers([
-              ...markers,
-              { ...event.nativeEvent.coordinate, key: pinCount.current },
-            ]);
+            tagGameStore
+              .putArea([
+                ...tagGameStore.getTagGame().getAreas(),
+                { ...event.nativeEvent.coordinate, key: pinCount.current },
+              ])
             pinCount.current += 1;
           }}
           onUserLocationChange={(event) => {
@@ -401,18 +413,21 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
             }
           }}
         >
-          {markers.map((marker) => (
-            <Marker
-              key={marker.key}
-              coordinate={{
-                latitude: marker.latitude,
-                longitude: marker.longitude,
-              }} // 東京
-              title={marker.key.toString()}
-            />
-          ))}
+          {tagGameStore
+            .getTagGame()
+            .getAreas()
+            .map((marker) => (
+              <Marker
+                key={marker.key}
+                coordinate={{
+                  latitude: marker.latitude,
+                  longitude: marker.longitude,
+                }} // 東京
+                title={marker.key.toString()}
+              />
+            ))}
           <Polyline
-            coordinates={markers}
+            coordinates={tagGameStore.getTagGame().getAreas()}
             strokeWidth={5} // 線の太さ
             strokeColor="blue" // 線の色
           />
