@@ -370,6 +370,8 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
           showsMyLocationButton={true}
           region={region}
           onLongPress={(event) => {
+            if(!(isGameMaster() || !tagGameStore.getTagGame().isSetGame())) return
+
             tagGameStore
               .putArea([
                 ...tagGameStore.getTagGame().getAreas(),
