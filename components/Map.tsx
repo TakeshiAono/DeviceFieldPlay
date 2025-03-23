@@ -68,12 +68,12 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
     // エリア変更時の通知を受け取って自分の持っているエリア情報を更新する
     const changeAreaNotificationListener =
       Notifications.addNotificationReceivedListener(async (notification) => {
-        console.log("push通知", notification.request.content);
         if (
           notification.request.content.data.notification_type !== "changeArea"
         )
           return;
-
+        console.log("エリア変更push通知", notification.request.content);
+        
         Toast.show({
           type: "info",
           text1: notification.request.content.title as string,
@@ -92,11 +92,11 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
 
     const rejectUserNotificationListener =
       Notifications.addNotificationReceivedListener(async (notification) => {
-        console.log("push通知", notification.request.content);
         if (
           notification.request.content.data.notification_type !== "rejectUser"
         )
           return;
+        console.log("脱落push通知", notification.request.content);
 
         Toast.show({
           type: "error",
@@ -114,11 +114,11 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
 
     const reviveUserNotificationListener =
       Notifications.addNotificationReceivedListener(async (notification) => {
-        console.log("push通知", notification.request.content);
         if (
           notification.request.content.data.notification_type !== "reviveUser"
         )
           return;
+        console.log("復活push通知", notification.request.content);
 
         Toast.show({
           type: "success",
