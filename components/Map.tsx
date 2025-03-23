@@ -101,8 +101,6 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
           text1: notification.request.content.title as string,
           text2: notification.request.content.body as string,
         });
-
-        getTagGames(gameId);
       });
 
     const reviveUserNotificationListener =
@@ -118,8 +116,6 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
           text1: notification.request.content.title as string,
           text2: notification.request.content.body as string,
         });
-
-        getTagGames(gameId);
       });
 
     getTagGames(gameId)
