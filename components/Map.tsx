@@ -211,15 +211,13 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
 
   const storeGameStartSetting = async (gameId: string) => {
     try {
-      await joinUser(
-        gameId,
-        userStore.getCurrentUser().getDeviceId(),
-      );
+      await joinUser(gameId, userStore.getCurrentUser().getDeviceId());
       await putUser(gameId, userStore.getCurrentUser());
-      if(!isGameStartDone.current) await putDevices(gameId, userStore.getCurrentUser().getDeviceId());
+      if (!isGameStartDone.current)
+        await putDevices(gameId, userStore.getCurrentUser().getDeviceId());
 
       console.log("通知設定をdynamoへセット完了");
-      isGameStartDone.current = true
+      isGameStartDone.current = true;
     } catch (error) {
       console.log(error);
     }
