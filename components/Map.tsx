@@ -82,7 +82,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
 
         try {
           const tagGame = await getTagGames(gameId);
-          tagGameStore.putArea(tagGame.areas);
+          tagGameStore.putArea(tagGame.validAreas);
         } catch (error) {
           console.error("Error: ", error);
         }
@@ -142,12 +142,15 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
   }, [tagGameStore.getTagGame().getId()]);
 
   const onChangeCurrentPosition = async (position: [longitude, latitude]) => {
-    if (tagGameStore.getTagGame().getAreas().length === 0 || !isSetDoneArea)
+    if (
+      tagGameStore.getTagGame().getValidAreas().length === 0 ||
+      !isSetDoneArea
+    )
       return;
 
     const targetPolygon = tagGameStore
       .getTagGame()
-      .getAreas()
+      .getValidAreas()
       .map((marker) => [marker.longitude, marker.latitude]);
     const targetPoint = point(position);
 
@@ -162,7 +165,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
 
       await rejectUser(
         tagGameStore.getTagGame().getId(),
-        userStore.getCurrentUser().getDeviceId(),
+        userStore.getCurrentUser().getDeviceId()
       );
       setIsCurrentUserLive(false);
       Alert.alert("脱落通知", "エリア外に出たため脱落となりました。", [
@@ -195,12 +198,12 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
 
     const updatedLiveUsers = await joinUser(
       gameId,
-      userStore.getCurrentUser().getDeviceId(),
+      userStore.getCurrentUser().getDeviceId()
     );
 
     const tagGame = new TagGameModel({
       id: gameId,
-      areas: tagGameStore.getTagGame().getAreas(),
+      validAreas: tagGameStore.getTagGame().getValidAreas(),
       liveUsers: updatedLiveUsers.liveUsers,
       rejectUsers: [],
       // TODO: ゲームマスターを取得できるようにしたい。現状は自分がげーむマスターでないことしかわからない
@@ -248,7 +251,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
                   }
                   if (_.isEmpty(tagGame.getGameMasterDeviceId())) {
                     tagGame.setGameMasterDeviceId(
-                      userStore.getCurrentUser().getDeviceId(),
+                      userStore.getCurrentUser().getDeviceId()
                     );
                   }
 
@@ -320,7 +323,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
                           try {
                             await reviveUser(
                               tagGameStore.getTagGame().getId(),
-                              userStore.getCurrentUser().getDeviceId(),
+                              userStore.getCurrentUser().getDeviceId()
                             );
                             setIsCurrentUserLive(true);
                           } catch (error) {
@@ -355,7 +358,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
                           try {
                             await rejectUser(
                               tagGameStore.getTagGame().getId(),
-                              userStore.getCurrentUser().getDeviceId(),
+                              userStore.getCurrentUser().getDeviceId()
                             );
                             setIsCurrentUserLive(false);
                           } catch (error) {
@@ -383,7 +386,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
               return;
 
             tagGameStore.putArea([
-              ...tagGameStore.getTagGame().getAreas(),
+              ...tagGameStore.getTagGame().getValidAreas(),
               { ...event.nativeEvent.coordinate, key: pinCount.current },
             ]);
             pinCount.current += 1;
@@ -426,7 +429,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
         >
           {tagGameStore
             .getTagGame()
-            .getAreas()
+            .getValidAreas()
             .map((marker) => (
               <Marker
                 key={marker.key}
@@ -438,7 +441,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
               />
             ))}
           <Polyline
-            coordinates={tagGameStore.getTagGame().getAreas()}
+            coordinates={tagGameStore.getTagGame().getValidAreas()}
             strokeWidth={5} // 線の太さ
             strokeColor="blue" // 線の色
           />

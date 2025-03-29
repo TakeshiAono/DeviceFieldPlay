@@ -2,7 +2,7 @@ type GameId = string;
 
 export type DynamoTagGame = {
   id: GameId;
-  areas: {
+  validAreas: {
     key: number;
     latitude: number;
     longitude: number;

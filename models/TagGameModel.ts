@@ -5,20 +5,20 @@ export default class TagGameModel {
   private id: DynamoTagGame["id"];
   private liveUsers: DynamoTagGame["liveUsers"];
   private rejectUsers?: DynamoTagGame["rejectUsers"];
-  private areas: DynamoTagGame["areas"];
+  private validAreas: DynamoTagGame["validAreas"];
   private gameMasterDeviceId: DynamoTagGame["gameMasterDeviceId"];
 
   constructor({
     id = "",
     liveUsers,
     rejectUsers,
-    areas,
+    validAreas,
     gameMasterDeviceId,
   }: DynamoTagGame) {
     this.id = id;
     this.liveUsers = liveUsers;
     this.rejectUsers = rejectUsers;
-    this.areas = areas;
+    this.validAreas = validAreas;
     this.gameMasterDeviceId = gameMasterDeviceId;
 
     makeAutoObservable(this);
@@ -51,13 +51,13 @@ export default class TagGameModel {
     this.rejectUsers = rejectUsers;
   }
 
-  // areas
-  getAreas(): DynamoTagGame["areas"] {
-    return toJS(this.areas);
+  // validAreas
+  getValidAreas(): DynamoTagGame["validAreas"] {
+    return toJS(this.validAreas);
   }
 
-  setAreas(areas: DynamoTagGame["areas"]): void {
-    this.areas = areas;
+  setValidAreas(validAreas: DynamoTagGame["validAreas"]): void {
+    this.validAreas = validAreas;
   }
 
   // gameMasterDeviceId
@@ -80,7 +80,7 @@ export default class TagGameModel {
       id: this.id,
       liveUsers: toJS(this.liveUsers),
       rejectUsers: toJS(this.rejectUsers) ?? [],
-      areas: toJS(this.areas),
+      validAreas: toJS(this.validAreas),
       gameMasterDeviceId: this.gameMasterDeviceId,
     };
   }

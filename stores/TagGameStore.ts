@@ -16,7 +16,7 @@ export default class TagGameStore {
       id: "",
       liveUsers: [],
       rejectUsers: [],
-      areas: [],
+      validAreas: [],
       gameMasterDeviceId: "",
     });
   }
@@ -27,8 +27,8 @@ export default class TagGameStore {
   }
 
   @action
-  public putArea(area: DynamoTagGame["areas"]) {
-    this.currentTagGame.setAreas(area);
+  public putArea(area: DynamoTagGame["validAreas"]) {
+    this.currentTagGame.setValidAreas(area);
   }
 
   @action
