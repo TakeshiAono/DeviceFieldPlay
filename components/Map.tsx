@@ -82,7 +82,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
 
         try {
           const tagGame = await getTagGames(gameId);
-          tagGameStore.putArea(tagGame.validAreas);
+          tagGameStore.putValidArea(tagGame.validAreas);
         } catch (error) {
           console.error("Error: ", error);
         }
@@ -182,7 +182,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
 
   const resetMarkers = () => {
     pinCount.current = 1;
-    tagGameStore.putArea([]);
+    tagGameStore.putValidArea([]);
   };
 
   const setDataSettings = async ({ data: gameId }: { data: string }) => {
@@ -385,7 +385,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
             if (!(isGameMaster() || !tagGameStore.getTagGame().isSetGame()))
               return;
 
-            tagGameStore.putArea([
+            tagGameStore.putValidArea([
               ...tagGameStore.getTagGame().getValidAreas(),
               { ...event.nativeEvent.coordinate, key: pinCount.current },
             ]);

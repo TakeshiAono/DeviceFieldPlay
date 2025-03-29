@@ -27,7 +27,7 @@ export default class TagGameStore {
   }
 
   @action
-  public putArea(area: DynamoTagGame["validAreas"]) {
+  public putValidArea(area: DynamoTagGame["validAreas"]) {
     this.currentTagGame.setValidAreas(area);
   }
 
