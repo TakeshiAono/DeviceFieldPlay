@@ -36,6 +36,15 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="(stacks)"
+        options={{
+          title: "Setting",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="hammer" color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
