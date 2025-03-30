@@ -2,9 +2,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { inject, observer } from "mobx-react";
 import { router } from "expo-router";
-import { Button, View } from "react-native";
+import { View } from "react-native";
 import TagGameStore from "@/stores/TagGameStore";
 import UserStore from "@/stores/UserStore";
+import { Button } from "@rneui/themed";
 
 interface Props {
   _userStore?: UserStore;
@@ -22,8 +23,8 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
           <Button
             color={
               tagGameStore.getTagGame().getIsSetValidAreaDone()
-                ? "yellowgreen"
-                : "gray"
+                ? "success"
+                : "error"
             }
             title="ゲーム範囲設定"
             onPress={() => {
