@@ -31,6 +31,17 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
               router.push("/ValidAreaScreen");
             }}
           ></Button>
+          <Button
+            color={
+              tagGameStore.getTagGame().getIsSetPrisonAreaDone()
+                ? "success"
+                : "error"
+            }
+            title="監獄エリア設定"
+            onPress={() => {
+              router.push("/PrisonAreaScreen");
+            }}
+          ></Button>
         </View>
       </View>
     </SafeAreaView>

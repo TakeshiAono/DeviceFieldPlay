@@ -7,7 +7,6 @@ import ReactNativeModal from "react-native-modal";
 import { CameraView } from "expo-camera";
 import { booleanPointInPolygon, point, polygon } from "@turf/turf";
 import "react-native-get-random-values";
-import * as Crypto from "expo-crypto";
 import _ from "lodash";
 import { inject, observer } from "mobx-react";
 import Toast from "react-native-toast-message";
@@ -17,9 +16,6 @@ import {
   getTagGames,
   joinUser,
   patchDevices,
-  putDevices,
-  putTagGames,
-  putUser,
   rejectUser,
   reviveUser,
 } from "@/utils/APIs";
@@ -33,6 +29,8 @@ export type Props = {
   mapVisible?: boolean;
   _userStore?: UserStore;
   _tagGameStore?: TagGameStore;
+  markers: Marker[];
+  setMarkers: (markers: Marker[]) => void;
 };
 
 const initialJapanRegion = {
@@ -45,12 +43,17 @@ const initialJapanRegion = {
 type latitude = number;
 type longitude = number;
 
-function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
+function Map({
+  mapVisible = true,
+  _userStore,
+  _tagGameStore,
+  setMarkers,
+  markers,
+}: Props) {
   const userStore = _userStore!;
   const tagGameStore = _tagGameStore!;
 
   const [region, setRegion] = useState<Region>(initialJapanRegion);
-  const [isSetDoneArea, setIsSetDoneArea] = useState(false);
   const [qrVisible, setQrVisible] = useState(false);
   const [cameraVisible, setCameraVisible] = useState(false);
   const [isFirstUpdate, setIsFirstUpdate] = useState(true);
@@ -63,14 +66,15 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
     // TODO: このブロックの処理が新規作成時と更新時両方で発火し複雑なためリファクタリングが必要
     if (_.isEmpty(gameId)) return;
 
-    // エリア変更時の通知を受け取って自分の持っているエリア情報を更新する
-    const changeAreaNotificationListener =
+    // ゲーム有効エリア変更時の通知を受け取って自分の持っているエリア情報を更新する
+    const changeValidAreaNotificationListener =
       Notifications.addNotificationReceivedListener(async (notification) => {
         if (
-          notification.request.content.data.notification_type !== "changeArea"
+          notification.request.content.data.notification_type !==
+          "changeValidArea"
         )
           return;
-        console.log("エリア変更push通知", notification.request.content);
+        console.log("ゲームエリア変更push通知", notification.request.content);
 
         Toast.show({
           type: "info",
@@ -81,6 +85,30 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
         try {
           const tagGame = await getTagGames(gameId);
           tagGameStore.putValidArea(tagGame.validAreas);
+        } catch (error) {
+          console.error("Error: ", error);
+        }
+      });
+
+    // 監獄エリア変更時の通知を受け取って自分の持っているエリア情報を更新する
+    const changePrisonAreaNotificationListener =
+      Notifications.addNotificationReceivedListener(async (notification) => {
+        if (
+          notification.request.content.data.notification_type !==
+          "changePrisonArea"
+        )
+          return;
+        console.log("監獄エリア変更push通知", notification.request.content);
+
+        Toast.show({
+          type: "info",
+          text1: notification.request.content.title as string,
+          text2: notification.request.content.body as string,
+        });
+
+        try {
+          const tagGame = await getTagGames(gameId);
+          tagGameStore.putPrisonArea(tagGame.prisonArea);
         } catch (error) {
           console.error("Error: ", error);
         }
@@ -133,7 +161,8 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
     gameStart();
     // gameIdが変わるたびに別のゲームのエリアで更新されてしまわないよう、イベントリスナーを削除し新規のイベントリスナーを生成する。
     return () => {
-      changeAreaNotificationListener.remove();
+      changeValidAreaNotificationListener.remove();
+      changePrisonAreaNotificationListener.remove();
       rejectUserNotificationListener.remove();
       reviveUserNotificationListener.remove();
     };
@@ -141,15 +170,15 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
 
   const onChangeCurrentPosition = async (position: [longitude, latitude]) => {
     if (
-      tagGameStore.getTagGame().getValidAreas().length === 0 ||
-      !isSetDoneArea
+      markers.length === 0 ||
+      !tagGameStore.getTagGame().getIsSetValidAreaDone()
     )
       return;
 
-    const targetPolygon = tagGameStore
-      .getTagGame()
-      .getValidAreas()
-      .map((marker) => [marker.longitude, marker.latitude]);
+    const targetPolygon = markers.map((marker) => [
+      marker.longitude,
+      marker.latitude,
+    ]);
     const targetPoint = point(position);
 
     // TODO: areaを毎回計算するのはパフォーマンス効率が悪いため、エリア変更時にuseRefで保存するように変更する
@@ -318,9 +347,16 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
             if (!(isGameMaster() || !tagGameStore.getTagGame().isSetGame()))
               return;
 
-            tagGameStore.putValidArea([
-              ...tagGameStore.getTagGame().getValidAreas(),
-              { ...event.nativeEvent.coordinate },
+            const lastKeyNumberMarker = _.maxBy(
+              markers,
+              (marker) => marker.key,
+            );
+            setMarkers([
+              ...markers,
+              {
+                ...event.nativeEvent.coordinate,
+                key: (lastKeyNumberMarker?.key ?? 0) + 1,
+              },
             ]);
           }}
           onUserLocationChange={(event) => {
@@ -359,10 +395,8 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
             }
           }}
         >
-          {tagGameStore
-            .getTagGame()
-            .getValidAreas()
-            .map((marker) => (
+          {markers.map((marker) => {
+            return (
               <Marker
                 key={marker.key}
                 coordinate={{
@@ -371,9 +405,10 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
                 }} // 東京
                 title={marker.key.toString()}
               />
-            ))}
+            );
+          })}
           <Polyline
-            coordinates={tagGameStore.getTagGame().getValidAreas()}
+            coordinates={markers}
             strokeWidth={5} // 線の太さ
             strokeColor="blue" // 線の色
           />

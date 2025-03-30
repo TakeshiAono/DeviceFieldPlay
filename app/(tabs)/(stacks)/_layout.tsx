@@ -16,6 +16,10 @@ export default function Layout() {
         name="ValidAreaScreen"
         options={{ title: "ゲーム範囲設定" }}
       />
+      <Stack.Screen
+        name="PrisonAreaScreen"
+        options={{ title: "刑務所範囲設定" }}
+      />
     </Stack>
   );
 }

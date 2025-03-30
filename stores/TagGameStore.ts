@@ -18,6 +18,7 @@ export default class TagGameStore {
       liveUsers: [],
       rejectUsers: [],
       validAreas: [],
+      prisonArea: [],
       gameMasterDeviceId: "",
     });
   }
@@ -29,10 +30,18 @@ export default class TagGameStore {
 
   @action
   public putValidArea(validAreas: { latitude: number; longitude: number }[]) {
-    const appendedKeyValidAreas = validAreas.map((area, index) => {
-      return { ...area, key: index + 1 };
+    const appendedKeyValidAreas = validAreas.map((marker, index) => {
+      return { ...marker, key: index + 1 };
     });
     this.currentTagGame.setValidAreas(appendedKeyValidAreas);
+  }
+
+  @action
+  public putPrisonArea(prisonArea: { latitude: number; longitude: number }[]) {
+    const appendedKeyPrisonArea = prisonArea.map((marker, index) => {
+      return { ...marker, key: index + 1 };
+    });
+    this.currentTagGame.setPrisonArea(appendedKeyPrisonArea);
   }
 
   @action
@@ -52,11 +61,22 @@ export default class TagGameStore {
     this.currentTagGame.setIsSetValidAreaDone(isSetValidAreaDone);
   }
 
-  public getTagGame() {
-    return this.currentTagGame;
+  public getIsSetDoneValidArea() {
+    return this.currentTagGame.getIsSetValidAreaDone();
   }
 
-  public getIsSetDoneValidAre() {
-    return this.currentTagGame.getIsSetValidAreaDone();
+  @action
+  public setIsSetPrisonAreaDone(
+    isSetPrisonAreaDone: LocalTagGameModelTypes["isSetPrisonAreaDone"],
+  ) {
+    this.currentTagGame.setIsSetPrisonAreaDone(isSetPrisonAreaDone);
+  }
+
+  public getIsSetDonePrisonArea() {
+    return this.currentTagGame.getIsSetPrisonAreaDone();
+  }
+
+  public getTagGame() {
+    return this.currentTagGame;
   }
 }

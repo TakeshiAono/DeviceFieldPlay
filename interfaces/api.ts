@@ -1,12 +1,15 @@
 type GameId = string;
 
+export type Marker = {
+  key: number;
+  latitude: number;
+  longitude: number;
+}
+
 export type DynamoTagGame = {
   id: GameId;
-  validAreas: {
-    key: number;
-    latitude: number;
-    longitude: number;
-  }[];
+  validAreas: Marker[];
+  prisonArea: Marker[];
   liveUsers: string[];
   rejectUsers: string[];
   gameMasterDeviceId: string;

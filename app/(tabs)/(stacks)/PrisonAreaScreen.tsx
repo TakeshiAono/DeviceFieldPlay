@@ -16,10 +16,9 @@ interface Props {
   _tagGameStore?: TagGameStore;
 }
 
-function ValidAreaScreen({ _userStore, _tagGameStore }: Props) {
+function PrisonAreaScreen({ _userStore, _tagGameStore }: Props) {
   const userStore = _userStore!;
   const tagGameStore = _tagGameStore!;
-  // const [isSetDoneArea, setIsSetDoneArea] = useState(false);
 
   const isGameStartDone = useRef(false);
 
@@ -43,17 +42,18 @@ function ValidAreaScreen({ _userStore, _tagGameStore }: Props) {
     }
   };
 
-  const resetValidArea = () => {
-    tagGameStore.putValidArea([]);
+  const resetPrisonArea = () => {
+    tagGameStore.putPrisonArea([]);
   };
 
   return (
     // NOTE: tab分の高さが7%なので93%に設定している
     <View style={{ backgroundColor: "blue", height: "93%", width: "100%" }}>
       <Map
-        markers={tagGameStore.getTagGame().getValidAreas()}
+        markers={tagGameStore.getTagGame().getPrisonArea()}
         setMarkers={(markers) => {
-          tagGameStore.putValidArea(markers);
+          console.log("監獄ooooo", markers);
+          tagGameStore.putPrisonArea(markers);
         }}
       />
       <View style={{ flexDirection: "row", width: "100%" }}>
@@ -61,7 +61,7 @@ function ValidAreaScreen({ _userStore, _tagGameStore }: Props) {
           <Button
             type="solid"
             color={
-              !!tagGameStore.getTagGame().getIsSetValidAreaDone()
+              !!tagGameStore.getTagGame().getIsSetPrisonAreaDone()
                 ? "success"
                 : "primary"
             }
@@ -80,15 +80,14 @@ function ValidAreaScreen({ _userStore, _tagGameStore }: Props) {
               }
 
               await putTagGames(tagGame.toObject());
-              // setIsSetDoneArea(true);
-              tagGameStore.setIsSetValidAreaDone(true);
+              tagGameStore.setIsSetPrisonAreaDone(true);
 
               if (!userStore.getCurrentUser().getDeviceId()) return;
               await storeGameStartSetting(tagGame.getId());
             }}
           >
             <IconSymbol size={28} name={"mappin.and.ellipse"} color={"white"} />
-            {!!tagGameStore.getTagGame().getIsSetValidAreaDone()
+            {!!tagGameStore.getTagGame().getIsSetPrisonAreaDone()
               ? "エリア更新"
               : "エリア登録"}
           </Button>
@@ -97,8 +96,8 @@ function ValidAreaScreen({ _userStore, _tagGameStore }: Props) {
           <Button
             type="solid"
             onPress={() => {
-              resetValidArea();
-              tagGameStore.setIsSetValidAreaDone(false);
+              resetPrisonArea();
+              tagGameStore.setIsSetPrisonAreaDone(false);
             }}
             disabled={
               !(isGameMaster() || !tagGameStore.getTagGame().isSetGame())
@@ -117,4 +116,7 @@ function ValidAreaScreen({ _userStore, _tagGameStore }: Props) {
   );
 }
 
-export default inject("_userStore", "_tagGameStore")(observer(ValidAreaScreen));
+export default inject(
+  "_userStore",
+  "_tagGameStore",
+)(observer(PrisonAreaScreen));
