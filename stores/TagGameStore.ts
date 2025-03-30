@@ -1,7 +1,8 @@
 import { action, observable } from "mobx";
-import TagGameModel from "@/models/TagGameModel";
+import _ from "lodash";
 
 import { DynamoTagGame } from "@/interfaces/api";
+import TagGameModel, { LocalTagGameModelTypes } from "@/models/TagGameModel";
 
 export default class TagGameStore {
   @observable.deep
@@ -27,8 +28,11 @@ export default class TagGameStore {
   }
 
   @action
-  public putValidArea(area: DynamoTagGame["validAreas"]) {
-    this.currentTagGame.setValidAreas(area);
+  public putValidArea(validAreas: { latitude: number; longitude: number }[]) {
+    const appendedKeyValidAreas = validAreas.map((area, index) => {
+      return { ...area, key: index + 1 };
+    });
+    this.currentTagGame.setValidAreas(appendedKeyValidAreas);
   }
 
   @action
@@ -41,7 +45,18 @@ export default class TagGameStore {
     this.currentTagGame.setRejectUsers(rejectUsers);
   }
 
+  @action
+  public setIsSetValidAreaDone(
+    isSetValidAreaDone: LocalTagGameModelTypes["isSetValidAreaDone"],
+  ) {
+    this.currentTagGame.setIsSetValidAreaDone(isSetValidAreaDone);
+  }
+
   public getTagGame() {
     return this.currentTagGame;
+  }
+
+  public getIsSetDoneValidAre() {
+    return this.currentTagGame.getIsSetValidAreaDone();
   }
 }

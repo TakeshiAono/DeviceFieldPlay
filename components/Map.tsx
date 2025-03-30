@@ -56,9 +56,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
   const [isFirstUpdate, setIsFirstUpdate] = useState(true);
   const [isCurrentUserLive, setIsCurrentUserLive] = useState(true);
 
-  const pinCount = useRef(1);
   const firstScan = useRef(true);
-  const isGameStartDone = useRef(false);
 
   useEffect(() => {
     const gameId = tagGameStore.getTagGame().getId();
@@ -165,7 +163,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
 
       await rejectUser(
         tagGameStore.getTagGame().getId(),
-        userStore.getCurrentUser().getDeviceId()
+        userStore.getCurrentUser().getDeviceId(),
       );
       setIsCurrentUserLive(false);
       Alert.alert("脱落通知", "エリア外に出たため脱落となりました。", [
@@ -178,11 +176,6 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
     // TODO: ゲームスタート時はエリアの中にいることが前提なので、エリア外にいる場合は警告を出す
     // TODO: 初期値はtrueだが念のため代入する
     setIsCurrentUserLive(true);
-  };
-
-  const resetMarkers = () => {
-    pinCount.current = 1;
-    tagGameStore.putValidArea([]);
   };
 
   const setDataSettings = async ({ data: gameId }: { data: string }) => {
@@ -198,7 +191,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
 
     const updatedLiveUsers = await joinUser(
       gameId,
-      userStore.getCurrentUser().getDeviceId()
+      userStore.getCurrentUser().getDeviceId(),
     );
 
     const tagGame = new TagGameModel({
@@ -210,20 +203,6 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
       gameMasterDeviceId: "",
     });
     tagGameStore.putTagGame(tagGame);
-  };
-
-  const storeGameStartSetting = async (gameId: string) => {
-    try {
-      await joinUser(gameId, userStore.getCurrentUser().getDeviceId());
-      await putUser(gameId, userStore.getCurrentUser());
-      if (!isGameStartDone.current)
-        await putDevices(gameId, userStore.getCurrentUser().getDeviceId());
-
-      console.log("通知設定をdynamoへセット完了");
-      isGameStartDone.current = true;
-    } catch (error) {
-      console.log(error);
-    }
   };
 
   const isGameMaster = () => {
@@ -238,52 +217,6 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
         <View style={{ display: "flex", gap: 5 }}>
           {(isGameMaster() || !tagGameStore.getTagGame().isSetGame()) && (
             <>
-              <Button
-                type="solid"
-                color={!!isSetDoneArea ? "success" : "primary"}
-                disabled={
-                  !(isGameMaster() || !tagGameStore.getTagGame().isSetGame())
-                }
-                onPress={async () => {
-                  const tagGame = tagGameStore.getTagGame();
-                  if (_.isEmpty(tagGame.getId())) {
-                    tagGame.setId(Crypto.randomUUID());
-                  }
-                  if (_.isEmpty(tagGame.getGameMasterDeviceId())) {
-                    tagGame.setGameMasterDeviceId(
-                      userStore.getCurrentUser().getDeviceId()
-                    );
-                  }
-
-                  await putTagGames(tagGame.toObject());
-                  setIsSetDoneArea(true);
-
-                  if (!userStore.getCurrentUser().getDeviceId()) return;
-                  await storeGameStartSetting(tagGame.getId());
-                }}
-              >
-                <IconSymbol
-                  size={28}
-                  name={"mappin.and.ellipse"}
-                  color={"white"}
-                />
-              </Button>
-              <Button
-                type="solid"
-                onPress={() => {
-                  resetMarkers();
-                  setIsSetDoneArea(false);
-                }}
-                disabled={
-                  !(isGameMaster() || !tagGameStore.getTagGame().isSetGame())
-                }
-              >
-                <IconSymbol
-                  size={28}
-                  name={"arrow.counterclockwise"}
-                  color={"white"}
-                />
-              </Button>
               {/* TODO: MapコンポーネントにQR表示ボタンとカメラ起動ボタンがあるのは適切ではないため、Mapコンポーネント外に切りだす(マップ上に表示しない) */}
               <Button
                 type="solid"
@@ -323,7 +256,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
                           try {
                             await reviveUser(
                               tagGameStore.getTagGame().getId(),
-                              userStore.getCurrentUser().getDeviceId()
+                              userStore.getCurrentUser().getDeviceId(),
                             );
                             setIsCurrentUserLive(true);
                           } catch (error) {
@@ -358,7 +291,7 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
                           try {
                             await rejectUser(
                               tagGameStore.getTagGame().getId(),
-                              userStore.getCurrentUser().getDeviceId()
+                              userStore.getCurrentUser().getDeviceId(),
                             );
                             setIsCurrentUserLive(false);
                           } catch (error) {
@@ -387,9 +320,8 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
 
             tagGameStore.putValidArea([
               ...tagGameStore.getTagGame().getValidAreas(),
-              { ...event.nativeEvent.coordinate, key: pinCount.current },
+              { ...event.nativeEvent.coordinate },
             ]);
-            pinCount.current += 1;
           }}
           onUserLocationChange={(event) => {
             if (!event.nativeEvent.coordinate) return;
