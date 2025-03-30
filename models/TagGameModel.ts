@@ -3,8 +3,8 @@ import { DynamoTagGame } from "@/interfaces/api";
 
 // DynamoDBでは保存せずクライアント側でのみ保持している値
 export type LocalTagGameModelTypes = {
-  isSetValidAreaDone: boolean
-}
+  isSetValidAreaDone: boolean;
+};
 
 export default class TagGameModel {
   private id: DynamoTagGame["id"];
