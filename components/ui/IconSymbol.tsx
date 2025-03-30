@@ -22,7 +22,7 @@ const MAPPING = {
   "mappin.and.ellipse": "pin-drop",
   "person.badge.plus": "person-add",
   "person.badge.minus": "person-remove",
-  "hammer": "construction",
+  hammer: "construction",
 } as Partial<
   Record<
     import("expo-symbols").SymbolViewProps["name"],

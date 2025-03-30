@@ -94,9 +94,7 @@ export default function RootLayout() {
                 if (userName == undefined) return;
                 setModalView(false);
                 const randomBytes = await Crypto.getRandomBytesAsync(16);
-                stores._userStore.setCurrentUserName(
-                  userName,
-                );
+                stores._userStore.setCurrentUserName(userName);
               }}
             />
           </View>
