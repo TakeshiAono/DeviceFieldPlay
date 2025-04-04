@@ -15,8 +15,7 @@ export default class UserStore {
   }
 
   @action
-  public setCurrentUserIdAndName(deviceId: string, name: string) {
-    this.currentUser.setDeviceId(deviceId);
+  public setCurrentUserName(name: string) {
     this.currentUser.setName(name);
   }
 

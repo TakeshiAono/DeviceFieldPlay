@@ -29,9 +29,9 @@ const firebaseConfig = {
 
 // Lambda ハンドラー
 export const handler = async (event) => {
-  const oldValidAreas = event.Records[0].dynamodb.OldImage?.validAreas;
-  const newValidAreas = event.Records[0].dynamodb.NewImage?.validAreas;
-  if (!oldValidAreas) {
+  const oldPrisonAreas = event.Records[0].dynamodb.OldImage?.prisonArea;
+  const newPrisonAreas = event.Records[0].dynamodb.NewImage?.prisonArea;
+  if (!oldPrisonAreas) {
     // エリア変更がない場合は早期リターンで処理を中断
     return {
       statusCode: 200,
@@ -39,10 +39,10 @@ export const handler = async (event) => {
     };
   }
 
-  const oldValidAreasString = JSON.stringify(oldValidAreas);
-  const newValidAreasString = JSON.stringify(newValidAreas);
+  const oldPrisonAreaString = JSON.stringify(oldPrisonAreas);
+  const newPrisonAreaString = JSON.stringify(newPrisonAreas);
 
-  if (oldValidAreasString == newValidAreasString) {
+  if (oldPrisonAreaString == newPrisonAreaString) {
     // エリア変更がない場合は早期リターンで処理を中断
     return {
       statusCode: 200,
@@ -75,7 +75,7 @@ export const handler = async (event) => {
             title: "エリア変更通知",
             body: "エリアが変更されました",
           },
-          data: {notification_type: "changeValidArea"},
+          data: {notification_type: "changePrisonArea"},
           android: { // ✅ ここで `priority: "high"` を設定
             priority: "high", // 🚀 高優先度にする
             notification: {
