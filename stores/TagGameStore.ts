@@ -20,6 +20,7 @@ export default class TagGameStore {
       validAreas: [],
       prisonArea: [],
       gameMasterDeviceId: "",
+      policeUsers: [],
     });
   }
 

@@ -11,6 +11,7 @@ export type DynamoTagGame = {
   validAreas: Marker[];
   prisonArea: Marker[];
   liveUsers: string[];
+  policeUsers: string[];
   rejectUsers: string[];
   gameMasterDeviceId: string;
 }
