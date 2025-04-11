@@ -30,7 +30,7 @@ export type Props = {
   _userStore?: UserStore;
   _tagGameStore?: TagGameStore;
   markers: Marker[];
-  setMarkers: (markers: Marker[]) => void;
+  setMarkers?: (markers: Marker[]) => void;
 };
 
 const initialJapanRegion = {
