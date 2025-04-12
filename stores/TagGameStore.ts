@@ -55,32 +55,48 @@ export default class TagGameStore {
    * @param deviceId
    */
   @action
-  public addThiefUser(deviceId: string) {
-    this.putLiveUsers([...this.currentTagGame.getLiveUsers(), deviceId])
+  public addLiveThiefUser(users: string[]) {
+    this.putLiveUsers([...this.currentTagGame.getLiveUsers(), ...users]);
+  }
+
+  /**
+   * 脱落ユーザーとしてユーザーを追加する
+   * @param deviceId
+   */
+  @action
+  public addRejectThiefUser(users: string[]) {
+    this.putRejectUsers([
+      ...(this.currentTagGame.getRejectUsers() ?? []),
+      ...users,
+    ]);
   }
 
   /**
    * 脱落ユーザー、生存ユーザー両方からuserを削除する
-   * @param deviceId 
+   * @param deviceId
    */
   @action
-  public deleteThiefUser(deviceId: string) {
-    const filteredLiveUsers = this.currentTagGame.getLiveUsers().filter(user => user !== deviceId)
-    this.putLiveUsers(filteredLiveUsers)
+  public deleteThiefUser(users: string[]) {
+    const filteredLiveUsers = this.currentTagGame
+      .getLiveUsers()
+      .filter((user) => !users.includes(user));
+    this.putLiveUsers(filteredLiveUsers);
 
-    const rejectUsers = this.currentTagGame.getRejectUsers()
-    if(rejectUsers === undefined ) return
-    const filteredRejectUsers = rejectUsers.filter(user => user !== deviceId)
-    this.putLiveUsers(filteredRejectUsers)
+    const rejectUsers = this.currentTagGame.getRejectUsers();
+    if (rejectUsers === undefined) return;
+    const filteredRejectUsers = rejectUsers.filter(
+      (user) => !users.includes(user),
+    );
+    this.putRejectUsers(filteredRejectUsers);
   }
 
-  public getThiefUsers() {
-    const thiefUsers = this.currentTagGame.getLiveUsers()
-    const rejectUsers = this.currentTagGame.getRejectUsers()
-    if(!rejectUsers) return thiefUsers
+  private getThiefUsers() {
+    const thiefUsers = this.currentTagGame.getLiveUsers();
+    const rejectUsers = this.currentTagGame.getRejectUsers();
+    if (!rejectUsers) return thiefUsers;
 
-    thiefUsers.push(...rejectUsers)
-    return thiefUsers
+    thiefUsers.push(...rejectUsers);
+    return thiefUsers;
   }
 
   @action
@@ -111,9 +127,7 @@ export default class TagGameStore {
   }
 
   @action
-  public putPoliceUsers(
-    policeUsers: DynamoTagGame["policeUsers"],
-  ) {
+  public putPoliceUsers(policeUsers: DynamoTagGame["policeUsers"]) {
     this.currentTagGame.setPoliceUsers(policeUsers);
   }
 
@@ -122,14 +136,17 @@ export default class TagGameStore {
   }
 
   @action
-  public addPoliceUser(deviceId: string) {
-    this.putPoliceUsers([...this.getPoliceUsers(), deviceId])
+  public addPoliceUser(users: string[]) {
+    this.putPoliceUsers([...this.getPoliceUsers(), ...users]);
   }
 
   @action
-  public deletePoliceUser(deviceId: string) {
-    const filteredUsers = this.getPoliceUsers().filter(user => user !== deviceId)
-    this.putLiveUsers(filteredUsers)
+  public deletePoliceUser(users: string[]) {
+    const filteredUsers = this.getPoliceUsers().filter(
+      (user) => !users.includes(user),
+    );
+
+    this.putPoliceUsers(filteredUsers);
   }
 
   /**
@@ -137,27 +154,30 @@ export default class TagGameStore {
    * @param user
    */
   @action
-  public kickOutUser(user: string) {
-    this.deletePoliceUser(user)
-    this.deleteThiefUser(user)
+  public kickOutUsers(users: string[]) {
+    this.deleteThiefUser(users);
+    this.deletePoliceUser(users);
   }
 
   @action
-  public thiefChangeToPolice(user: string) {
-    const foundUser = this.getThiefUsers().find(thiefUser => thiefUser !== user)
-    if(!foundUser) return
-
-    this.deleteThiefUser(user)
-    this.addPoliceUser(user)
+  public changeToPolice(users: string[]) {
+    this.deleteThiefUser(users);
+    this.deletePoliceUser(users);
+    this.addPoliceUser(users);
   }
 
   @action
-  public policeChangeToThief(user: string) {
-    const foundUser = this.getPoliceUsers().find(policeUser => policeUser !== user)
-    if(!foundUser) return
+  public changeToLiveThief(users: string[]) {
+    this.deleteThiefUser(users);
+    this.deletePoliceUser(users);
+    this.addLiveThiefUser(users);
+  }
 
-    this.deletePoliceUser(user)
-    this.addThiefUser(user)
+  @action
+  public changeToRejectThief(users: string[]) {
+    this.deleteThiefUser(users);
+    this.deletePoliceUser(users);
+    this.addRejectThiefUser(users);
   }
 
   public getTagGame() {
