@@ -4,7 +4,7 @@ export type Marker = {
   key: number;
   latitude: number;
   longitude: number;
-}
+};
 
 export type DynamoTagGame = {
   id: GameId;
@@ -14,17 +14,18 @@ export type DynamoTagGame = {
   policeUsers: string[];
   rejectUsers: string[];
   gameMasterDeviceId: string;
-}
+  gameTimeLimit: string;
+};
 
 export type DynamoUser = {
   gameId: GameId;
   deviceId: string;
   name: string;
   userId: string;
-}
+};
 
 export type DynamoDevice = {
   gameId: GameId;
   androidDeviceIds: string[];
   iOSDeviceIds: string[];
-}
+};

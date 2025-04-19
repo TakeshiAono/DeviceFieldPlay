@@ -1,5 +1,6 @@
 import { makeAutoObservable, toJS } from "mobx";
 import { DynamoTagGame } from "@/interfaces/api";
+import dayjs, { Dayjs } from "dayjs";
 
 // DynamoDBでは保存せずクライアント側でのみ保持している値
 export type LocalTagGameModelTypes = {
@@ -14,7 +15,9 @@ export default class TagGameModel {
   private policeUsers: DynamoTagGame["policeUsers"];
   private validAreas: DynamoTagGame["validAreas"];
   private prisonArea: DynamoTagGame["prisonArea"];
+  private gameTimeLimit: Dayjs | null;
   private gameMasterDeviceId: DynamoTagGame["gameMasterDeviceId"];
+
   private isSetValidAreaDone: LocalTagGameModelTypes["isSetValidAreaDone"];
   private isSetPrisonAreaDone: LocalTagGameModelTypes["isSetPrisonAreaDone"];
 
@@ -22,21 +25,23 @@ export default class TagGameModel {
     id = "",
     liveUsers,
     rejectUsers,
+    policeUsers,
     validAreas,
     prisonArea,
     gameMasterDeviceId,
-    policeUsers,
+    gameTimeLimit,
   }: DynamoTagGame) {
     this.id = id;
     this.liveUsers = liveUsers;
     this.rejectUsers = rejectUsers;
+    this.policeUsers = policeUsers;
     this.validAreas = validAreas;
     this.prisonArea = prisonArea;
     this.gameMasterDeviceId = gameMasterDeviceId;
+    this.gameTimeLimit = gameTimeLimit ? dayjs(gameTimeLimit) : null;
+
     this.isSetValidAreaDone = false;
     this.isSetPrisonAreaDone = false;
-
-    this.policeUsers = policeUsers;
 
     makeAutoObservable(this);
   }
@@ -97,6 +102,15 @@ export default class TagGameModel {
     this.gameMasterDeviceId = gameMasterDeviceId;
   }
 
+  // gameTimeLimit
+  getGameTimeLimit(): Dayjs | null {
+    return this.gameTimeLimit;
+  }
+
+  setGameTimeLimit(gameTimeLimit: Dayjs): void {
+    this.gameTimeLimit = gameTimeLimit;
+  }
+
   // isSetValidAreaDone
   getIsSetValidAreaDone(): LocalTagGameModelTypes["isSetValidAreaDone"] {
     return this.isSetValidAreaDone;
@@ -141,6 +155,7 @@ export default class TagGameModel {
       prisonArea: toJS(this.prisonArea),
       gameMasterDeviceId: this.gameMasterDeviceId,
       policeUsers: this.policeUsers,
+      gameTimeLimit: this.gameTimeLimit ? this.gameTimeLimit.toISOString() : "",
     };
   }
 }

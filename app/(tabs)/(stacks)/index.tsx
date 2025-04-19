@@ -50,6 +50,15 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
             router.push("/TeamEditScreen");
           }}
         ></Button>
+        <Button
+          color={
+            tagGameStore.getTagGame().getGameTimeLimit() ? "success" : "error"
+          }
+          title="タイムリミット設定"
+          onPress={() => {
+            router.push("/GameTimeScreen");
+          }}
+        ></Button>
       </View>
     </View>
   );
