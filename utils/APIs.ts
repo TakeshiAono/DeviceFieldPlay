@@ -7,7 +7,6 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 
 import Constants from "expo-constants";
-import { Marker } from "@/components/Map";
 import { Platform } from "react-native";
 import UserModel from "@/models/UserModel";
 import { DynamoDevice, DynamoTagGame, DynamoUser } from "@/interfaces/api";

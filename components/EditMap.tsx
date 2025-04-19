@@ -2,12 +2,11 @@ import { Alert, StyleSheet, Text, View } from "react-native";
 import { Button } from "@rneui/themed";
 import React, { useState, useEffect, useRef } from "react";
 import QRCode from "react-native-qrcode-svg";
-import MapView, { LatLng, Marker, Polyline, Region } from "react-native-maps";
+import MapView, { LatLng, Polygon, Region } from "react-native-maps";
 import ReactNativeModal from "react-native-modal";
 import { CameraView } from "expo-camera";
 import { booleanPointInPolygon, point, polygon } from "@turf/turf";
 import "react-native-get-random-values";
-import * as Crypto from "expo-crypto";
 import _ from "lodash";
 import { inject, observer } from "mobx-react";
 import Toast from "react-native-toast-message";
@@ -17,9 +16,6 @@ import {
   getTagGames,
   joinUser,
   patchDevices,
-  putDevices,
-  putTagGames,
-  putUser,
   rejectUser,
   reviveUser,
 } from "@/utils/APIs";
@@ -28,14 +24,16 @@ import UserStore from "@/stores/UserStore";
 import TagGameModel from "@/models/TagGameModel";
 import TagGameStore from "@/stores/TagGameStore";
 
-export type Marker = LatLng & { key: number };
 export type Props = {
   mapVisible?: boolean;
   _userStore?: UserStore;
   _tagGameStore?: TagGameStore;
+  drawColor: string;
+  points: LatLng[];
+  setPoints: (points: LatLng[]) => void;
 };
 
-const initialJapanRegion = {
+export const initialJapanRegion = {
   latitude: 36.2048,
   longitude: 138.2529,
   latitudeDelta: 0.001,
@@ -45,34 +43,39 @@ const initialJapanRegion = {
 type latitude = number;
 type longitude = number;
 
-function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
+function EditMap({
+  mapVisible = true,
+  _userStore,
+  _tagGameStore,
+  setPoints,
+  points,
+  drawColor,
+}: Props) {
   const userStore = _userStore!;
   const tagGameStore = _tagGameStore!;
 
   const [region, setRegion] = useState<Region>(initialJapanRegion);
-  const [isSetDoneArea, setIsSetDoneArea] = useState(false);
   const [qrVisible, setQrVisible] = useState(false);
   const [cameraVisible, setCameraVisible] = useState(false);
   const [isFirstUpdate, setIsFirstUpdate] = useState(true);
   const [isCurrentUserLive, setIsCurrentUserLive] = useState(true);
 
-  const pinCount = useRef(1);
   const firstScan = useRef(true);
-  const isGameStartDone = useRef(false);
 
   useEffect(() => {
     const gameId = tagGameStore.getTagGame().getId();
     // TODO: このブロックの処理が新規作成時と更新時両方で発火し複雑なためリファクタリングが必要
     if (_.isEmpty(gameId)) return;
 
-    // エリア変更時の通知を受け取って自分の持っているエリア情報を更新する
-    const changeAreaNotificationListener =
+    // ゲーム有効エリア変更時の通知を受け取って自分の持っているエリア情報を更新する
+    const changeValidAreaNotificationListener =
       Notifications.addNotificationReceivedListener(async (notification) => {
         if (
-          notification.request.content.data.notification_type !== "changeArea"
+          notification.request.content.data.notification_type !==
+          "changeValidArea"
         )
           return;
-        console.log("エリア変更push通知", notification.request.content);
+        console.log("ゲームエリア変更push通知", notification.request.content);
 
         Toast.show({
           type: "info",
@@ -82,7 +85,31 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
 
         try {
           const tagGame = await getTagGames(gameId);
-          tagGameStore.putArea(tagGame.areas);
+          tagGameStore.putValidArea(tagGame.validAreas);
+        } catch (error) {
+          console.error("Error: ", error);
+        }
+      });
+
+    // 監獄エリア変更時の通知を受け取って自分の持っているエリア情報を更新する
+    const changePrisonAreaNotificationListener =
+      Notifications.addNotificationReceivedListener(async (notification) => {
+        if (
+          notification.request.content.data.notification_type !==
+          "changePrisonArea"
+        )
+          return;
+        console.log("監獄エリア変更push通知", notification.request.content);
+
+        Toast.show({
+          type: "info",
+          text1: notification.request.content.title as string,
+          text2: notification.request.content.body as string,
+        });
+
+        try {
+          const tagGame = await getTagGames(gameId);
+          tagGameStore.putPrisonArea(tagGame.prisonArea);
         } catch (error) {
           console.error("Error: ", error);
         }
@@ -135,20 +162,24 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
     gameStart();
     // gameIdが変わるたびに別のゲームのエリアで更新されてしまわないよう、イベントリスナーを削除し新規のイベントリスナーを生成する。
     return () => {
-      changeAreaNotificationListener.remove();
+      changeValidAreaNotificationListener.remove();
+      changePrisonAreaNotificationListener.remove();
       rejectUserNotificationListener.remove();
       reviveUserNotificationListener.remove();
     };
   }, [tagGameStore.getTagGame().getId()]);
 
   const onChangeCurrentPosition = async (position: [longitude, latitude]) => {
-    if (tagGameStore.getTagGame().getAreas().length === 0 || !isSetDoneArea)
+    if (
+      points.length === 0 ||
+      !tagGameStore.getTagGame().getIsSetValidAreaDone()
+    )
       return;
 
-    const targetPolygon = tagGameStore
-      .getTagGame()
-      .getAreas()
-      .map((marker) => [marker.longitude, marker.latitude]);
+    const targetPolygon = points.map((point) => [
+      point.longitude,
+      point.latitude,
+    ]);
     const targetPoint = point(position);
 
     // TODO: areaを毎回計算するのはパフォーマンス効率が悪いため、エリア変更時にuseRefで保存するように変更する
@@ -177,11 +208,6 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
     setIsCurrentUserLive(true);
   };
 
-  const resetMarkers = () => {
-    pinCount.current = 1;
-    tagGameStore.putArea([]);
-  };
-
   const setDataSettings = async ({ data: gameId }: { data: string }) => {
     // NOTE: カメラモーダルを閉じた際にtrueに戻します。
     // NOTE: QRが画面上にある限り廉造スキャンしてしまうので最初のスキャン以外は早期リターンしている
@@ -200,27 +226,13 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
 
     const tagGame = new TagGameModel({
       id: gameId,
-      areas: tagGameStore.getTagGame().getAreas(),
+      validAreas: tagGameStore.getTagGame().getValidAreas(),
       liveUsers: updatedLiveUsers.liveUsers,
       rejectUsers: [],
       // TODO: ゲームマスターを取得できるようにしたい。現状は自分がげーむマスターでないことしかわからない
       gameMasterDeviceId: "",
     });
     tagGameStore.putTagGame(tagGame);
-  };
-
-  const storeGameStartSetting = async (gameId: string) => {
-    try {
-      await joinUser(gameId, userStore.getCurrentUser().getDeviceId());
-      await putUser(gameId, userStore.getCurrentUser());
-      if (!isGameStartDone.current)
-        await putDevices(gameId, userStore.getCurrentUser().getDeviceId());
-
-      console.log("通知設定をdynamoへセット完了");
-      isGameStartDone.current = true;
-    } catch (error) {
-      console.log(error);
-    }
   };
 
   const isGameMaster = () => {
@@ -235,52 +247,6 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
         <View style={{ display: "flex", gap: 5 }}>
           {(isGameMaster() || !tagGameStore.getTagGame().isSetGame()) && (
             <>
-              <Button
-                type="solid"
-                color={!!isSetDoneArea ? "success" : "primary"}
-                disabled={
-                  !(isGameMaster() || !tagGameStore.getTagGame().isSetGame())
-                }
-                onPress={async () => {
-                  const tagGame = tagGameStore.getTagGame();
-                  if (_.isEmpty(tagGame.getId())) {
-                    tagGame.setId(Crypto.randomUUID());
-                  }
-                  if (_.isEmpty(tagGame.getGameMasterDeviceId())) {
-                    tagGame.setGameMasterDeviceId(
-                      userStore.getCurrentUser().getDeviceId(),
-                    );
-                  }
-
-                  await putTagGames(tagGame.toObject());
-                  setIsSetDoneArea(true);
-
-                  if (!userStore.getCurrentUser().getDeviceId()) return;
-                  await storeGameStartSetting(tagGame.getId());
-                }}
-              >
-                <IconSymbol
-                  size={28}
-                  name={"mappin.and.ellipse"}
-                  color={"white"}
-                />
-              </Button>
-              <Button
-                type="solid"
-                onPress={() => {
-                  resetMarkers();
-                  setIsSetDoneArea(false);
-                }}
-                disabled={
-                  !(isGameMaster() || !tagGameStore.getTagGame().isSetGame())
-                }
-              >
-                <IconSymbol
-                  size={28}
-                  name={"arrow.counterclockwise"}
-                  color={"white"}
-                />
-              </Button>
               {/* TODO: MapコンポーネントにQR表示ボタンとカメラ起動ボタンがあるのは適切ではないため、Mapコンポーネント外に切りだす(マップ上に表示しない) */}
               <Button
                 type="solid"
@@ -379,14 +345,18 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
           showsMyLocationButton={true}
           region={region}
           onLongPress={(event) => {
-            if (!(isGameMaster() || !tagGameStore.getTagGame().isSetGame()))
+            if (
+              !(isGameMaster() || !tagGameStore.getTagGame().isSetGame()) ||
+              !setPoints
+            )
               return;
 
-            tagGameStore.putArea([
-              ...tagGameStore.getTagGame().getAreas(),
-              { ...event.nativeEvent.coordinate, key: pinCount.current },
+            setPoints([
+              ...points,
+              {
+                ...event.nativeEvent.coordinate,
+              },
             ]);
-            pinCount.current += 1;
           }}
           onUserLocationChange={(event) => {
             if (!event.nativeEvent.coordinate) return;
@@ -424,24 +394,12 @@ function Map({ mapVisible = true, _userStore, _tagGameStore }: Props) {
             }
           }}
         >
-          {tagGameStore
-            .getTagGame()
-            .getAreas()
-            .map((marker) => (
-              <Marker
-                key={marker.key}
-                coordinate={{
-                  latitude: marker.latitude,
-                  longitude: marker.longitude,
-                }} // 東京
-                title={marker.key.toString()}
-              />
-            ))}
-          <Polyline
-            coordinates={tagGameStore.getTagGame().getAreas()}
-            strokeWidth={5} // 線の太さ
-            strokeColor="blue" // 線の色
-          />
+          {points.length > 0 && (
+            <Polygon
+              fillColor={drawColor}
+              coordinates={points} // 東京
+            />
+          )}
         </MapView>
       )}
       {/* TODO: MapコンポーネントにQR表示ボタンとカメラ起動ボタンの移動に伴いQRモーダルとカメラモーダルも移設する */}
@@ -518,4 +476,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default inject("_userStore", "_tagGameStore")(observer(Map));
+export default inject("_userStore", "_tagGameStore")(observer(EditMap));

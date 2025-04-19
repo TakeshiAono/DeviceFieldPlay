@@ -28,20 +28,20 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="MapScreen"
+        name="index"
         options={{
-          title: "MapScreen",
+          title: "MAP",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="map.fill" color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="index"
+        name="(stacks)"
         options={{
-          title: "Home",
+          title: "Setting",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
+            <IconSymbol size={28} name="hammer" color={color} />
           ),
         }}
       />
