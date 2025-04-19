@@ -1,7 +1,6 @@
 import { useState, useRef } from "react";
 import * as Crypto from "expo-crypto";
 
-import Map from "@/components/Map";
 import UserStore from "@/stores/UserStore";
 import { inject, observer } from "mobx-react";
 import { Pressable, Text, View } from "react-native";

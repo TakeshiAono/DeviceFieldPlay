@@ -1,7 +1,6 @@
 import { useState, useRef } from "react";
 import * as Crypto from "expo-crypto";
 
-import Map from "@/components/Map";
 import UserStore from "@/stores/UserStore";
 import { inject, observer } from "mobx-react";
 import { Pressable, Text, View } from "react-native";
@@ -10,6 +9,7 @@ import { Button } from "@rneui/themed";
 import { joinUser, putDevices, putTagGames, putUser } from "@/utils/APIs";
 import TagGameStore from "@/stores/TagGameStore";
 import _ from "lodash";
+import { PrisonAreaEditMap } from "@/components/PrisonAreaEditMap";
 
 interface Props {
   _userStore?: UserStore;
@@ -47,7 +47,7 @@ function PrisonAreaScreen({ _userStore, _tagGameStore }: Props) {
   };
 
   return (
-    // NOTE: tab分の高さが7%なので93%に設定している
+    // NOTE: tab分の高さで下部のボタンが画面外に隠れてしまうため%指定している
     <View style={{ backgroundColor: "blue", height: "93%", width: "100%" }}>
       <PrisonAreaEditMap
         points={tagGameStore.getTagGame().getPrisonArea()}

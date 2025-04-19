@@ -124,9 +124,7 @@ export default class TagGameModel {
     return this.policeUsers;
   }
 
-  setPoliceUsers(
-    policeUsers: DynamoTagGame["policeUsers"],
-  ): void {
+  setPoliceUsers(policeUsers: DynamoTagGame["policeUsers"]): void {
     this.policeUsers = policeUsers;
   }
 

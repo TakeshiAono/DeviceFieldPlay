@@ -193,7 +193,7 @@ function EditMap({
 
       await rejectUser(
         tagGameStore.getTagGame().getId(),
-        userStore.getCurrentUser().getDeviceId()
+        userStore.getCurrentUser().getDeviceId(),
       );
       setIsCurrentUserLive(false);
       Alert.alert("脱落通知", "エリア外に出たため脱落となりました。", [
@@ -221,7 +221,7 @@ function EditMap({
 
     const updatedLiveUsers = await joinUser(
       gameId,
-      userStore.getCurrentUser().getDeviceId()
+      userStore.getCurrentUser().getDeviceId(),
     );
 
     const tagGame = new TagGameModel({
@@ -286,7 +286,7 @@ function EditMap({
                           try {
                             await reviveUser(
                               tagGameStore.getTagGame().getId(),
-                              userStore.getCurrentUser().getDeviceId()
+                              userStore.getCurrentUser().getDeviceId(),
                             );
                             setIsCurrentUserLive(true);
                           } catch (error) {
@@ -321,7 +321,7 @@ function EditMap({
                           try {
                             await rejectUser(
                               tagGameStore.getTagGame().getId(),
-                              userStore.getCurrentUser().getDeviceId()
+                              userStore.getCurrentUser().getDeviceId(),
                             );
                             setIsCurrentUserLive(false);
                           } catch (error) {
