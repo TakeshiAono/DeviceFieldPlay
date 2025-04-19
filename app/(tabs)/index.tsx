@@ -4,16 +4,20 @@ import * as Location from "expo-location";
 import { useCameraPermissions } from "expo-camera";
 import * as Notifications from "expo-notifications";
 
-import Map from "@/components/Map";
 import UserStore from "@/stores/UserStore";
 import { inject, observer } from "mobx-react";
+import TagGameStore from "@/stores/TagGameStore";
+import ShowMap from "@/components/ShowMap";
+import { MapAreaColors } from "@/constants/Colors";
 
 interface Props {
   _userStore?: UserStore;
+  _tagGameStore?: TagGameStore;
 }
 
-function MapScreen({ _userStore }: Props) {
+function MapScreen({ _userStore, _tagGameStore }: Props) {
   const userStore = _userStore!;
+  const tagGameStore = _tagGameStore!;
 
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const [locationPermissionStatus, setLocationPermissionStatus] = useState("");
@@ -49,16 +53,16 @@ function MapScreen({ _userStore }: Props) {
     }
   }, [cameraPermission]);
 
-  const isDisplayMap = () => {
-    return locationPermissionStatus == "granted";
-  };
-
   return (
     <SafeAreaView>
-      {/* TODO: 設定画面ができた時に設定画面にマップを出力させたい */}
-      <Map mapVisible={isDisplayMap()} />
+      <ShowMap
+        validPoints={tagGameStore.getTagGame().getValidAreas()}
+        validPointsDrawColor={MapAreaColors.validArea}
+        prisonPoints={tagGameStore.getTagGame().getPrisonArea()}
+        prisonPointsDrawColor={MapAreaColors.prisonArea}
+      />
     </SafeAreaView>
   );
 }
 
-export default inject("_userStore")(observer(MapScreen));
+export default inject("_userStore", "_tagGameStore")(observer(MapScreen));

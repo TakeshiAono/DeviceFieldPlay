@@ -1,10 +1,7 @@
-import { Alert, StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 import { Button } from "@rneui/themed";
-import React, { useState, useEffect, useRef } from "react";
-import QRCode from "react-native-qrcode-svg";
+import React, { useState, useEffect } from "react";
 import MapView, { LatLng, Polygon, Region } from "react-native-maps";
-import ReactNativeModal from "react-native-modal";
-import { CameraView } from "expo-camera";
 import { booleanPointInPolygon, point, polygon } from "@turf/turf";
 import "react-native-get-random-values";
 import _ from "lodash";
@@ -12,55 +9,40 @@ import { inject, observer } from "mobx-react";
 import Toast from "react-native-toast-message";
 import * as Notifications from "expo-notifications";
 
-import {
-  getTagGames,
-  joinUser,
-  patchDevices,
-  rejectUser,
-  reviveUser,
-} from "@/utils/APIs";
+import { getTagGames, rejectUser, reviveUser } from "@/utils/APIs";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import UserStore from "@/stores/UserStore";
-import TagGameModel from "@/models/TagGameModel";
 import TagGameStore from "@/stores/TagGameStore";
+import { initialJapanRegion } from "./EditMap";
 
 export type Props = {
   mapVisible?: boolean;
   _userStore?: UserStore;
   _tagGameStore?: TagGameStore;
-  drawColor: string;
-  points: LatLng[];
-  setPoints: (points: LatLng[]) => void;
-};
-
-const initialJapanRegion = {
-  latitude: 36.2048,
-  longitude: 138.2529,
-  latitudeDelta: 0.001,
-  longitudeDelta: 0.001,
+  validPoints: LatLng[];
+  validPointsDrawColor: string;
+  prisonPoints: LatLng[];
+  prisonPointsDrawColor: string;
 };
 
 type latitude = number;
 type longitude = number;
 
-function Map({
+function ShowMap({
   mapVisible = true,
   _userStore,
   _tagGameStore,
-  setPoints,
-  points,
-  drawColor,
+  validPoints,
+  validPointsDrawColor,
+  prisonPoints,
+  prisonPointsDrawColor,
 }: Props) {
+  const [region, setRegion] = useState<Region>(initialJapanRegion);
   const userStore = _userStore!;
   const tagGameStore = _tagGameStore!;
 
-  const [region, setRegion] = useState<Region>(initialJapanRegion);
-  const [qrVisible, setQrVisible] = useState(false);
-  const [cameraVisible, setCameraVisible] = useState(false);
   const [isFirstUpdate, setIsFirstUpdate] = useState(true);
   const [isCurrentUserLive, setIsCurrentUserLive] = useState(true);
-
-  const firstScan = useRef(true);
 
   useEffect(() => {
     const gameId = tagGameStore.getTagGame().getId();
@@ -159,7 +141,6 @@ function Map({
         }
       });
 
-    gameStart();
     // gameIdが変わるたびに別のゲームのエリアで更新されてしまわないよう、イベントリスナーを削除し新規のイベントリスナーを生成する。
     return () => {
       changeValidAreaNotificationListener.remove();
@@ -169,22 +150,27 @@ function Map({
     };
   }, [tagGameStore.getTagGame().getId()]);
 
-  const onChangeCurrentPosition = async (position: [longitude, latitude]) => {
+  const onChangeCurrentPosition = async (
+    userPosition: [longitude, latitude],
+  ) => {
     if (
-      points.length === 0 ||
+      validPoints.length === 0 ||
       !tagGameStore.getTagGame().getIsSetValidAreaDone()
     )
       return;
 
-    const targetPolygon = points.map((point) => [
+    const userPositionPoint = point(userPosition);
+
+    // TODO: areaを毎回計算するのはパフォーマンス効率が悪いため、エリア変更時にuseRefで保存するように変更する
+    const targetPolygon = validPoints.map((point) => [
       point.longitude,
       point.latitude,
     ]);
-    const targetPoint = point(position);
-
-    // TODO: areaを毎回計算するのはパフォーマンス効率が悪いため、エリア変更時にuseRefで保存するように変更する
-    const area = polygon([targetPolygon]);
-    const isInside: boolean = booleanPointInPolygon(targetPoint, area);
+    const areaPoint = polygon([targetPolygon]);
+    const isInside: boolean = booleanPointInPolygon(
+      userPositionPoint,
+      areaPoint,
+    );
 
     if (!userStore.getCurrentUser().getDeviceId()) return;
 
@@ -202,73 +188,10 @@ function Map({
     }
   };
 
-  const gameStart = () => {
-    // TODO: ゲームスタート時はエリアの中にいることが前提なので、エリア外にいる場合は警告を出す
-    // TODO: 初期値はtrueだが念のため代入する
-    setIsCurrentUserLive(true);
-  };
-
-  const setDataSettings = async ({ data: gameId }: { data: string }) => {
-    // NOTE: カメラモーダルを閉じた際にtrueに戻します。
-    // NOTE: QRが画面上にある限り廉造スキャンしてしまうので最初のスキャン以外は早期リターンしている
-    if (!firstScan.current || !userStore.getCurrentUser().getDeviceId()) return;
-
-    firstScan.current = false;
-    console.log("ScanData: ", gameId);
-    setCameraVisible(false);
-    tagGameStore.getTagGame().setId(gameId);
-    await patchDevices(gameId, userStore.getCurrentUser().getDeviceId());
-
-    const updatedLiveUsers = await joinUser(
-      gameId,
-      userStore.getCurrentUser().getDeviceId(),
-    );
-
-    const tagGame = new TagGameModel({
-      id: gameId,
-      validAreas: tagGameStore.getTagGame().getValidAreas(),
-      liveUsers: updatedLiveUsers.liveUsers,
-      rejectUsers: [],
-      // TODO: ゲームマスターを取得できるようにしたい。現状は自分がげーむマスターでないことしかわからない
-      gameMasterDeviceId: "",
-    });
-    tagGameStore.putTagGame(tagGame);
-  };
-
-  const isGameMaster = () => {
-    return userStore
-      .getCurrentUser()
-      .isCurrentGameMaster(tagGameStore.getTagGame());
-  };
-
   return (
     <>
       <View style={{ position: "absolute", top: 150, right: 5, zIndex: 1 }}>
         <View style={{ display: "flex", gap: 5 }}>
-          {(isGameMaster() || !tagGameStore.getTagGame().isSetGame()) && (
-            <>
-              {/* TODO: MapコンポーネントにQR表示ボタンとカメラ起動ボタンがあるのは適切ではないため、Mapコンポーネント外に切りだす(マップ上に表示しない) */}
-              <Button
-                type="solid"
-                onPress={() => {
-                  setQrVisible(true);
-                }}
-                disabled={
-                  !(isGameMaster() || !tagGameStore.getTagGame().isSetGame())
-                }
-              >
-                <IconSymbol size={28} name={"qrcode"} color={"white"} />
-              </Button>
-              <Button
-                type="solid"
-                onPress={() => {
-                  setCameraVisible(true);
-                }}
-              >
-                <IconSymbol size={28} name={"camera"} color={"white"} />
-              </Button>
-            </>
-          )}
           <Button
             type="solid"
             color={isCurrentUserLive ? "gray" : "success"}
@@ -344,20 +267,6 @@ function Map({
           followsUserLocation={true}
           showsMyLocationButton={true}
           region={region}
-          onLongPress={(event) => {
-            if (
-              !(isGameMaster() || !tagGameStore.getTagGame().isSetGame()) ||
-              !setPoints
-            )
-              return;
-
-            setPoints([
-              ...points,
-              {
-                ...event.nativeEvent.coordinate,
-              },
-            ]);
-          }}
           onUserLocationChange={(event) => {
             if (!event.nativeEvent.coordinate) return;
             const currentPosition: [number, number] = [
@@ -394,77 +303,20 @@ function Map({
             }
           }}
         >
-          {points.length > 0 && (
+          {validPoints.length > 0 && (
             <Polygon
-              fillColor={drawColor}
-              coordinates={points} // 東京
+              fillColor={validPointsDrawColor}
+              coordinates={validPoints} // 東京
+            />
+          )}
+          {prisonPoints.length > 0 && (
+            <Polygon
+              fillColor={prisonPointsDrawColor}
+              coordinates={prisonPoints} // 東京
             />
           )}
         </MapView>
       )}
-      {/* TODO: MapコンポーネントにQR表示ボタンとカメラ起動ボタンの移動に伴いQRモーダルとカメラモーダルも移設する */}
-      <ReactNativeModal style={{ margin: "auto" }} isVisible={qrVisible}>
-        <View style={{ backgroundColor: "white", width: 330, padding: 20 }}>
-          {tagGameStore.getTagGame().getId() ? (
-            <>
-              <Text style={{ fontSize: 30 }}>参加QR</Text>
-              <Text>
-                {"友達にスキャンしてもらい\nゲームに参加してもらいましょう"}
-              </Text>
-              <View style={{ alignItems: "center", marginVertical: 20 }}>
-                <QRCode size={150} value={tagGameStore.getTagGame().getId()} />
-              </View>
-            </>
-          ) : (
-            <View style={{ height: 100 }}>
-              <Text style={{ fontSize: 15 }}>
-                {
-                  "ゲームグループQRを表示するためには\nゲームをスタートしてください"
-                }
-              </Text>
-            </View>
-          )}
-          <Button
-            type="solid"
-            color={"red"}
-            onPress={() => {
-              setQrVisible(false);
-            }}
-          >
-            閉じる
-          </Button>
-        </View>
-      </ReactNativeModal>
-      <ReactNativeModal style={{ margin: "auto" }} isVisible={cameraVisible}>
-        <View style={{ backgroundColor: "white", width: 330, padding: 20 }}>
-          <Text style={{ fontSize: 18 }}>
-            {"QRを読み込ませてもらって\nゲームグループに参加しましょう!!"}
-          </Text>
-          <CameraView
-            style={{
-              width: 250,
-              height: 300,
-              marginHorizontal: "auto",
-              marginBottom: 20,
-            }}
-            barcodeScannerSettings={{
-              barcodeTypes: ["qr"],
-            }}
-            onBarcodeScanned={setDataSettings}
-            facing={"back"}
-          />
-          <Button
-            type="solid"
-            color={"red"}
-            onPress={() => {
-              setCameraVisible(false);
-              firstScan.current = true;
-            }}
-          >
-            閉じる
-          </Button>
-        </View>
-      </ReactNativeModal>
     </>
   );
 }
@@ -476,4 +328,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default inject("_userStore", "_tagGameStore")(observer(Map));
+export default inject("_userStore", "_tagGameStore")(observer(ShowMap));

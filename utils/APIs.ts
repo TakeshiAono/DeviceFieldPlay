@@ -7,7 +7,6 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 
 import Constants from "expo-constants";
-import { Marker } from "@/components/Map";
 import { Platform } from "react-native";
 import UserModel from "@/models/UserModel";
 import { DynamoDevice, DynamoTagGame, DynamoUser } from "@/interfaces/api";
@@ -27,7 +26,7 @@ const client = new DynamoDBClient({
 const docClient = DynamoDBDocumentClient.from(client);
 
 export const getTagGames = async <T extends DynamoTagGame>(
-  id: T["id"],
+  id: T["id"]
 ): Promise<DynamoTagGame> => {
   try {
     const command = new GetCommand({
@@ -46,7 +45,7 @@ export const getTagGames = async <T extends DynamoTagGame>(
 };
 
 export const putTagGames = async <T extends DynamoTagGame>(
-  item: T,
+  item: T
 ): Promise<T> => {
   try {
     const command = new PutCommand({
@@ -65,7 +64,7 @@ export const putTagGames = async <T extends DynamoTagGame>(
 
 export const joinUser = async <T extends DynamoTagGame>(
   gameId: T["id"],
-  deviceId: string,
+  deviceId: string
 ): Promise<Pick<T, "liveUsers">> => {
   try {
     const command = new UpdateCommand({
@@ -90,7 +89,7 @@ export const joinUser = async <T extends DynamoTagGame>(
 
 export const putUser = async <T extends DynamoUser>(
   gameId: T["gameId"],
-  user: UserModel,
+  user: UserModel
 ): Promise<T | undefined> => {
   try {
     const command = new PutCommand({
@@ -117,7 +116,7 @@ export const putUser = async <T extends DynamoUser>(
 // dynamoStreamのLambdaで同期対応させるようにする
 export const rejectUser = async <T extends DynamoTagGame>(
   gameId: T["id"],
-  deviceId: string,
+  deviceId: string
 ): Promise<Pick<T, "rejectUsers">> => {
   try {
     const getCommand = new GetCommand({
@@ -158,7 +157,7 @@ export const rejectUser = async <T extends DynamoTagGame>(
 // dynamoStreamのLambdaで同期対応させるようにする
 export const reviveUser = async <T extends DynamoTagGame>(
   gameId: T["id"],
-  deviceId: string,
+  deviceId: string
 ): Promise<Pick<T, "liveUsers">> => {
   try {
     const getCommand = new GetCommand({
@@ -196,7 +195,7 @@ export const reviveUser = async <T extends DynamoTagGame>(
 
 export const putDevices = async <T extends DynamoDevice>(
   gameId: T["gameId"],
-  deviceId: string,
+  deviceId: string
 ) => {
   const [iOSDeviceList, androidDeviceList] = _getIdsByPlatform(deviceId);
 
@@ -221,7 +220,7 @@ export const putDevices = async <T extends DynamoDevice>(
 
 export const patchDevices = async <T extends DynamoDevice>(
   gameId: T["gameId"],
-  deviceId: string,
+  deviceId: string
 ): Promise<Pick<T, "androidDeviceIds">> => {
   const platformKey =
     Platform.OS === "ios" ? "iOSDeviceIds" : "androidDeviceIds";

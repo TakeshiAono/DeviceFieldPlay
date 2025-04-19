@@ -1,15 +1,16 @@
 import React from "react";
-import Map, { Props } from "./Map";
+import EditMap, { Props } from "./EditMap";
+import { MapAreaColors } from "@/constants/Colors";
 
 export function ValidAreaEditMap({
   points,
   setPoints,
 }: Omit<Props, "drawColor">) {
   return (
-    <Map
+    <EditMap
       points={points}
       setPoints={setPoints}
-      drawColor="rgba(50,200,50,0.2)"
+      drawColor={MapAreaColors.validArea}
     />
   );
 }

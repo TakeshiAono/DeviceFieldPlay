@@ -1,11 +1,16 @@
 import React from "react";
-import Map, { Props } from "./Map";
+import EditMap, { Props } from "./EditMap";
+import { MapAreaColors } from "@/constants/Colors";
 
 export function PrisonAreaEditMap({
   points,
   setPoints,
 }: Omit<Props, "drawColor">) {
   return (
-    <Map points={points} setPoints={setPoints} drawColor="rgba(200,0,0,0.5)" />
+    <EditMap
+      points={points}
+      setPoints={setPoints}
+      drawColor={MapAreaColors.prisonArea}
+    />
   );
 }

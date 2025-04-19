@@ -24,3 +24,8 @@ export const Colors = {
     tabIconSelected: tintColorDark,
   },
 };
+
+export const MapAreaColors = {
+  validArea: "rgba(50,200,50,0.2)",
+  prisonArea: "rgba(200,0,0,0.5)",
+};
