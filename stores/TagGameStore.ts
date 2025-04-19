@@ -1,4 +1,4 @@
-import { action, observable } from "mobx";
+import { action, makeObservable, observable } from "mobx";
 import _ from "lodash";
 
 import { DynamoTagGame } from "@/interfaces/api";
@@ -8,7 +8,11 @@ export default class TagGameStore {
   @observable.deep
   private currentTagGame!: TagGameModel;
 
+  @observable
+  private isEditTeams!: boolean;
+
   constructor() {
+    makeObservable(this);
     this._initialize();
   }
 
@@ -22,6 +26,7 @@ export default class TagGameStore {
       gameMasterDeviceId: "",
       policeUsers: [],
     });
+    this.isEditTeams = false;
   }
 
   @action
@@ -88,6 +93,15 @@ export default class TagGameStore {
       (user) => !users.includes(user),
     );
     this.putRejectUsers(filteredRejectUsers);
+  }
+
+  public getIsEditTeams() {
+    return this.isEditTeams;
+  }
+
+  @action
+  public setIsEditTeams(isEditTeams: boolean) {
+    this.isEditTeams = isEditTeams;
   }
 
   private getThiefUsers() {

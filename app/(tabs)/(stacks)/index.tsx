@@ -44,7 +44,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
           }}
         ></Button>
         <Button
-          color={"error"}
+          color={tagGameStore.getIsEditTeams() ? "success" : "error"}
           title="チーム設定"
           onPress={() => {
             router.push("/TeamEditScreen");

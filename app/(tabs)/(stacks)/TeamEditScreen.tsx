@@ -267,15 +267,22 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
               </View>
             </View>
             <TouchableOpacity
-              onPress={() => {
+              onPress={async () => {
                 setSelectedUsers([]);
-                // なぜエラーが発生してしまう？
-                // TODO: 先にエリアを設定しないとidが設定されず、dynamo not keyエラーが発生してしまう
-                // idはマップコンポーネントではなくて設定画面でゲーム生成ボタンなどの押下時に格納するよう変更する
-                putTagGames(tagGameStore.getTagGame().toObject());
+                try {
+                  // TODO: 先にエリアを設定しないとidが設定されず、dynamo not keyエラーが発生してしまう
+                  // idはマップコンポーネントではなくて設定画面でゲーム生成ボタンなどの押下時に格納するよう変更する
+                  await putTagGames(tagGameStore.getTagGame().toObject());
+                  tagGameStore.setIsEditTeams(true);
+                } catch (error) {
+                  console.log("Error: ", error);
+                  throw error;
+                }
               }}
               style={{
-                backgroundColor: "red",
+                backgroundColor: tagGameStore.getIsEditTeams()
+                  ? "green"
+                  : "red",
                 paddingHorizontal: 24,
                 borderRadius: 8,
                 justifyContent: "center",

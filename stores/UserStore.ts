@@ -1,11 +1,12 @@
 import UserModel from "@/models/UserModel";
-import { action, observable } from "mobx";
+import { action, makeObservable, observable } from "mobx";
 
 export default class UserStore {
   @observable.deep
   private currentUser!: UserModel;
 
   constructor() {
+    makeObservable(this);
     this.initialize();
   }
 
