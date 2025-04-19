@@ -49,11 +49,10 @@ function PrisonAreaScreen({ _userStore, _tagGameStore }: Props) {
   return (
     // NOTE: tab分の高さが7%なので93%に設定している
     <View style={{ backgroundColor: "blue", height: "93%", width: "100%" }}>
-      <Map
-        markers={tagGameStore.getTagGame().getPrisonArea()}
-        setMarkers={(markers) => {
-          console.log("監獄ooooo", markers);
-          tagGameStore.putPrisonArea(markers);
+      <PrisonAreaEditMap
+        points={tagGameStore.getTagGame().getPrisonArea()}
+        setPoints={(points) => {
+          tagGameStore.putPrisonArea(points);
         }}
       />
       <View style={{ flexDirection: "row", width: "100%" }}>

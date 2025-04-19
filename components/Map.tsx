@@ -2,7 +2,7 @@ import { Alert, StyleSheet, Text, View } from "react-native";
 import { Button } from "@rneui/themed";
 import React, { useState, useEffect, useRef } from "react";
 import QRCode from "react-native-qrcode-svg";
-import MapView, { LatLng, Marker, Polyline, Region } from "react-native-maps";
+import MapView, { LatLng, Polygon, Region } from "react-native-maps";
 import ReactNativeModal from "react-native-modal";
 import { CameraView } from "expo-camera";
 import { booleanPointInPolygon, point, polygon } from "@turf/turf";
@@ -24,13 +24,13 @@ import UserStore from "@/stores/UserStore";
 import TagGameModel from "@/models/TagGameModel";
 import TagGameStore from "@/stores/TagGameStore";
 
-export type Marker = LatLng & { key: number };
 export type Props = {
   mapVisible?: boolean;
   _userStore?: UserStore;
   _tagGameStore?: TagGameStore;
-  markers: Marker[];
-  setMarkers?: (markers: Marker[]) => void;
+  drawColor: string;
+  points: LatLng[];
+  setPoints: (points: LatLng[]) => void;
 };
 
 const initialJapanRegion = {
@@ -47,8 +47,9 @@ function Map({
   mapVisible = true,
   _userStore,
   _tagGameStore,
-  setMarkers,
-  markers,
+  setPoints,
+  points,
+  drawColor,
 }: Props) {
   const userStore = _userStore!;
   const tagGameStore = _tagGameStore!;
@@ -170,14 +171,14 @@ function Map({
 
   const onChangeCurrentPosition = async (position: [longitude, latitude]) => {
     if (
-      markers.length === 0 ||
+      points.length === 0 ||
       !tagGameStore.getTagGame().getIsSetValidAreaDone()
     )
       return;
 
-    const targetPolygon = markers.map((marker) => [
-      marker.longitude,
-      marker.latitude,
+    const targetPolygon = points.map((point) => [
+      point.longitude,
+      point.latitude,
     ]);
     const targetPoint = point(position);
 
@@ -344,18 +345,16 @@ function Map({
           showsMyLocationButton={true}
           region={region}
           onLongPress={(event) => {
-            if (!(isGameMaster() || !tagGameStore.getTagGame().isSetGame()))
+            if (
+              !(isGameMaster() || !tagGameStore.getTagGame().isSetGame()) ||
+              !setPoints
+            )
               return;
 
-            const lastKeyNumberMarker = _.maxBy(
-              markers,
-              (marker) => marker.key,
-            );
-            setMarkers([
-              ...markers,
+            setPoints([
+              ...points,
               {
                 ...event.nativeEvent.coordinate,
-                key: (lastKeyNumberMarker?.key ?? 0) + 1,
               },
             ]);
           }}
@@ -395,23 +394,12 @@ function Map({
             }
           }}
         >
-          {markers.map((marker) => {
-            return (
-              <Marker
-                key={marker.key}
-                coordinate={{
-                  latitude: marker.latitude,
-                  longitude: marker.longitude,
-                }} // 東京
-                title={marker.key.toString()}
-              />
-            );
-          })}
-          <Polyline
-            coordinates={markers}
-            strokeWidth={5} // 線の太さ
-            strokeColor="blue" // 線の色
-          />
+          {points.length > 0 && (
+            <Polygon
+              fillColor={drawColor}
+              coordinates={points} // 東京
+            />
+          )}
         </MapView>
       )}
       {/* TODO: MapコンポーネントにQR表示ボタンとカメラ起動ボタンの移動に伴いQRモーダルとカメラモーダルも移設する */}

@@ -10,6 +10,7 @@ import { Button } from "@rneui/themed";
 import { joinUser, putDevices, putTagGames, putUser } from "@/utils/APIs";
 import TagGameStore from "@/stores/TagGameStore";
 import _ from "lodash";
+import { ValidAreaEditMap } from "@/components/ValidAreaEditMap";
 
 interface Props {
   _userStore?: UserStore;
@@ -50,10 +51,10 @@ function ValidAreaScreen({ _userStore, _tagGameStore }: Props) {
   return (
     // NOTE: tab分の高さが7%なので93%に設定している
     <View style={{ backgroundColor: "blue", height: "93%", width: "100%" }}>
-      <Map
-        markers={tagGameStore.getTagGame().getValidAreas()}
-        setMarkers={(markers) => {
-          tagGameStore.putValidArea(markers);
+      <ValidAreaEditMap
+        points={tagGameStore.getTagGame().getValidAreas()}
+        setPoints={(points) => {
+          tagGameStore.putValidArea(points);
         }}
       />
       <View style={{ flexDirection: "row", width: "100%" }}>
