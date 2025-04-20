@@ -3,18 +3,17 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
-import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import "react-native-reanimated";
 import { Provider } from "mobx-react";
-import * as Crypto from "expo-crypto";
 import ReactNativeModal from "react-native-modal";
 import { Button, Text, TextInput, View } from "react-native";
 import Toast from "react-native-toast-message";
 import * as Notifications from "expo-notifications";
+import { CheckBox } from "@rneui/themed";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import UserStore from "@/stores/UserStore";
@@ -32,9 +31,7 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [userName, setUserName] = useState<string | undefined>(undefined);
   const [modalView, setModalView] = useState<boolean>(true);
-  const [loaded] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
-  });
+  const [isGameMaster, setIsGameMaster] = useState<boolean>(false);
 
   useEffect(() => {
     async function registerForPushNotificationsAsync() {
@@ -54,15 +51,15 @@ export default function RootLayout() {
     registerForPushNotificationsAsync();
   }, []);
 
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
+  // useEffect(() => {
+  //   if (loaded) {
+  //     SplashScreen.hideAsync();
+  //   }
+  // }, [loaded]);
 
-  if (!loaded) {
-    return null;
-  }
+  // if (!loaded) {
+  //   return null;
+  // }
 
   return (
     <Provider {...stores}>
@@ -88,13 +85,36 @@ export default function RootLayout() {
               }}
               value={userName}
             />
+            <Text>あなたのゲーム内での役職を選んでください</Text>
+            <CheckBox
+              checked={isGameMaster === true}
+              onPress={() => setIsGameMaster(true)}
+              checkedIcon="dot-circle-o"
+              uncheckedIcon="circle-o"
+              title={"ゲームマスター"}
+            />
+            <CheckBox
+              checked={isGameMaster === false}
+              onPress={() => setIsGameMaster(false)}
+              checkedIcon="dot-circle-o"
+              uncheckedIcon="circle-o"
+              title={"メンバー"}
+            />
             <Button
               title="登録"
+              disabled={userName === undefined}
               onPress={async () => {
-                if (userName == undefined) return;
+                if (userName === undefined) return;
+
                 setModalView(false);
-                const randomBytes = await Crypto.getRandomBytesAsync(16);
                 stores._userStore.setCurrentUserName(userName);
+                if (isGameMaster) {
+                  stores._tagGameStore
+                    .getTagGame()
+                    .setGameMasterDeviceId(
+                      stores._userStore.getCurrentUser().getDeviceId(),
+                    );
+                }
               }}
             />
           </View>

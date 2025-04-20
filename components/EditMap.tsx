@@ -1,10 +1,9 @@
 import { Alert, StyleSheet, Text, View } from "react-native";
 import { Button } from "@rneui/themed";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import QRCode from "react-native-qrcode-svg";
 import MapView, { LatLng, Polygon, Region } from "react-native-maps";
 import ReactNativeModal from "react-native-modal";
-import { CameraView } from "expo-camera";
 import { booleanPointInPolygon, point, polygon } from "@turf/turf";
 import "react-native-get-random-values";
 import _ from "lodash";
@@ -12,16 +11,9 @@ import { inject, observer } from "mobx-react";
 import Toast from "react-native-toast-message";
 import * as Notifications from "expo-notifications";
 
-import {
-  getTagGames,
-  joinUser,
-  patchDevices,
-  rejectUser,
-  reviveUser,
-} from "@/utils/APIs";
+import { getTagGames, rejectUser, reviveUser } from "@/utils/APIs";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import UserStore from "@/stores/UserStore";
-import TagGameModel from "@/models/TagGameModel";
 import TagGameStore from "@/stores/TagGameStore";
 
 export type Props = {
@@ -56,11 +48,8 @@ function EditMap({
 
   const [region, setRegion] = useState<Region>(initialJapanRegion);
   const [qrVisible, setQrVisible] = useState(false);
-  const [cameraVisible, setCameraVisible] = useState(false);
   const [isFirstUpdate, setIsFirstUpdate] = useState(true);
   const [isCurrentUserLive, setIsCurrentUserLive] = useState(true);
-
-  const firstScan = useRef(true);
 
   useEffect(() => {
     const gameId = tagGameStore.getTagGame().getId();
@@ -208,41 +197,8 @@ function EditMap({
     setIsCurrentUserLive(true);
   };
 
-  // ゲームマスター以外の人(子)がゲーム情報をstoreにセットするための処理
-  const setDataSettings = async ({ data: gameId }: { data: string }) => {
-    // NOTE: カメラモーダルを閉じた際にtrueに戻します。
-    // NOTE: QRが画面上にある限り廉造スキャンしてしまうので最初のスキャン以外は早期リターンしている
-    if (!firstScan.current || !userStore.getCurrentUser().getDeviceId()) return;
-
-    firstScan.current = false;
-    console.log("ScanData: ", gameId);
-    setCameraVisible(false);
-    tagGameStore.getTagGame().setId(gameId);
-    await patchDevices(gameId, userStore.getCurrentUser().getDeviceId());
-
-    const updatedLiveUsers = await joinUser(
-      gameId,
-      userStore.getCurrentUser().getDeviceId(),
-    );
-
-    const tagGame = new TagGameModel({
-      id: gameId,
-      validAreas: tagGameStore.getTagGame().getValidAreas(),
-      liveUsers: updatedLiveUsers.liveUsers,
-      rejectUsers: [],
-      // TODO: ゲームマスターを取得できるようにしたい。現状は自分がゲームマスターでないことしかわからない
-      gameMasterDeviceId: "",
-      prisonArea: [],
-      policeUsers: [],
-      gameTimeLimit: "",
-    });
-    tagGameStore.putTagGame(tagGame);
-  };
-
   const isGameMaster = () => {
-    return userStore
-      .getCurrentUser()
-      .isCurrentGameMaster(tagGameStore.getTagGame());
+    return userStore.isCurrentUserGameMaster(tagGameStore.getTagGame());
   };
 
   return (
@@ -262,14 +218,6 @@ function EditMap({
                 }
               >
                 <IconSymbol size={28} name={"qrcode"} color={"white"} />
-              </Button>
-              <Button
-                type="solid"
-                onPress={() => {
-                  setCameraVisible(true);
-                }}
-              >
-                <IconSymbol size={28} name={"camera"} color={"white"} />
               </Button>
             </>
           )}
@@ -433,36 +381,6 @@ function EditMap({
             color={"red"}
             onPress={() => {
               setQrVisible(false);
-            }}
-          >
-            閉じる
-          </Button>
-        </View>
-      </ReactNativeModal>
-      <ReactNativeModal style={{ margin: "auto" }} isVisible={cameraVisible}>
-        <View style={{ backgroundColor: "white", width: 330, padding: 20 }}>
-          <Text style={{ fontSize: 18 }}>
-            {"QRを読み込ませてもらって\nゲームグループに参加しましょう!!"}
-          </Text>
-          <CameraView
-            style={{
-              width: 250,
-              height: 300,
-              marginHorizontal: "auto",
-              marginBottom: 20,
-            }}
-            barcodeScannerSettings={{
-              barcodeTypes: ["qr"],
-            }}
-            onBarcodeScanned={setDataSettings}
-            facing={"back"}
-          />
-          <Button
-            type="solid"
-            color={"red"}
-            onPress={() => {
-              setCameraVisible(false);
-              firstScan.current = true;
             }}
           >
             閉じる

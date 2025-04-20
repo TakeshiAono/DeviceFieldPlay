@@ -24,9 +24,7 @@ function ValidAreaScreen({ _userStore, _tagGameStore }: Props) {
   const isGameStartDone = useRef(false);
 
   const isGameMaster = () => {
-    return userStore
-      .getCurrentUser()
-      .isCurrentGameMaster(tagGameStore.getTagGame());
+    return userStore.isCurrentUserGameMaster(tagGameStore.getTagGame());
   };
 
   const storeGameStartSetting = async (gameId: string) => {

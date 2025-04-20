@@ -23,4 +23,8 @@ export default class UserStore {
   public getCurrentUser() {
     return this.currentUser;
   }
+
+  public isCurrentUserGameMaster(targetTagGame: TagGameModel) {
+    return this.getCurrentUser().isCurrentGameMaster(targetTagGame);
+  }
 }
