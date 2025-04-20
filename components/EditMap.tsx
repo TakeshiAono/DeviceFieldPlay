@@ -47,7 +47,7 @@ function EditMap({
   const tagGameStore = _tagGameStore!;
 
   const [region, setRegion] = useState<Region>(initialJapanRegion);
-  const [qrVisible, setQrVisible] = useState(false);
+
   const [isFirstUpdate, setIsFirstUpdate] = useState(true);
   const [isCurrentUserLive, setIsCurrentUserLive] = useState(true);
 
@@ -205,22 +205,6 @@ function EditMap({
     <>
       <View style={{ position: "absolute", top: 150, right: 5, zIndex: 1 }}>
         <View style={{ display: "flex", gap: 5 }}>
-          {(isGameMaster() || !tagGameStore.getTagGame().isSetGame()) && (
-            <>
-              {/* TODO: MapコンポーネントにQR表示ボタンとカメラ起動ボタンがあるのは適切ではないため、Mapコンポーネント外に切りだす(マップ上に表示しない) */}
-              <Button
-                type="solid"
-                onPress={() => {
-                  setQrVisible(true);
-                }}
-                disabled={
-                  !(isGameMaster() || !tagGameStore.getTagGame().isSetGame())
-                }
-              >
-                <IconSymbol size={28} name={"qrcode"} color={"white"} />
-              </Button>
-            </>
-          )}
           <Button
             type="solid"
             color={isCurrentUserLive ? "gray" : "success"}
@@ -354,39 +338,6 @@ function EditMap({
           )}
         </MapView>
       )}
-      {/* TODO: MapコンポーネントにQR表示ボタンとカメラ起動ボタンの移動に伴いQRモーダルとカメラモーダルも移設する */}
-      <ReactNativeModal style={{ margin: "auto" }} isVisible={qrVisible}>
-        <View style={{ backgroundColor: "white", width: 330, padding: 20 }}>
-          {tagGameStore.getTagGame().getId() ? (
-            <>
-              <Text style={{ fontSize: 30 }}>参加QR</Text>
-              <Text>
-                {"友達にスキャンしてもらい\nゲームに参加してもらいましょう"}
-              </Text>
-              <View style={{ alignItems: "center", marginVertical: 20 }}>
-                <QRCode size={150} value={tagGameStore.getTagGame().getId()} />
-              </View>
-            </>
-          ) : (
-            <View style={{ height: 100 }}>
-              <Text style={{ fontSize: 15 }}>
-                {
-                  "ゲームグループQRを表示するためには\nゲームをスタートしてください"
-                }
-              </Text>
-            </View>
-          )}
-          <Button
-            type="solid"
-            color={"red"}
-            onPress={() => {
-              setQrVisible(false);
-            }}
-          >
-            閉じる
-          </Button>
-        </View>
-      </ReactNativeModal>
     </>
   );
 }

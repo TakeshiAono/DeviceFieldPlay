@@ -1,3 +1,4 @@
+import TagGameModel from "@/models/TagGameModel";
 import UserModel from "@/models/UserModel";
 import { action, makeObservable, observable } from "mobx";
 

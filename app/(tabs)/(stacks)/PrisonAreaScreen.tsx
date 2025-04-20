@@ -58,7 +58,7 @@ function PrisonAreaScreen({ _userStore, _tagGameStore }: Props) {
           <Button
             type="solid"
             color={
-              !!tagGameStore.getTagGame().getIsSetPrisonAreaDone()
+              tagGameStore.getTagGame().getIsSetPrisonAreaDone()
                 ? "success"
                 : "primary"
             }
@@ -84,7 +84,7 @@ function PrisonAreaScreen({ _userStore, _tagGameStore }: Props) {
             }}
           >
             <IconSymbol size={28} name={"mappin.and.ellipse"} color={"white"} />
-            {!!tagGameStore.getTagGame().getIsSetPrisonAreaDone()
+            {tagGameStore.getTagGame().getIsSetPrisonAreaDone()
               ? "エリア更新"
               : "エリア登録"}
           </Button>

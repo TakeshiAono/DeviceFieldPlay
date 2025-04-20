@@ -13,6 +13,9 @@ import UserList from "@/components/UserList";
 import _ from "lodash";
 
 import { putTagGames } from "@/utils/APIs";
+import { IconSymbol } from "@/components/ui/IconSymbol";
+import ReactNativeModal from "react-native-modal";
+import QRCode from "react-native-qrcode-svg";
 
 interface Props {
   _userStore?: UserStore;
@@ -43,6 +46,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
   const [rejectUsersForList, setRejectUsersForList] = useState<
     UserTypeForList[]
   >(formatForListData(tagGameStore.getTagGame().getRejectUsers() ?? []));
+  const [qrVisible, setQrVisible] = useState(false);
 
   const deviceId = useRef("");
 
@@ -208,10 +212,9 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                   marginHorizontal: "auto",
                   flexDirection: "row",
                   justifyContent: "space-around",
-                  width: "80%",
                 }}
               >
-                <View style={{ width: "50%" }}>
+                <View style={{ width: "33%" }}>
                   <Button
                     title="追放"
                     onPress={() => {
@@ -222,7 +225,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                     }}
                   />
                 </View>
-                <View style={{ width: "50%", marginLeft: 10 }}>
+                <View style={{ width: "33%", marginLeft: 10 }}>
                   <Button
                     title="警察へ変更"
                     onPress={() => {
@@ -233,16 +236,31 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                     }}
                   />
                 </View>
+                <View style={{ width: "33%", marginLeft: 10 }}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setQrVisible(true);
+                    }}
+                    style={{
+                      backgroundColor: "blue",
+                      paddingVertical: "auto",
+                      flex: 1,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <IconSymbol size={30} name={"qrcode"} color={"white"} />
+                  </TouchableOpacity>
+                </View>
               </View>
               <View
                 style={{
                   marginHorizontal: "auto",
                   flexDirection: "row",
-                  width: "80%",
                   marginTop: 10,
                 }}
               >
-                <View style={{ width: "50%" }}>
+                <View style={{ width: "33%" }}>
                   <Button
                     title="泥棒(生存)に変更"
                     onPress={() => {
@@ -253,7 +271,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                     }}
                   />
                 </View>
-                <View style={{ width: "50%", marginLeft: 10 }}>
+                <View style={{ width: "33%", marginLeft: 10 }}>
                   <Button
                     title="泥棒(脱落)に変更"
                     onPress={() => {
@@ -264,44 +282,81 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                     }}
                   />
                 </View>
+                <View
+                  style={{
+                    width: "33%",
+                    marginLeft: 10,
+                    backgroundColor: "green",
+                  }}
+                >
+                  <TouchableOpacity
+                    onPress={async () => {
+                      setSelectedUsers([]);
+                      try {
+                        // TODO: 先にエリアを設定しないとidが設定されず、dynamo not keyエラーが発生してしまう
+                        // idはマップコンポーネントではなくて設定画面でゲーム生成ボタンなどの押下時に格納するよう変更する
+                        await putTagGames(tagGameStore.getTagGame().toObject());
+                        tagGameStore.setIsEditTeams(true);
+                      } catch (error) {
+                        console.log("Error: ", error);
+                        throw error;
+                      }
+                    }}
+                    style={{
+                      backgroundColor: tagGameStore.getIsEditTeams()
+                        ? "green"
+                        : "red",
+                      paddingVertical: "auto",
+                      flex: 1,
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: "white",
+                        fontWeight: "bold",
+                        textAlign: "center",
+                      }}
+                    >
+                      確定
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
-            <TouchableOpacity
-              onPress={async () => {
-                setSelectedUsers([]);
-                try {
-                  // TODO: 先にエリアを設定しないとidが設定されず、dynamo not keyエラーが発生してしまう
-                  // idはマップコンポーネントではなくて設定画面でゲーム生成ボタンなどの押下時に格納するよう変更する
-                  await putTagGames(tagGameStore.getTagGame().toObject());
-                  tagGameStore.setIsEditTeams(true);
-                } catch (error) {
-                  console.log("Error: ", error);
-                  throw error;
-                }
-              }}
-              style={{
-                backgroundColor: tagGameStore.getIsEditTeams()
-                  ? "green"
-                  : "red",
-                paddingHorizontal: 24,
-                borderRadius: 8,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Text
-                style={{
-                  color: "white",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                }}
-              >
-                確定
-              </Text>
-            </TouchableOpacity>
           </View>
         </View>
       </View>
+      <ReactNativeModal style={{ margin: "auto" }} isVisible={qrVisible}>
+        <View style={{ backgroundColor: "white", width: 330, padding: 20 }}>
+          {tagGameStore.getTagGame().getId() ? (
+            <>
+              <Text style={{ fontSize: 30 }}>参加QR</Text>
+              <Text>
+                {"友達にスキャンしてもらい\nゲームに参加してもらいましょう"}
+              </Text>
+              <View style={{ alignItems: "center", marginVertical: 20 }}>
+                <QRCode size={150} value={tagGameStore.getTagGame().getId()} />
+              </View>
+            </>
+          ) : (
+            <View style={{ height: 100 }}>
+              <Text style={{ fontSize: 15 }}>
+                {
+                  "ゲームグループQRを表示するためには\nゲームをスタートしてください"
+                }
+              </Text>
+            </View>
+          )}
+          <Button
+            title="閉じる"
+            color={"red"}
+            onPress={() => {
+              setQrVisible(false);
+            }}
+          />
+        </View>
+      </ReactNativeModal>
     </View>
   );
 }

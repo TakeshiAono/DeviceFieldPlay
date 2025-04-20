@@ -1,9 +1,9 @@
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import * as Crypto from "expo-crypto";
 
 import UserStore from "@/stores/UserStore";
 import { inject, observer } from "mobx-react";
-import { Pressable, Text, View } from "react-native";
+import { View } from "react-native";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { Button } from "@rneui/themed";
 import { joinUser, putDevices, putTagGames, putUser } from "@/utils/APIs";
@@ -59,7 +59,7 @@ function ValidAreaScreen({ _userStore, _tagGameStore }: Props) {
           <Button
             type="solid"
             color={
-              !!tagGameStore.getTagGame().getIsSetValidAreaDone()
+              tagGameStore.getTagGame().getIsSetValidAreaDone()
                 ? "success"
                 : "primary"
             }
@@ -86,7 +86,7 @@ function ValidAreaScreen({ _userStore, _tagGameStore }: Props) {
             }}
           >
             <IconSymbol size={28} name={"mappin.and.ellipse"} color={"white"} />
-            {!!tagGameStore.getTagGame().getIsSetValidAreaDone()
+            {tagGameStore.getTagGame().getIsSetValidAreaDone()
               ? "エリア更新"
               : "エリア登録"}
           </Button>
