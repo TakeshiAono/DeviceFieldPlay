@@ -1,10 +1,10 @@
-import { SafeAreaView } from "react-native-safe-area-context";
-
 import { inject, observer } from "mobx-react";
 import { router } from "expo-router";
 import { View } from "react-native";
+
 import TagGameStore from "@/stores/TagGameStore";
 import UserStore from "@/stores/UserStore";
+import { putTagGames } from "@/utils/APIs";
 import { Button } from "@rneui/themed";
 
 interface Props {
@@ -12,9 +12,29 @@ interface Props {
   _tagGameStore?: TagGameStore;
 }
 
-function SettingScreen({ _userStore, _tagGameStore }: Props) {
-  const userStore = _userStore!;
+function SettingScreen({ _tagGameStore }: Props) {
   const tagGameStore = _tagGameStore!;
+
+  const gameStart = () => {
+    tagGameStore.getTagGame().setIsGameStarted(true);
+    const tagGame = tagGameStore.getTagGame().toObject();
+    putTagGames(tagGame);
+  };
+
+  const gameCancel = () => {
+    tagGameStore.getTagGame().setIsGameStarted(false);
+    const tagGame = tagGameStore.getTagGame().toObject();
+    putTagGames(tagGame);
+  };
+
+  const canGameStart = () => {
+    return (
+      tagGameStore.getTagGame().getIsSetValidAreaDone() &&
+      tagGameStore.getTagGame().getIsSetPrisonAreaDone() &&
+      tagGameStore.getIsEditTeams() &&
+      !!tagGameStore.getTagGame().getGameTimeLimit()
+    );
+  };
 
   return (
     <View
@@ -60,6 +80,24 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
           }}
         ></Button>
       </View>
+      {tagGameStore.getTagGame().getIsGameStarted() === true ? (
+        <Button
+          title={"ゲーム中止"}
+          color={"error"}
+          onPress={() => {
+            gameCancel();
+          }}
+        />
+      ) : (
+        <Button
+          title={"ゲームスタート"}
+          color={"primary"}
+          disabled={!canGameStart()}
+          onPress={() => {
+            gameStart();
+          }}
+        />
+      )}
     </View>
   );
 }

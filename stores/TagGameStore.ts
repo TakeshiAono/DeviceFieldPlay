@@ -25,6 +25,7 @@ export default class TagGameStore {
       gameMasterDeviceId: "",
       policeUsers: [],
       gameTimeLimit: null,
+      isGameStarted: null,
     });
     this.isEditTeams = false;
   }

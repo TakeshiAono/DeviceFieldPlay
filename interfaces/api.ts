@@ -15,6 +15,7 @@ export type DynamoTagGame = {
   rejectUsers: string[];
   gameMasterDeviceId: string;
   gameTimeLimit: string | null;
+  isGameStarted: boolean | null;
 };
 
 export type DynamoUser = {

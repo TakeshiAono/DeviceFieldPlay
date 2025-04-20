@@ -17,6 +17,7 @@ export default class TagGameModel {
   private prisonArea: DynamoTagGame["prisonArea"];
   private gameTimeLimit: Dayjs | null;
   private gameMasterDeviceId: DynamoTagGame["gameMasterDeviceId"];
+  private isGameStarted: DynamoTagGame["isGameStarted"];
 
   private isSetValidAreaDone: LocalTagGameModelTypes["isSetValidAreaDone"];
   private isSetPrisonAreaDone: LocalTagGameModelTypes["isSetPrisonAreaDone"];
@@ -30,6 +31,7 @@ export default class TagGameModel {
     prisonArea,
     gameMasterDeviceId,
     gameTimeLimit,
+    isGameStarted,
   }: DynamoTagGame) {
     this.id = id;
     this.liveUsers = liveUsers;
@@ -39,6 +41,7 @@ export default class TagGameModel {
     this.prisonArea = prisonArea;
     this.gameMasterDeviceId = gameMasterDeviceId;
     this.gameTimeLimit = gameTimeLimit ? dayjs(gameTimeLimit) : null;
+    this.isGameStarted = isGameStarted;
 
     this.isSetValidAreaDone = false;
     this.isSetPrisonAreaDone = false;
@@ -142,6 +145,14 @@ export default class TagGameModel {
     this.policeUsers = policeUsers;
   }
 
+  getIsGameStarted(): boolean | null {
+    return this.isGameStarted;
+  }
+
+  setIsGameStarted(isGameStarted: boolean): void {
+    this.isGameStarted = isGameStarted;
+  }
+
   isSetGame() {
     return this.id != "";
   }
@@ -156,6 +167,7 @@ export default class TagGameModel {
       gameMasterDeviceId: this.gameMasterDeviceId,
       policeUsers: this.policeUsers,
       gameTimeLimit: this.gameTimeLimit ? this.gameTimeLimit.toISOString() : "",
+      isGameStarted: this.isGameStarted,
     };
   }
 }
