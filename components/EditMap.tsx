@@ -1,9 +1,7 @@
-import { Alert, StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 import { Button } from "@rneui/themed";
 import React, { useState, useEffect } from "react";
-import QRCode from "react-native-qrcode-svg";
 import MapView, { LatLng, Polygon, Region } from "react-native-maps";
-import ReactNativeModal from "react-native-modal";
 import { booleanPointInPolygon, point, polygon } from "@turf/turf";
 import "react-native-get-random-values";
 import _ from "lodash";

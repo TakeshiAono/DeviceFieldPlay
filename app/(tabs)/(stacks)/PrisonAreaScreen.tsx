@@ -1,9 +1,9 @@
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import * as Crypto from "expo-crypto";
 
 import UserStore from "@/stores/UserStore";
 import { inject, observer } from "mobx-react";
-import { Pressable, Text, View } from "react-native";
+import { View } from "react-native";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { Button } from "@rneui/themed";
 import { joinUser, putDevices, putTagGames, putUser } from "@/utils/APIs";

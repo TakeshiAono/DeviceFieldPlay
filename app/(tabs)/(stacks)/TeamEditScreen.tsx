@@ -5,7 +5,6 @@ import * as Notifications from "expo-notifications";
 
 import UserStore from "@/stores/UserStore";
 import { inject, observer } from "mobx-react";
-import { useRouter } from "expo-router";
 import { Button, Text, TouchableOpacity, View } from "react-native";
 import { UserTypeForList } from "@/components/UserList";
 import TagGameStore from "@/stores/TagGameStore";
@@ -49,8 +48,6 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
   const [qrVisible, setQrVisible] = useState(false);
 
   const deviceId = useRef("");
-
-  const router = useRouter();
 
   Notifications.getDevicePushTokenAsync().then(({ data }) => {
     console.log("deviceId:", data);
