@@ -21,6 +21,7 @@ export default [
     },
     rules: {
       ...plugin.configs.recommended.rules,
+      "@typescript-eslint/ban-ts-comment": "off",
       "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": ["error"],
     },

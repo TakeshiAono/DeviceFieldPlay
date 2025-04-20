@@ -14,7 +14,7 @@ export type DynamoTagGame = {
   policeUsers: string[];
   rejectUsers: string[];
   gameMasterDeviceId: string;
-  gameTimeLimit: string;
+  gameTimeLimit: string | null;
 };
 
 export type DynamoUser = {

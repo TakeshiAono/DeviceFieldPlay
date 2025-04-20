@@ -1,5 +1,4 @@
 import { action, makeObservable, observable } from "mobx";
-import _ from "lodash";
 
 import { DynamoTagGame } from "@/interfaces/api";
 import TagGameModel, { LocalTagGameModelTypes } from "@/models/TagGameModel";

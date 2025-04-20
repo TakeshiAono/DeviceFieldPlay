@@ -208,6 +208,7 @@ function EditMap({
     setIsCurrentUserLive(true);
   };
 
+  // ゲームマスター以外の人(子)がゲーム情報をstoreにセットするための処理
   const setDataSettings = async ({ data: gameId }: { data: string }) => {
     // NOTE: カメラモーダルを閉じた際にtrueに戻します。
     // NOTE: QRが画面上にある限り廉造スキャンしてしまうので最初のスキャン以外は早期リターンしている
@@ -229,8 +230,11 @@ function EditMap({
       validAreas: tagGameStore.getTagGame().getValidAreas(),
       liveUsers: updatedLiveUsers.liveUsers,
       rejectUsers: [],
-      // TODO: ゲームマスターを取得できるようにしたい。現状は自分がげーむマスターでないことしかわからない
+      // TODO: ゲームマスターを取得できるようにしたい。現状は自分がゲームマスターでないことしかわからない
       gameMasterDeviceId: "",
+      prisonArea: [],
+      policeUsers: [],
+      gameTimeLimit: "",
     });
     tagGameStore.putTagGame(tagGame);
   };
