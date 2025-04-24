@@ -147,18 +147,6 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
           </>
         ) : (
           <>
-            {/* <View style={{ gap: 100, height: "80%" }}> */}
-            <Button
-              color={
-                tagGameStore.getTagGame().getIsSetValidAreaDone()
-                  ? "success"
-                  : "error"
-              }
-              title="ゲーム範囲設定"
-              onPress={() => {
-                router.push("/ValidAreaScreen");
-              }}
-            />
             <Button
               type="solid"
               onPress={() => {
@@ -167,7 +155,6 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
               title="ゲームに参加"
               icon={<IconSymbol size={28} name={"camera"} color={"white"} />}
             />
-            {/* </View> */}
             <ReactNativeModal
               style={{ margin: "auto" }}
               isVisible={cameraVisible}
