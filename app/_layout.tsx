@@ -14,10 +14,12 @@ import { Button, Text, TextInput, View } from "react-native";
 import Toast from "react-native-toast-message";
 import * as Notifications from "expo-notifications";
 import { CheckBox } from "@rneui/themed";
+import * as Crypto from "expo-crypto";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import UserStore from "@/stores/UserStore";
 import TagGameStore from "@/stores/TagGameStore";
+import { putUser } from "@/utils/APIs";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -32,6 +34,13 @@ export default function RootLayout() {
   const [userName, setUserName] = useState<string | undefined>(undefined);
   const [modalView, setModalView] = useState<boolean>(true);
   const [isGameMaster, setIsGameMaster] = useState<boolean>(false);
+
+  Notifications.getDevicePushTokenAsync().then(({ data }) => {
+    console.log("deviceId:", data);
+    stores._userStore.getCurrentUser().setDeviceId(data);
+    const id = Crypto.randomUUID();
+    stores._userStore.getCurrentUser().setId(id);
+  });
 
   useEffect(() => {
     async function registerForPushNotificationsAsync() {
@@ -106,8 +115,11 @@ export default function RootLayout() {
               onPress={async () => {
                 if (userName === undefined) return;
 
+                const gameId = Crypto.randomUUID();
+                stores._tagGameStore.getTagGame().setId(gameId);
                 setModalView(false);
                 stores._userStore.setCurrentUserName(userName);
+                await putUser(gameId, stores._userStore.getCurrentUser());
                 if (isGameMaster) {
                   stores._tagGameStore
                     .getTagGame()

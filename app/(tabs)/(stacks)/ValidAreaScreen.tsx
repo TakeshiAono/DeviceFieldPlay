@@ -30,7 +30,6 @@ function ValidAreaScreen({ _userStore, _tagGameStore }: Props) {
   const storeGameStartSetting = async (gameId: string) => {
     try {
       await joinUser(gameId, userStore.getCurrentUser().getDeviceId());
-      await putUser(gameId, userStore.getCurrentUser());
       if (!isGameStartDone.current)
         await putDevices(gameId, userStore.getCurrentUser().getDeviceId());
 
@@ -68,9 +67,6 @@ function ValidAreaScreen({ _userStore, _tagGameStore }: Props) {
             }
             onPress={async () => {
               const tagGame = tagGameStore.getTagGame();
-              if (_.isEmpty(tagGame.getId())) {
-                tagGame.setId(Crypto.randomUUID());
-              }
               if (_.isEmpty(tagGame.getGameMasterDeviceId())) {
                 tagGame.setGameMasterDeviceId(
                   userStore.getCurrentUser().getDeviceId(),
