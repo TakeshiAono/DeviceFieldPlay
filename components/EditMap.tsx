@@ -1,13 +1,11 @@
-import { Alert, StyleSheet, View } from "react-native";
-import { Button } from "@rneui/themed";
+import { Alert, StyleSheet } from "react-native";
 import React, { useState } from "react";
 import MapView, { LatLng, Polygon, Region } from "react-native-maps";
 import { booleanPointInPolygon, point, polygon } from "@turf/turf";
 import "react-native-get-random-values";
 import { inject, observer } from "mobx-react";
 
-import { rejectUser, reviveUser } from "@/utils/APIs";
-import { IconSymbol } from "@/components/ui/IconSymbol";
+import { rejectUser } from "@/utils/APIs";
 import UserStore from "@/stores/UserStore";
 import TagGameStore from "@/stores/TagGameStore";
 
@@ -85,76 +83,6 @@ function EditMap({
 
   return (
     <>
-      <View style={{ position: "absolute", top: 150, right: 5, zIndex: 1 }}>
-        <View style={{ display: "flex", gap: 5 }}>
-          <Button
-            type="solid"
-            color={isCurrentUserLive ? "gray" : "success"}
-            onPress={
-              isCurrentUserLive
-                ? undefined
-                : () => {
-                    Alert.alert("復活", "復活してもよいですか？", [
-                      { text: "Cancel", onPress: undefined },
-                      {
-                        text: "OK",
-                        onPress: async () => {
-                          if (!userStore.getCurrentUser().getDeviceId()) return;
-
-                          try {
-                            await reviveUser(
-                              tagGameStore.getTagGame().getId(),
-                              userStore.getCurrentUser().getDeviceId(),
-                            );
-                            setIsCurrentUserLive(true);
-                          } catch (error) {
-                            console.error(error);
-                          }
-                        },
-                      },
-                    ]);
-                  }
-            }
-          >
-            <IconSymbol size={28} name={"person.badge.plus"} color={"white"} />
-          </Button>
-          <Button
-            type="solid"
-            color={
-              !isCurrentUserLive || !tagGameStore.getTagGame().getId()
-                ? "gray"
-                : "error"
-            }
-            onPress={
-              !isCurrentUserLive || !tagGameStore.getTagGame().getId()
-                ? undefined
-                : () => {
-                    Alert.alert("脱落", "脱落してもよいですか？", [
-                      { text: "Cancel", onPress: undefined },
-                      {
-                        text: "OK",
-                        onPress: async () => {
-                          if (!userStore.getCurrentUser().getDeviceId()) return;
-
-                          try {
-                            await rejectUser(
-                              tagGameStore.getTagGame().getId(),
-                              userStore.getCurrentUser().getDeviceId(),
-                            );
-                            setIsCurrentUserLive(false);
-                          } catch (error) {
-                            console.error(error);
-                          }
-                        },
-                      },
-                    ]);
-                  }
-            }
-          >
-            <IconSymbol size={28} name={"person.badge.minus"} color={"white"} />
-          </Button>
-        </View>
-      </View>
       {mapVisible && (
         <MapView
           style={styles.map}
