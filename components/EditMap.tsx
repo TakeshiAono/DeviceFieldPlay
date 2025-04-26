@@ -1,15 +1,12 @@
 import { Alert, StyleSheet, View } from "react-native";
 import { Button } from "@rneui/themed";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import MapView, { LatLng, Polygon, Region } from "react-native-maps";
 import { booleanPointInPolygon, point, polygon } from "@turf/turf";
 import "react-native-get-random-values";
-import _ from "lodash";
 import { inject, observer } from "mobx-react";
-import Toast from "react-native-toast-message";
-import * as Notifications from "expo-notifications";
 
-import { getTagGames, rejectUser, reviveUser } from "@/utils/APIs";
+import { rejectUser, reviveUser } from "@/utils/APIs";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import UserStore from "@/stores/UserStore";
 import TagGameStore from "@/stores/TagGameStore";
@@ -49,113 +46,6 @@ function EditMap({
   const [isFirstUpdate, setIsFirstUpdate] = useState(true);
   const [isCurrentUserLive, setIsCurrentUserLive] = useState(true);
 
-  useEffect(() => {
-    const gameId = tagGameStore.getTagGame().getId();
-    // TODO: このブロックの処理が新規作成時と更新時両方で発火し複雑なためリファクタリングが必要
-    if (_.isEmpty(gameId)) return;
-
-    // ゲーム有効エリア変更時の通知を受け取って自分の持っているエリア情報を更新する
-    const changeValidAreaNotificationListener =
-      Notifications.addNotificationReceivedListener(async (notification) => {
-        if (
-          notification.request.content.data.notification_type !==
-          "changeValidArea"
-        )
-          return;
-        console.log("ゲームエリア変更push通知", notification.request.content);
-
-        Toast.show({
-          type: "info",
-          text1: notification.request.content.title as string,
-          text2: notification.request.content.body as string,
-        });
-
-        try {
-          const tagGame = await getTagGames(gameId);
-          tagGameStore.putValidArea(tagGame.validAreas);
-        } catch (error) {
-          console.error("Error: ", error);
-        }
-      });
-
-    // 監獄エリア変更時の通知を受け取って自分の持っているエリア情報を更新する
-    const changePrisonAreaNotificationListener =
-      Notifications.addNotificationReceivedListener(async (notification) => {
-        if (
-          notification.request.content.data.notification_type !==
-          "changePrisonArea"
-        )
-          return;
-        console.log("監獄エリア変更push通知", notification.request.content);
-
-        Toast.show({
-          type: "info",
-          text1: notification.request.content.title as string,
-          text2: notification.request.content.body as string,
-        });
-
-        try {
-          const tagGame = await getTagGames(gameId);
-          tagGameStore.putPrisonArea(tagGame.prisonArea);
-        } catch (error) {
-          console.error("Error: ", error);
-        }
-      });
-
-    const rejectUserNotificationListener =
-      Notifications.addNotificationReceivedListener(async (notification) => {
-        if (
-          notification.request.content.data.notification_type !== "rejectUser"
-        )
-          return;
-        console.log("脱落push通知", notification.request.content);
-
-        Toast.show({
-          type: "error",
-          text1: notification.request.content.title as string,
-          text2: notification.request.content.body as string,
-        });
-
-        try {
-          const tagGame = await getTagGames(gameId);
-          tagGameStore.putRejectUsers(tagGame.rejectUsers);
-        } catch (error) {
-          console.error("Error: ", error);
-        }
-      });
-
-    const reviveUserNotificationListener =
-      Notifications.addNotificationReceivedListener(async (notification) => {
-        if (
-          notification.request.content.data.notification_type !== "reviveUser"
-        )
-          return;
-        console.log("復活push通知", notification.request.content);
-
-        Toast.show({
-          type: "success",
-          text1: notification.request.content.title as string,
-          text2: notification.request.content.body as string,
-        });
-
-        try {
-          const tagGame = await getTagGames(gameId);
-          tagGameStore.putLiveUsers(tagGame.liveUsers);
-        } catch (error) {
-          console.error("Error: ", error);
-        }
-      });
-
-    gameStart();
-    // gameIdが変わるたびに別のゲームのエリアで更新されてしまわないよう、イベントリスナーを削除し新規のイベントリスナーを生成する。
-    return () => {
-      changeValidAreaNotificationListener.remove();
-      changePrisonAreaNotificationListener.remove();
-      rejectUserNotificationListener.remove();
-      reviveUserNotificationListener.remove();
-    };
-  }, [tagGameStore.getTagGame().getId()]);
-
   const onChangeCurrentPosition = async (position: [longitude, latitude]) => {
     if (
       points.length === 0 ||
@@ -187,12 +77,6 @@ function EditMap({
         { text: "OK" },
       ]);
     }
-  };
-
-  const gameStart = () => {
-    // TODO: ゲームスタート時はエリアの中にいることが前提なので、エリア外にいる場合は警告を出す
-    // TODO: 初期値はtrueだが念のため代入する
-    setIsCurrentUserLive(true);
   };
 
   const isGameMaster = () => {

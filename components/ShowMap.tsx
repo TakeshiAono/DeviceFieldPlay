@@ -6,14 +6,19 @@ import { booleanPointInPolygon, point, polygon } from "@turf/turf";
 import "react-native-get-random-values";
 import _ from "lodash";
 import { inject, observer } from "mobx-react";
-import Toast from "react-native-toast-message";
 import * as Notifications from "expo-notifications";
 
-import { getTagGames, rejectUser, reviveUser } from "@/utils/APIs";
+import { rejectUser, reviveUser } from "@/utils/APIs";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import UserStore from "@/stores/UserStore";
 import TagGameStore from "@/stores/TagGameStore";
 import { initialJapanRegion } from "./EditMap";
+import {
+  liveUserNotificationHandler,
+  prisonAreaNotificationHandler,
+  rejectUserNotificationHandler,
+  validAreaNotificationHandler,
+} from "@/utils/Notifications";
 
 export type Props = {
   mapVisible?: boolean;
@@ -51,94 +56,24 @@ function ShowMap({
 
     // ゲーム有効エリア変更時の通知を受け取って自分の持っているエリア情報を更新する
     const changeValidAreaNotificationListener =
-      Notifications.addNotificationReceivedListener(async (notification) => {
-        if (
-          notification.request.content.data.notification_type !==
-          "changeValidArea"
-        )
-          return;
-        console.log("ゲームエリア変更push通知", notification.request.content);
-
-        Toast.show({
-          type: "info",
-          text1: notification.request.content.title as string,
-          text2: notification.request.content.body as string,
-        });
-
-        try {
-          const tagGame = await getTagGames(gameId);
-          tagGameStore.putValidArea(tagGame.validAreas);
-        } catch (error) {
-          console.error("Error: ", error);
-        }
+      Notifications.addNotificationReceivedListener((event) => {
+        validAreaNotificationHandler(event, gameId, tagGameStore);
       });
 
     // 監獄エリア変更時の通知を受け取って自分の持っているエリア情報を更新する
     const changePrisonAreaNotificationListener =
-      Notifications.addNotificationReceivedListener(async (notification) => {
-        if (
-          notification.request.content.data.notification_type !==
-          "changePrisonArea"
-        )
-          return;
-        console.log("監獄エリア変更push通知", notification.request.content);
-
-        Toast.show({
-          type: "info",
-          text1: notification.request.content.title as string,
-          text2: notification.request.content.body as string,
-        });
-
-        try {
-          const tagGame = await getTagGames(gameId);
-          tagGameStore.putPrisonArea(tagGame.prisonArea);
-        } catch (error) {
-          console.error("Error: ", error);
-        }
+      Notifications.addNotificationReceivedListener((event) => {
+        prisonAreaNotificationHandler(event, gameId, tagGameStore);
       });
 
     const rejectUserNotificationListener =
-      Notifications.addNotificationReceivedListener(async (notification) => {
-        if (
-          notification.request.content.data.notification_type !== "rejectUser"
-        )
-          return;
-        console.log("脱落push通知", notification.request.content);
-
-        Toast.show({
-          type: "error",
-          text1: notification.request.content.title as string,
-          text2: notification.request.content.body as string,
-        });
-
-        try {
-          const tagGame = await getTagGames(gameId);
-          tagGameStore.putRejectUsers(tagGame.rejectUsers);
-        } catch (error) {
-          console.error("Error: ", error);
-        }
+      Notifications.addNotificationReceivedListener((event) => {
+        rejectUserNotificationHandler(event, gameId, tagGameStore);
       });
 
     const reviveUserNotificationListener =
-      Notifications.addNotificationReceivedListener(async (notification) => {
-        if (
-          notification.request.content.data.notification_type !== "reviveUser"
-        )
-          return;
-        console.log("復活push通知", notification.request.content);
-
-        Toast.show({
-          type: "success",
-          text1: notification.request.content.title as string,
-          text2: notification.request.content.body as string,
-        });
-
-        try {
-          const tagGame = await getTagGames(gameId);
-          tagGameStore.putLiveUsers(tagGame.liveUsers);
-        } catch (error) {
-          console.error("Error: ", error);
-        }
+      Notifications.addNotificationReceivedListener((event) => {
+        liveUserNotificationHandler(event, gameId, tagGameStore);
       });
 
     // gameIdが変わるたびに別のゲームのエリアで更新されてしまわないよう、イベントリスナーを削除し新規のイベントリスナーを生成する。
