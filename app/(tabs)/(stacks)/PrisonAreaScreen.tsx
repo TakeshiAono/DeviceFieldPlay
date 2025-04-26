@@ -1,12 +1,11 @@
 import { useRef } from "react";
-import * as Crypto from "expo-crypto";
 
 import UserStore from "@/stores/UserStore";
 import { inject, observer } from "mobx-react";
 import { View } from "react-native";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { Button } from "@rneui/themed";
-import { joinUser, putDevices, putTagGames, putUser } from "@/utils/APIs";
+import { joinUser, putDevices, putTagGames } from "@/utils/APIs";
 import TagGameStore from "@/stores/TagGameStore";
 import _ from "lodash";
 import { PrisonAreaEditMap } from "@/components/PrisonAreaEditMap";
@@ -28,7 +27,7 @@ function PrisonAreaScreen({ _userStore, _tagGameStore }: Props) {
 
   const storeGameStartSetting = async (gameId: string) => {
     try {
-      await joinUser(gameId, userStore.getCurrentUser().getDeviceId());
+      await joinUser(gameId, userStore.getCurrentUser().getId());
       if (!isGameStartDone.current)
         await putDevices(gameId, userStore.getCurrentUser().getDeviceId());
 
@@ -66,10 +65,8 @@ function PrisonAreaScreen({ _userStore, _tagGameStore }: Props) {
             }
             onPress={async () => {
               const tagGame = tagGameStore.getTagGame();
-              if (_.isEmpty(tagGame.getGameMasterDeviceId())) {
-                tagGame.setGameMasterDeviceId(
-                  userStore.getCurrentUser().getDeviceId(),
-                );
+              if (_.isEmpty(tagGame.getGameMasterId())) {
+                tagGame.setGameMasterId(userStore.getCurrentUser().getId());
               }
 
               await putTagGames(tagGame.toObject());

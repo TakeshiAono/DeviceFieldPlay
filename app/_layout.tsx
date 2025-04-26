@@ -123,8 +123,8 @@ export default function RootLayout() {
                 if (isGameMaster) {
                   stores._tagGameStore
                     .getTagGame()
-                    .setGameMasterDeviceId(
-                      stores._userStore.getCurrentUser().getDeviceId(),
+                    .setGameMasterId(
+                      stores._userStore.getCurrentUser().getId(),
                     );
                 }
               }}

@@ -144,7 +144,7 @@ function ShowMap({
                           try {
                             await reviveUser(
                               tagGameStore.getTagGame().getId(),
-                              userStore.getCurrentUser().getDeviceId(),
+                              userStore.getCurrentUser().getId(),
                             );
                             setIsCurrentUserLive(true);
                           } catch (error) {
@@ -179,7 +179,7 @@ function ShowMap({
                           try {
                             await rejectUser(
                               tagGameStore.getTagGame().getId(),
-                              userStore.getCurrentUser().getDeviceId(),
+                              userStore.getCurrentUser().getId(),
                             );
                             setIsCurrentUserLive(false);
                           } catch (error) {

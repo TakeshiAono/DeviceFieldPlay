@@ -51,7 +51,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
 
     const updatedLiveUsers = await joinUser(
       gameId,
-      userStore.getCurrentUser().getDeviceId(),
+      userStore.getCurrentUser().getId(),
     );
 
     const tagGame = new TagGameModel({
@@ -60,7 +60,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
       liveUsers: updatedLiveUsers.liveUsers,
       rejectUsers: [],
       // TODO: ゲームマスターを取得できるようにしたい。現状は自分がゲームマスターでないことしかわからない
-      gameMasterDeviceId: "",
+      gameMasterId: "",
       prisonArea: [],
       policeUsers: [],
       gameTimeLimit: "",

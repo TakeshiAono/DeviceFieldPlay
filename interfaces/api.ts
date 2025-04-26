@@ -13,14 +13,13 @@ export type DynamoTagGame = {
   liveUsers: string[];
   policeUsers: string[];
   rejectUsers: string[];
-  gameMasterDeviceId: string;
+  gameMasterId: string;
   gameTimeLimit: string | null;
   isGameStarted: boolean | null;
 };
 
 export type DynamoUser = {
   gameId: GameId;
-  deviceId: string;
   name: string;
   userId: string;
 };

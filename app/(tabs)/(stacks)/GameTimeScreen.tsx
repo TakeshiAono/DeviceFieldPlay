@@ -5,7 +5,6 @@ import { TimerPickerModal } from "react-native-timer-picker";
 import { Button } from "@rneui/themed";
 import dayjs from "dayjs";
 
-import UserStore from "@/stores/UserStore";
 import TagGameStore from "@/stores/TagGameStore";
 
 interface Props {

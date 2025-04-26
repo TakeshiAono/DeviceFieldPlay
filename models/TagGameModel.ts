@@ -16,7 +16,7 @@ export default class TagGameModel {
   private validAreas: DynamoTagGame["validAreas"];
   private prisonArea: DynamoTagGame["prisonArea"];
   private gameTimeLimit: Dayjs | null;
-  private gameMasterDeviceId: DynamoTagGame["gameMasterDeviceId"];
+  private gameMasterId: DynamoTagGame["gameMasterId"];
   private isGameStarted: DynamoTagGame["isGameStarted"];
 
   private isSetValidAreaDone: LocalTagGameModelTypes["isSetValidAreaDone"];
@@ -29,7 +29,7 @@ export default class TagGameModel {
     policeUsers,
     validAreas,
     prisonArea,
-    gameMasterDeviceId,
+    gameMasterId,
     gameTimeLimit,
     isGameStarted,
   }: DynamoTagGame) {
@@ -39,7 +39,7 @@ export default class TagGameModel {
     this.policeUsers = policeUsers;
     this.validAreas = validAreas;
     this.prisonArea = prisonArea;
-    this.gameMasterDeviceId = gameMasterDeviceId;
+    this.gameMasterId = gameMasterId;
     this.gameTimeLimit = gameTimeLimit ? dayjs(gameTimeLimit) : null;
     this.isGameStarted = isGameStarted;
 
@@ -95,14 +95,12 @@ export default class TagGameModel {
   }
 
   // gameMasterDeviceId
-  getGameMasterDeviceId(): DynamoTagGame["gameMasterDeviceId"] {
-    return this.gameMasterDeviceId;
+  getGameMasterId(): DynamoTagGame["gameMasterId"] {
+    return this.gameMasterId;
   }
 
-  setGameMasterDeviceId(
-    gameMasterDeviceId: DynamoTagGame["gameMasterDeviceId"],
-  ): void {
-    this.gameMasterDeviceId = gameMasterDeviceId;
+  setGameMasterId(gameMasterId: DynamoTagGame["gameMasterId"]): void {
+    this.gameMasterId = gameMasterId;
   }
 
   // gameTimeLimit
@@ -164,7 +162,7 @@ export default class TagGameModel {
       rejectUsers: toJS(this.rejectUsers) ?? [],
       validAreas: toJS(this.validAreas),
       prisonArea: toJS(this.prisonArea),
-      gameMasterDeviceId: this.gameMasterDeviceId,
+      gameMasterId: this.gameMasterId,
       policeUsers: this.policeUsers,
       gameTimeLimit: this.gameTimeLimit ? this.gameTimeLimit.toISOString() : "",
       isGameStarted: this.isGameStarted,

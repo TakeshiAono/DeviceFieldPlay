@@ -46,6 +46,6 @@ export default class UserModel {
   }
 
   isCurrentGameMaster(targetTagGame: TagGameModel) {
-    return this.deviceId === targetTagGame.getGameMasterDeviceId();
+    return this.id === targetTagGame.getGameMasterId();
   }
 }
