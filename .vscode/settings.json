@@ -2,5 +2,5 @@
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "prettier.prettierPath": "./node_modules/prettier",
-  "cSpell.words": ["forwardslash", "qrcode"]
+  "cSpell.words": ["devicefieldplay", "forwardslash", "qrcode"]
 }
