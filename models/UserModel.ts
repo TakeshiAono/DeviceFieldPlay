@@ -1,10 +1,12 @@
 import { makeAutoObservable } from "mobx";
 
 import TagGameModel from "./TagGameModel";
+import { UserTypeForList } from "@/components/UserList";
 
 type Props = {
   id: string;
   name: string;
+  // TODO: deviceIdはデバイス側では使わないので削除する
   deviceId: string;
 };
 
@@ -47,5 +49,13 @@ export default class UserModel {
 
   isCurrentGameMaster(targetTagGame: TagGameModel) {
     return this.id === targetTagGame.getGameMasterId();
+  }
+
+  static convertListTypeUserToUserModel(listTypeUser: UserTypeForList) {
+    return new UserModel({
+      id: listTypeUser.id,
+      name: listTypeUser.name,
+      deviceId: "",
+    });
   }
 }

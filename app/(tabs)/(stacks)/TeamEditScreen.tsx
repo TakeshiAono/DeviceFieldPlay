@@ -15,6 +15,7 @@ import { putTagGames } from "@/utils/APIs";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import ReactNativeModal from "react-native-modal";
 import QRCode from "react-native-qrcode-svg";
+import UserModel from "@/models/UserModel";
 
 interface Props {
   _userStore?: UserStore;
@@ -25,12 +26,14 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
   const userStore = _userStore!;
   const tagGameStore = _tagGameStore!;
 
-  const formatForListData = (users: string[]) => {
-    return users.map((user, index) => ({
-      id: String(index),
-      name: user,
-      checked: false,
-    }));
+  const formatForListData = (users: UserModel[]) => {
+    return users.map((user) => {
+      return {
+        id: user.getId(),
+        name: user.getName(),
+        checked: false,
+      };
+    });
   };
 
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
@@ -44,7 +47,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
   );
   const [rejectUsersForList, setRejectUsersForList] = useState<
     UserTypeForList[]
-  >(formatForListData(tagGameStore.getTagGame().getRejectUsers() ?? []));
+  >(formatForListData(tagGameStore.getTagGame().getRejectUsers()));
   const [qrVisible, setQrVisible] = useState(false);
 
   const deviceId = useRef("");
@@ -216,7 +219,9 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                     title="追放"
                     onPress={() => {
                       tagGameStore.kickOutUsers(
-                        selectedUsers.map((user) => user.name),
+                        selectedUsers.map(
+                          UserModel.convertListTypeUserToUserModel,
+                        ),
                       );
                       setSelectedUsers([]);
                     }}
@@ -227,7 +232,9 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                     title="警察へ変更"
                     onPress={() => {
                       tagGameStore.changeToPolice(
-                        selectedUsers.map((user) => user.name),
+                        selectedUsers.map(
+                          UserModel.convertListTypeUserToUserModel,
+                        ),
                       );
                       setSelectedUsers([]);
                     }}
@@ -262,7 +269,9 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                     title="泥棒(生存)に変更"
                     onPress={() => {
                       tagGameStore.changeToLiveThief(
-                        selectedUsers.map((user) => user.name),
+                        selectedUsers.map(
+                          UserModel.convertListTypeUserToUserModel,
+                        ),
                       );
                       setSelectedUsers([]);
                     }}
@@ -273,7 +282,9 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                     title="泥棒(脱落)に変更"
                     onPress={() => {
                       tagGameStore.changeToRejectThief(
-                        selectedUsers.map((user) => user.name),
+                        selectedUsers.map(
+                          UserModel.convertListTypeUserToUserModel,
+                        ),
                       );
                       setSelectedUsers([]);
                     }}
