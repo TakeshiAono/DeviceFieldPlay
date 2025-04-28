@@ -67,7 +67,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
       prisonArea: [],
       policeUsers: [],
       gameTimeLimit: "",
-      isGameStarted: null,
+      isGameStarted: false,
     });
     tagGameStore.putTagGame(tagGame);
   };
