@@ -48,6 +48,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
     setCameraVisible(false);
     tagGameStore.getTagGame().setId(gameId);
     await patchDevices(gameId, userStore.getCurrentUser().getDeviceId());
+    await putUser(gameId, userStore.getCurrentUser());
 
     const updatedLiveUsers = await joinUser(
       gameId,
