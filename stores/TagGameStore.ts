@@ -198,4 +198,8 @@ export default class TagGameStore {
   public getTagGame() {
     return this.currentTagGame;
   }
+
+  public belongingGameGroup(gameId: string) {
+    return this.currentTagGame.getId() == gameId;
+  }
 }

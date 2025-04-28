@@ -39,6 +39,8 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
 
   // ゲームマスター以外の人(子)がゲーム情報をstoreにセットするための処理
   const setDataSettings = async ({ data: gameId }: { data: string }) => {
+    if (!tagGameStore.belongingGameGroup(gameId)) firstScan.current = true;
+
     // NOTE: カメラモーダルを閉じた際にtrueに戻します。
     // NOTE: QRが画面上にある限り廉造スキャンしてしまうので最初のスキャン以外は早期リターンしている
     if (!firstScan.current || !userStore.getCurrentUser().getDeviceId()) return;
