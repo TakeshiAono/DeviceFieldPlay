@@ -168,6 +168,17 @@ export default class TagGameStore {
     this.putPoliceUsers(filteredUsers);
   }
 
+  @action
+  public putAllUsers(usersLists: {
+    liveUsers: UserModel[];
+    policeUsers: UserModel[];
+    rejectUsers: UserModel[];
+  }) {
+    this.putLiveUsers(usersLists.liveUsers);
+    this.putRejectUsers(usersLists.rejectUsers);
+    this.putPoliceUsers(usersLists.policeUsers);
+  }
+
   /**
    * thiefUsersとpoliceUsers両方から該当ユーザを除外し、ゲームから追放する
    * @param user

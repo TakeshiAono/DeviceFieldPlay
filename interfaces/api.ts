@@ -6,17 +6,20 @@ export type Marker = {
   longitude: number;
 };
 
+export type UserLists = {
+  liveUsers: string[];
+  policeUsers: string[];
+  rejectUsers: string[];
+};
+
 export type DynamoTagGame = {
   id: GameId;
   validAreas: Marker[];
   prisonArea: Marker[];
-  liveUsers: string[];
-  policeUsers: string[];
-  rejectUsers: string[];
   gameMasterId: string;
   gameTimeLimit: string | null;
   isGameStarted: boolean | null;
-};
+} & UserLists;
 
 export type DynamoUser = {
   gameId: GameId;

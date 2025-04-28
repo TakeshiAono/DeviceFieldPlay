@@ -5,7 +5,7 @@ import ReactNativeModal from "react-native-modal";
 
 import TagGameStore from "@/stores/TagGameStore";
 import UserStore from "@/stores/UserStore";
-import { joinUser, patchDevices, putTagGames } from "@/utils/APIs";
+import { joinUser, patchDevices, putTagGames, putUser } from "@/utils/APIs";
 import { Button } from "@rneui/themed";
 import { useRef, useState } from "react";
 import { CameraView } from "expo-camera";

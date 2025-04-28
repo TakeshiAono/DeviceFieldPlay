@@ -14,6 +14,8 @@ import UserStore from "@/stores/UserStore";
 import TagGameStore from "@/stores/TagGameStore";
 import { initialJapanRegion } from "./EditMap";
 import {
+  joinUserNotificationHandler,
+  kickOutUsersNotificationHandler,
   liveUserNotificationHandler,
   prisonAreaNotificationHandler,
   rejectUserNotificationHandler,
@@ -54,6 +56,16 @@ function ShowMap({
     // TODO: このブロックの処理が新規作成時と更新時両方で発火し複雑なためリファクタリングが必要
     if (_.isEmpty(gameId)) return;
 
+    const joinUserNotificationListener =
+      Notifications.addNotificationReceivedListener((event) => {
+        joinUserNotificationHandler(event, gameId, tagGameStore, userStore);
+      });
+
+    const kickOutUsersNotificationListener =
+      Notifications.addNotificationReceivedListener((event) => {
+        kickOutUsersNotificationHandler(event, gameId, tagGameStore);
+      });
+
     // ゲーム有効エリア変更時の通知を受け取って自分の持っているエリア情報を更新する
     const changeValidAreaNotificationListener =
       Notifications.addNotificationReceivedListener((event) => {
@@ -78,6 +90,8 @@ function ShowMap({
 
     // gameIdが変わるたびに別のゲームのエリアで更新されてしまわないよう、イベントリスナーを削除し新規のイベントリスナーを生成する。
     return () => {
+      joinUserNotificationListener.remove();
+      kickOutUsersNotificationListener.remove();
       changeValidAreaNotificationListener.remove();
       changePrisonAreaNotificationListener.remove();
       rejectUserNotificationListener.remove();
