@@ -26,7 +26,7 @@ export default class TagGameStore {
       prisonArea: [],
       gameMasterId: "",
       gameTimeLimit: null,
-      isGameStarted: null,
+      isGameStarted: false,
     });
     this.isEditTeams = false;
   }

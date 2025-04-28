@@ -1,11 +1,10 @@
 import TagGameStore from "@/stores/TagGameStore";
 import * as Notifications from "expo-notifications";
 import Toast from "react-native-toast-message";
+import dayjs from "dayjs";
 
 import { getCurrentGameUsersInfo, getTagGames } from "./APIs";
-import UserStore from "@/stores/UserStore";
-import UserModel from "@/models/UserModel";
-import { DynamoUser } from "@/interfaces/api";
+import { DynamoTagGame, DynamoUser } from "@/interfaces/api";
 
 export const prisonAreaNotificationHandler = async (
   notification: Notifications.Notification,
@@ -116,6 +115,53 @@ export const kickOutUsersNotificationHandler = async (
   }
 };
 
+export const gameStartNotificationHandler = async (
+  notification: Notifications.Notification,
+  gameId: string,
+  tagGameStore: TagGameStore,
+) => {
+  if (notification.request.content.data.notification_type !== "gameStart")
+    return;
+  console.log("ゲームスタートpush通知", notification.request.content);
+
+  Toast.show({
+    type: "success",
+    text1: notification.request.content.title as string,
+    text2: notification.request.content.body as string,
+  });
+
+  try {
+    const tagGame = await getTagGames(gameId);
+    const gameUsers = await getCurrentGameUsersInfo(gameId);
+    asyncDynamoTagGameAllProperties(tagGameStore, tagGame, gameUsers);
+  } catch (error) {
+    console.error("Error: ", error);
+  }
+};
+
+export const gameStopNotificationHandler = async (
+  notification: Notifications.Notification,
+  gameId: string,
+  tagGameStore: TagGameStore,
+) => {
+  if (notification.request.content.data.notification_type !== "gameEnd") return;
+  console.log("ゲーム終了push通知", notification.request.content);
+
+  Toast.show({
+    type: "error",
+    text1: notification.request.content.title as string,
+    text2: notification.request.content.body as string,
+  });
+
+  try {
+    const tagGame = await getTagGames(gameId);
+    const gameUsers = await getCurrentGameUsersInfo(gameId);
+    asyncDynamoTagGameAllProperties(tagGameStore, tagGame, gameUsers);
+  } catch (error) {
+    console.error("Error: ", error);
+  }
+};
+
 export const rejectUserNotificationHandler = async (
   notification: Notifications.Notification,
   gameId: string,
@@ -166,4 +212,27 @@ export const liveUserNotificationHandler = async (
   } catch (error) {
     console.error("Error: ", error);
   }
+};
+
+const asyncDynamoTagGameAllProperties = (
+  tagGameStore: TagGameStore,
+  tagGame: DynamoTagGame,
+  gameUsers: DynamoUser[],
+) => {
+  tagGameStore.putAllUsers({
+    liveUsers: TagGameStore.convertUserInstances(gameUsers, tagGame.liveUsers),
+    policeUsers: TagGameStore.convertUserInstances(
+      gameUsers,
+      tagGame.policeUsers,
+    ),
+    rejectUsers: TagGameStore.convertUserInstances(
+      gameUsers,
+      tagGame.rejectUsers,
+    ),
+  });
+  tagGameStore.putValidArea(tagGame.validAreas);
+  tagGameStore.putPrisonArea(tagGame.prisonArea);
+  tagGameStore.getTagGame().setGameMasterId(tagGame.gameMasterId);
+  tagGameStore.getTagGame().setGameTimeLimit(dayjs(tagGame.gameTimeLimit));
+  tagGameStore.getTagGame().setIsGameStarted(tagGame.isGameStarted);
 };

@@ -14,6 +14,8 @@ import UserStore from "@/stores/UserStore";
 import TagGameStore from "@/stores/TagGameStore";
 import { initialJapanRegion } from "./EditMap";
 import {
+  gameStartNotificationHandler,
+  gameStopNotificationHandler,
   joinUserNotificationHandler,
   kickOutUsersNotificationHandler,
   liveUserNotificationHandler,
@@ -88,6 +90,16 @@ function ShowMap({
         liveUserNotificationHandler(event, gameId, tagGameStore);
       });
 
+    const gameStartNotificationListener =
+      Notifications.addNotificationReceivedListener((event) => {
+        gameStartNotificationHandler(event, gameId, tagGameStore);
+      });
+
+    const gameStopNotificationListener =
+      Notifications.addNotificationReceivedListener((event) => {
+        gameStopNotificationHandler(event, gameId, tagGameStore);
+      });
+
     // gameIdが変わるたびに別のゲームのエリアで更新されてしまわないよう、イベントリスナーを削除し新規のイベントリスナーを生成する。
     return () => {
       joinUserNotificationListener.remove();
@@ -96,6 +108,8 @@ function ShowMap({
       changePrisonAreaNotificationListener.remove();
       rejectUserNotificationListener.remove();
       reviveUserNotificationListener.remove();
+      gameStartNotificationListener.remove();
+      gameStopNotificationListener.remove();
     };
   }, [tagGameStore.getTagGame().getId()]);
 
