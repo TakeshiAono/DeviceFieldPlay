@@ -1,10 +1,11 @@
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
 import {
   PutCommand,
   DynamoDBDocumentClient,
   GetCommand,
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
+import { unmarshall } from "@aws-sdk/util-dynamodb";
 
 import Constants from "expo-constants";
 import { Platform } from "react-native";
@@ -83,6 +84,29 @@ export const joinUser = async <T extends DynamoTagGame>(
     return response.Attributes as Pick<T, "liveUsers">;
   } catch (error) {
     console.error("joinUser:", error);
+    throw error;
+  }
+};
+
+export const getCurrentGameUsersInfo = async <T extends DynamoUser>(
+  gameId: T["gameId"],
+): Promise<T[]> => {
+  try {
+    const command = new ScanCommand({
+      TableName: "users",
+      FilterExpression: "gameId = :gameId",
+      ExpressionAttributeValues: {
+        ":gameId": { S: gameId },
+      },
+    });
+
+    const response = await docClient.send(command);
+    console.log("getCurrentGameUsersInfo:", response);
+
+    const items = response.Items?.map((item) => unmarshall(item) as T) ?? [];
+    return items;
+  } catch (error) {
+    console.error("getCurrentGameUsersInfo:", error);
     throw error;
   }
 };
