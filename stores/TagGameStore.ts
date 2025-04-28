@@ -22,7 +22,7 @@ export default class TagGameStore {
       rejectUsers: [],
       validAreas: [],
       prisonArea: [],
-      gameMasterDeviceId: "",
+      gameMasterId: "",
       policeUsers: [],
       gameTimeLimit: null,
       isGameStarted: null,

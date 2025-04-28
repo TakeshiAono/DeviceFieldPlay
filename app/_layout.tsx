@@ -29,18 +29,19 @@ const stores = {
   _tagGameStore: new TagGameStore(),
 };
 
+const id = Crypto.randomUUID();
+
+Notifications.getDevicePushTokenAsync().then(({ data }) => {
+  console.log("deviceId:", data);
+  stores._userStore.getCurrentUser().setDeviceId(data);
+});
+stores._userStore.getCurrentUser().setId(id);
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [userName, setUserName] = useState<string | undefined>(undefined);
   const [modalView, setModalView] = useState<boolean>(true);
   const [isGameMaster, setIsGameMaster] = useState<boolean>(false);
-
-  Notifications.getDevicePushTokenAsync().then(({ data }) => {
-    console.log("deviceId:", data);
-    stores._userStore.getCurrentUser().setDeviceId(data);
-    const id = Crypto.randomUUID();
-    stores._userStore.getCurrentUser().setId(id);
-  });
 
   useEffect(() => {
     async function registerForPushNotificationsAsync() {
@@ -59,16 +60,6 @@ export default function RootLayout() {
 
     registerForPushNotificationsAsync();
   }, []);
-
-  // useEffect(() => {
-  //   if (loaded) {
-  //     SplashScreen.hideAsync();
-  //   }
-  // }, [loaded]);
-
-  // if (!loaded) {
-  //   return null;
-  // }
 
   return (
     <Provider {...stores}>
