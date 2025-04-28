@@ -42,7 +42,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
     if (!tagGameStore.belongingGameGroup(gameId)) firstScan.current = true;
 
     // NOTE: カメラモーダルを閉じた際にtrueに戻します。
-    // NOTE: QRが画面上にある限り廉造スキャンしてしまうので最初のスキャン以外は早期リターンしている
+    // NOTE: QRが画面上にある限り連続スキャンしてしまうので最初のスキャン以外は早期リターンしている
     if (!firstScan.current || !userStore.getCurrentUser().getDeviceId()) return;
 
     firstScan.current = false;
