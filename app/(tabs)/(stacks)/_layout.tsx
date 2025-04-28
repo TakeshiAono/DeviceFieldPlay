@@ -21,6 +21,10 @@ export default function Layout() {
         options={{ title: "刑務所範囲設定" }}
       />
       <Stack.Screen name="TeamEditScreen" options={{ title: "チーム設定" }} />
+      <Stack.Screen
+        name="GameTimeScreen"
+        options={{ title: "ゲーム時間設定" }}
+      />
     </Stack>
   );
 }

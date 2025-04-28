@@ -1,8 +1,7 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import * as Location from "expo-location";
 import { useCameraPermissions } from "expo-camera";
-import * as Notifications from "expo-notifications";
 
 import UserStore from "@/stores/UserStore";
 import { inject, observer } from "mobx-react";
@@ -15,20 +14,11 @@ interface Props {
   _tagGameStore?: TagGameStore;
 }
 
-function MapScreen({ _userStore, _tagGameStore }: Props) {
-  const userStore = _userStore!;
+function MapScreen({ _tagGameStore }: Props) {
   const tagGameStore = _tagGameStore!;
 
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const [locationPermissionStatus, setLocationPermissionStatus] = useState("");
-
-  const deviceId = useRef("");
-
-  Notifications.getDevicePushTokenAsync().then(({ data }) => {
-    console.log("deviceId:", data);
-    deviceId.current = data;
-    userStore.getCurrentUser().setDeviceId(data);
-  });
 
   useEffect(() => {
     async function getCurrentLocation() {

@@ -1,8 +1,7 @@
 import { action, makeObservable, observable } from "mobx";
-import _ from "lodash";
 
-import { DynamoTagGame } from "@/interfaces/api";
 import TagGameModel, { LocalTagGameModelTypes } from "@/models/TagGameModel";
+import UserModel from "@/models/UserModel";
 
 export default class TagGameStore {
   @observable.deep
@@ -23,8 +22,10 @@ export default class TagGameStore {
       rejectUsers: [],
       validAreas: [],
       prisonArea: [],
-      gameMasterDeviceId: "",
+      gameMasterId: "",
       policeUsers: [],
+      gameTimeLimit: null,
+      isGameStarted: null,
     });
     this.isEditTeams = false;
   }
@@ -51,7 +52,7 @@ export default class TagGameStore {
   }
 
   @action
-  public putLiveUsers(liveUsers: DynamoTagGame["liveUsers"]) {
+  public putLiveUsers(liveUsers: UserModel[]) {
     this.currentTagGame.setLiveUsers(liveUsers);
   }
 
@@ -60,7 +61,7 @@ export default class TagGameStore {
    * @param deviceId
    */
   @action
-  public addLiveThiefUser(users: string[]) {
+  public addLiveThiefUsers(users: UserModel[]) {
     this.putLiveUsers([...this.currentTagGame.getLiveUsers(), ...users]);
   }
 
@@ -69,7 +70,7 @@ export default class TagGameStore {
    * @param deviceId
    */
   @action
-  public addRejectThiefUser(users: string[]) {
+  public addRejectThiefUsers(users: UserModel[]) {
     this.putRejectUsers([
       ...(this.currentTagGame.getRejectUsers() ?? []),
       ...users,
@@ -81,16 +82,19 @@ export default class TagGameStore {
    * @param deviceId
    */
   @action
-  public deleteThiefUser(users: string[]) {
+  public deleteThiefUsers(deleteUsers: UserModel[]) {
+    const deleteUserIdSet = new Set(deleteUsers.map((user) => user.getId()));
+
     const filteredLiveUsers = this.currentTagGame
       .getLiveUsers()
-      .filter((user) => !users.includes(user));
+      .filter((user) => !deleteUserIdSet.has(user.getId()));
     this.putLiveUsers(filteredLiveUsers);
 
     const rejectUsers = this.currentTagGame.getRejectUsers();
     if (rejectUsers === undefined) return;
+
     const filteredRejectUsers = rejectUsers.filter(
-      (user) => !users.includes(user),
+      (user) => !deleteUserIdSet.has(user.getId()),
     );
     this.putRejectUsers(filteredRejectUsers);
   }
@@ -114,7 +118,7 @@ export default class TagGameStore {
   }
 
   @action
-  public putRejectUsers(rejectUsers: DynamoTagGame["rejectUsers"]) {
+  public putRejectUsers(rejectUsers: UserModel[]) {
     this.currentTagGame.setRejectUsers(rejectUsers);
   }
 
@@ -141,7 +145,7 @@ export default class TagGameStore {
   }
 
   @action
-  public putPoliceUsers(policeUsers: DynamoTagGame["policeUsers"]) {
+  public putPoliceUsers(policeUsers: UserModel[]) {
     this.currentTagGame.setPoliceUsers(policeUsers);
   }
 
@@ -150,17 +154,29 @@ export default class TagGameStore {
   }
 
   @action
-  public addPoliceUser(users: string[]) {
+  public addPoliceUsers(users: UserModel[]) {
     this.putPoliceUsers([...this.getPoliceUsers(), ...users]);
   }
 
   @action
-  public deletePoliceUser(users: string[]) {
-    const filteredUsers = this.getPoliceUsers().filter(
-      (user) => !users.includes(user),
-    );
+  public deletePoliceUsers(deleteUsers: UserModel[]) {
+    const deleteUserIdSet = new Set(deleteUsers.map((user) => user.getId()));
 
+    const filteredUsers = this.getPoliceUsers().filter(
+      (user) => !deleteUserIdSet.has(user.getId()),
+    );
     this.putPoliceUsers(filteredUsers);
+  }
+
+  @action
+  public putAllUsers(usersLists: {
+    liveUsers: UserModel[];
+    policeUsers: UserModel[];
+    rejectUsers: UserModel[];
+  }) {
+    this.putLiveUsers(usersLists.liveUsers);
+    this.putRejectUsers(usersLists.rejectUsers);
+    this.putPoliceUsers(usersLists.policeUsers);
   }
 
   /**
@@ -168,33 +184,37 @@ export default class TagGameStore {
    * @param user
    */
   @action
-  public kickOutUsers(users: string[]) {
-    this.deleteThiefUser(users);
-    this.deletePoliceUser(users);
+  public kickOutUsers(users: UserModel[]) {
+    this.deleteThiefUsers(users);
+    this.deletePoliceUsers(users);
   }
 
   @action
-  public changeToPolice(users: string[]) {
-    this.deleteThiefUser(users);
-    this.deletePoliceUser(users);
-    this.addPoliceUser(users);
+  public changeToPolice(users: UserModel[]) {
+    this.deleteThiefUsers(users);
+    this.deletePoliceUsers(users);
+    this.addPoliceUsers(users);
   }
 
   @action
-  public changeToLiveThief(users: string[]) {
-    this.deleteThiefUser(users);
-    this.deletePoliceUser(users);
-    this.addLiveThiefUser(users);
+  public changeToLiveThief(users: UserModel[]) {
+    this.deleteThiefUsers(users);
+    this.deletePoliceUsers(users);
+    this.addLiveThiefUsers(users);
   }
 
   @action
-  public changeToRejectThief(users: string[]) {
-    this.deleteThiefUser(users);
-    this.deletePoliceUser(users);
-    this.addRejectThiefUser(users);
+  public changeToRejectThief(users: UserModel[]) {
+    this.deleteThiefUsers(users);
+    this.deletePoliceUsers(users);
+    this.addRejectThiefUsers(users);
   }
 
   public getTagGame() {
     return this.currentTagGame;
+  }
+
+  public belongingGameGroup(gameId: string) {
+    return this.currentTagGame.getId() == gameId;
   }
 }

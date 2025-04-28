@@ -1,10 +1,11 @@
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
 import {
   PutCommand,
   DynamoDBDocumentClient,
   GetCommand,
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
+import { unmarshall } from "@aws-sdk/util-dynamodb";
 
 import Constants from "expo-constants";
 import { Platform } from "react-native";
@@ -64,15 +65,15 @@ export const putTagGames = async <T extends DynamoTagGame>(
 
 export const joinUser = async <T extends DynamoTagGame>(
   gameId: T["id"],
-  deviceId: string,
+  userId: string,
 ): Promise<Pick<T, "liveUsers">> => {
   try {
     const command = new UpdateCommand({
       TableName: "tagGames",
       Key: { id: gameId },
-      UpdateExpression: `SET liveUsers = list_append(if_not_exists(liveUsers, :emptyList), :newDevice)`,
+      UpdateExpression: `SET liveUsers = list_append(if_not_exists(liveUsers, :emptyList), :newUserId)`,
       ExpressionAttributeValues: {
-        ":newDevice": [deviceId],
+        ":newUserId": [userId],
         ":emptyList": [],
       },
       ReturnValues: "UPDATED_NEW",
@@ -87,6 +88,29 @@ export const joinUser = async <T extends DynamoTagGame>(
   }
 };
 
+export const getCurrentGameUsersInfo = async <T extends DynamoUser>(
+  gameId: T["gameId"],
+): Promise<T[]> => {
+  try {
+    const command = new ScanCommand({
+      TableName: "users",
+      FilterExpression: "gameId = :gameId",
+      ExpressionAttributeValues: {
+        ":gameId": { S: gameId },
+      },
+    });
+
+    const response = await docClient.send(command);
+    console.log("getCurrentGameUsersInfo:", response);
+
+    const items = response.Items?.map((item) => unmarshall(item) as T) ?? [];
+    return items;
+  } catch (error) {
+    console.error("getCurrentGameUsersInfo:", error);
+    throw error;
+  }
+};
+
 export const putUser = async <T extends DynamoUser>(
   gameId: T["gameId"],
   user: UserModel,
@@ -97,7 +121,6 @@ export const putUser = async <T extends DynamoUser>(
       Item: {
         gameId: gameId,
         userId: user.getId(),
-        deviceId: user.getDeviceId(),
         name: user.getName(),
       },
       ReturnValues: "ALL_OLD",
@@ -116,7 +139,7 @@ export const putUser = async <T extends DynamoUser>(
 // dynamoStreamのLambdaで同期対応させるようにする
 export const rejectUser = async <T extends DynamoTagGame>(
   gameId: T["id"],
-  deviceId: string,
+  userId: DynamoUser["userId"],
 ): Promise<Pick<T, "rejectUsers">> => {
   try {
     const getCommand = new GetCommand({
@@ -127,19 +150,19 @@ export const rejectUser = async <T extends DynamoTagGame>(
     const currentData = await docClient.send(getCommand);
     const liveUserList = currentData.Item?.liveUsers || [];
 
-    const deviceIndex = liveUserList.indexOf(deviceId);
-    if (deviceIndex === -1) {
-      throw new Error("Device ID not found in liveUsers list");
+    const userIdIndex = liveUserList.indexOf(userId);
+    if (userIdIndex === -1) {
+      throw new Error("User ID not found in liveUsers list");
     }
 
     const command = new UpdateCommand({
       TableName: "tagGames",
       Key: { id: gameId },
       UpdateExpression: `
-        SET rejectUsers = list_append(rejectUsers, :newDevice)
-        REMOVE liveUsers[${deviceIndex}]`,
+        SET rejectUsers = list_append(rejectUsers, :newUserId)
+        REMOVE liveUsers[${userIdIndex}]`,
       ExpressionAttributeValues: {
-        ":newDevice": [deviceId],
+        ":newUserId": [userId],
       },
       ReturnValues: "UPDATED_NEW",
     });
@@ -157,7 +180,7 @@ export const rejectUser = async <T extends DynamoTagGame>(
 // dynamoStreamのLambdaで同期対応させるようにする
 export const reviveUser = async <T extends DynamoTagGame>(
   gameId: T["id"],
-  deviceId: string,
+  userId: DynamoUser["userId"],
 ): Promise<Pick<T, "liveUsers">> => {
   try {
     const getCommand = new GetCommand({
@@ -168,17 +191,17 @@ export const reviveUser = async <T extends DynamoTagGame>(
     const currentData = await docClient.send(getCommand);
     const rejectUserList = currentData.Item?.rejectUsers || [];
 
-    const deviceIndex = rejectUserList.indexOf(deviceId);
-    if (deviceIndex === -1) {
-      throw new Error("Device ID not found in rejectUsers list");
+    const userIdIndex = rejectUserList.indexOf(userId);
+    if (userIdIndex === -1) {
+      throw new Error("User ID not found in rejectUsers list");
     }
 
     const command = new UpdateCommand({
       TableName: "tagGames",
       Key: { id: gameId },
-      UpdateExpression: `SET liveUsers = list_append(if_not_exists(liveUsers, :emptyList), :newDevice) REMOVE rejectUsers[${deviceIndex}]`,
+      UpdateExpression: `SET liveUsers = list_append(if_not_exists(liveUsers, :emptyList), :newUserId) REMOVE rejectUsers[${userIdIndex}]`,
       ExpressionAttributeValues: {
-        ":newDevice": [deviceId],
+        ":newUserId": [userId],
         ":emptyList": [],
       },
       ReturnValues: "UPDATED_NEW",

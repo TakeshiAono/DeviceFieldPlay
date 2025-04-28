@@ -1,3 +1,4 @@
+import TagGameModel from "@/models/TagGameModel";
 import UserModel from "@/models/UserModel";
 import { action, makeObservable, observable } from "mobx";
 
@@ -22,5 +23,9 @@ export default class UserStore {
 
   public getCurrentUser() {
     return this.currentUser;
+  }
+
+  public isCurrentUserGameMaster(targetTagGame: TagGameModel) {
+    return this.getCurrentUser().isCurrentGameMaster(targetTagGame);
   }
 }

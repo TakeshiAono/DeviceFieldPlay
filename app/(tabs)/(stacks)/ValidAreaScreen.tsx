@@ -1,12 +1,11 @@
-import { useState, useRef } from "react";
-import * as Crypto from "expo-crypto";
+import { useRef } from "react";
 
 import UserStore from "@/stores/UserStore";
 import { inject, observer } from "mobx-react";
-import { Pressable, Text, View } from "react-native";
+import { View } from "react-native";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { Button } from "@rneui/themed";
-import { joinUser, putDevices, putTagGames, putUser } from "@/utils/APIs";
+import { joinUser, putDevices, putTagGames } from "@/utils/APIs";
 import TagGameStore from "@/stores/TagGameStore";
 import _ from "lodash";
 import { ValidAreaEditMap } from "@/components/ValidAreaEditMap";
@@ -24,15 +23,12 @@ function ValidAreaScreen({ _userStore, _tagGameStore }: Props) {
   const isGameStartDone = useRef(false);
 
   const isGameMaster = () => {
-    return userStore
-      .getCurrentUser()
-      .isCurrentGameMaster(tagGameStore.getTagGame());
+    return userStore.isCurrentUserGameMaster(tagGameStore.getTagGame());
   };
 
   const storeGameStartSetting = async (gameId: string) => {
     try {
-      await joinUser(gameId, userStore.getCurrentUser().getDeviceId());
-      await putUser(gameId, userStore.getCurrentUser());
+      await joinUser(gameId, userStore.getCurrentUser().getId());
       if (!isGameStartDone.current)
         await putDevices(gameId, userStore.getCurrentUser().getDeviceId());
 
@@ -61,7 +57,7 @@ function ValidAreaScreen({ _userStore, _tagGameStore }: Props) {
           <Button
             type="solid"
             color={
-              !!tagGameStore.getTagGame().getIsSetValidAreaDone()
+              tagGameStore.getTagGame().getIsSetValidAreaDone()
                 ? "success"
                 : "primary"
             }
@@ -70,13 +66,8 @@ function ValidAreaScreen({ _userStore, _tagGameStore }: Props) {
             }
             onPress={async () => {
               const tagGame = tagGameStore.getTagGame();
-              if (_.isEmpty(tagGame.getId())) {
-                tagGame.setId(Crypto.randomUUID());
-              }
-              if (_.isEmpty(tagGame.getGameMasterDeviceId())) {
-                tagGame.setGameMasterDeviceId(
-                  userStore.getCurrentUser().getDeviceId(),
-                );
+              if (_.isEmpty(tagGame.getGameMasterId())) {
+                tagGame.setGameMasterId(userStore.getCurrentUser().getId());
               }
 
               await putTagGames(tagGame.toObject());
@@ -88,7 +79,7 @@ function ValidAreaScreen({ _userStore, _tagGameStore }: Props) {
             }}
           >
             <IconSymbol size={28} name={"mappin.and.ellipse"} color={"white"} />
-            {!!tagGameStore.getTagGame().getIsSetValidAreaDone()
+            {tagGameStore.getTagGame().getIsSetValidAreaDone()
               ? "エリア更新"
               : "エリア登録"}
           </Button>

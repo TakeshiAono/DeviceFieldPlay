@@ -1,5 +1,7 @@
 import { makeAutoObservable, toJS } from "mobx";
 import { DynamoTagGame } from "@/interfaces/api";
+import dayjs, { Dayjs } from "dayjs";
+import UserModel from "./UserModel";
 
 // DynamoDBでは保存せずクライアント側でのみ保持している値
 export type LocalTagGameModelTypes = {
@@ -9,34 +11,38 @@ export type LocalTagGameModelTypes = {
 
 export default class TagGameModel {
   private id: DynamoTagGame["id"];
-  private liveUsers: DynamoTagGame["liveUsers"];
-  private rejectUsers?: DynamoTagGame["rejectUsers"];
-  private policeUsers: DynamoTagGame["policeUsers"];
+  private liveUsers: UserModel[];
+  private rejectUsers: UserModel[];
+  private policeUsers: UserModel[];
   private validAreas: DynamoTagGame["validAreas"];
   private prisonArea: DynamoTagGame["prisonArea"];
-  private gameMasterDeviceId: DynamoTagGame["gameMasterDeviceId"];
+  private gameTimeLimit: Dayjs | null;
+  private gameMasterId: DynamoTagGame["gameMasterId"];
+  private isGameStarted: DynamoTagGame["isGameStarted"];
+
   private isSetValidAreaDone: LocalTagGameModelTypes["isSetValidAreaDone"];
   private isSetPrisonAreaDone: LocalTagGameModelTypes["isSetPrisonAreaDone"];
 
   constructor({
     id = "",
-    liveUsers,
-    rejectUsers,
     validAreas,
     prisonArea,
-    gameMasterDeviceId,
-    policeUsers,
+    gameMasterId,
+    gameTimeLimit,
+    isGameStarted,
   }: DynamoTagGame) {
     this.id = id;
-    this.liveUsers = liveUsers;
-    this.rejectUsers = rejectUsers;
+    this.liveUsers = [];
+    this.rejectUsers = [];
+    this.policeUsers = [];
     this.validAreas = validAreas;
     this.prisonArea = prisonArea;
-    this.gameMasterDeviceId = gameMasterDeviceId;
+    this.gameMasterId = gameMasterId;
+    this.gameTimeLimit = gameTimeLimit ? dayjs(gameTimeLimit) : null;
+    this.isGameStarted = isGameStarted;
+
     this.isSetValidAreaDone = false;
     this.isSetPrisonAreaDone = false;
-
-    this.policeUsers = policeUsers;
 
     makeAutoObservable(this);
   }
@@ -51,20 +57,20 @@ export default class TagGameModel {
   }
 
   // liveUsers
-  getLiveUsers(): DynamoTagGame["liveUsers"] {
-    return toJS(this.liveUsers);
+  getLiveUsers(): UserModel[] {
+    return this.liveUsers;
   }
 
-  setLiveUsers(liveUsers: DynamoTagGame["liveUsers"]): void {
+  setLiveUsers(liveUsers: UserModel[]): void {
     this.liveUsers = liveUsers;
   }
 
   // rejectUsers
-  getRejectUsers(): DynamoTagGame["rejectUsers"] | undefined {
-    return toJS(this.rejectUsers);
+  getRejectUsers(): UserModel[] {
+    return this.rejectUsers;
   }
 
-  setRejectUsers(rejectUsers: DynamoTagGame["rejectUsers"]): void {
+  setRejectUsers(rejectUsers: UserModel[]): void {
     this.rejectUsers = rejectUsers;
   }
 
@@ -87,14 +93,21 @@ export default class TagGameModel {
   }
 
   // gameMasterDeviceId
-  getGameMasterDeviceId(): DynamoTagGame["gameMasterDeviceId"] {
-    return this.gameMasterDeviceId;
+  getGameMasterId(): DynamoTagGame["gameMasterId"] {
+    return this.gameMasterId;
   }
 
-  setGameMasterDeviceId(
-    gameMasterDeviceId: DynamoTagGame["gameMasterDeviceId"],
-  ): void {
-    this.gameMasterDeviceId = gameMasterDeviceId;
+  setGameMasterId(gameMasterId: DynamoTagGame["gameMasterId"]): void {
+    this.gameMasterId = gameMasterId;
+  }
+
+  // gameTimeLimit
+  getGameTimeLimit(): Dayjs | null {
+    return this.gameTimeLimit;
+  }
+
+  setGameTimeLimit(gameTimeLimit: Dayjs): void {
+    this.gameTimeLimit = gameTimeLimit;
   }
 
   // isSetValidAreaDone
@@ -120,12 +133,20 @@ export default class TagGameModel {
   }
 
   // policeUsers
-  getPoliceUsers(): DynamoTagGame["policeUsers"] {
+  getPoliceUsers(): UserModel[] {
     return this.policeUsers;
   }
 
-  setPoliceUsers(policeUsers: DynamoTagGame["policeUsers"]): void {
+  setPoliceUsers(policeUsers: UserModel[]): void {
     this.policeUsers = policeUsers;
+  }
+
+  getIsGameStarted(): boolean | null {
+    return this.isGameStarted;
+  }
+
+  setIsGameStarted(isGameStarted: boolean): void {
+    this.isGameStarted = isGameStarted;
   }
 
   isSetGame() {
@@ -135,12 +156,14 @@ export default class TagGameModel {
   toObject(): DynamoTagGame {
     return {
       id: this.id,
-      liveUsers: toJS(this.liveUsers),
-      rejectUsers: toJS(this.rejectUsers) ?? [],
+      liveUsers: this.liveUsers.map((user) => user.getId()),
+      rejectUsers: this.rejectUsers.map((user) => user.getId()),
       validAreas: toJS(this.validAreas),
       prisonArea: toJS(this.prisonArea),
-      gameMasterDeviceId: this.gameMasterDeviceId,
-      policeUsers: this.policeUsers,
+      gameMasterId: this.gameMasterId,
+      policeUsers: this.policeUsers.map((user) => user.getId()),
+      gameTimeLimit: this.gameTimeLimit ? this.gameTimeLimit.toISOString() : "",
+      isGameStarted: this.isGameStarted,
     };
   }
 }

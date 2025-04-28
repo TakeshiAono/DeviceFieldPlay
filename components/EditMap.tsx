@@ -1,27 +1,12 @@
-import { Alert, StyleSheet, Text, View } from "react-native";
-import { Button } from "@rneui/themed";
-import React, { useState, useEffect, useRef } from "react";
-import QRCode from "react-native-qrcode-svg";
+import { Alert, StyleSheet } from "react-native";
+import React, { useState } from "react";
 import MapView, { LatLng, Polygon, Region } from "react-native-maps";
-import ReactNativeModal from "react-native-modal";
-import { CameraView } from "expo-camera";
 import { booleanPointInPolygon, point, polygon } from "@turf/turf";
 import "react-native-get-random-values";
-import _ from "lodash";
 import { inject, observer } from "mobx-react";
-import Toast from "react-native-toast-message";
-import * as Notifications from "expo-notifications";
 
-import {
-  getTagGames,
-  joinUser,
-  patchDevices,
-  rejectUser,
-  reviveUser,
-} from "@/utils/APIs";
-import { IconSymbol } from "@/components/ui/IconSymbol";
+import { rejectUser } from "@/utils/APIs";
 import UserStore from "@/stores/UserStore";
-import TagGameModel from "@/models/TagGameModel";
 import TagGameStore from "@/stores/TagGameStore";
 
 export type Props = {
@@ -55,119 +40,9 @@ function EditMap({
   const tagGameStore = _tagGameStore!;
 
   const [region, setRegion] = useState<Region>(initialJapanRegion);
-  const [qrVisible, setQrVisible] = useState(false);
-  const [cameraVisible, setCameraVisible] = useState(false);
+
   const [isFirstUpdate, setIsFirstUpdate] = useState(true);
   const [isCurrentUserLive, setIsCurrentUserLive] = useState(true);
-
-  const firstScan = useRef(true);
-
-  useEffect(() => {
-    const gameId = tagGameStore.getTagGame().getId();
-    // TODO: このブロックの処理が新規作成時と更新時両方で発火し複雑なためリファクタリングが必要
-    if (_.isEmpty(gameId)) return;
-
-    // ゲーム有効エリア変更時の通知を受け取って自分の持っているエリア情報を更新する
-    const changeValidAreaNotificationListener =
-      Notifications.addNotificationReceivedListener(async (notification) => {
-        if (
-          notification.request.content.data.notification_type !==
-          "changeValidArea"
-        )
-          return;
-        console.log("ゲームエリア変更push通知", notification.request.content);
-
-        Toast.show({
-          type: "info",
-          text1: notification.request.content.title as string,
-          text2: notification.request.content.body as string,
-        });
-
-        try {
-          const tagGame = await getTagGames(gameId);
-          tagGameStore.putValidArea(tagGame.validAreas);
-        } catch (error) {
-          console.error("Error: ", error);
-        }
-      });
-
-    // 監獄エリア変更時の通知を受け取って自分の持っているエリア情報を更新する
-    const changePrisonAreaNotificationListener =
-      Notifications.addNotificationReceivedListener(async (notification) => {
-        if (
-          notification.request.content.data.notification_type !==
-          "changePrisonArea"
-        )
-          return;
-        console.log("監獄エリア変更push通知", notification.request.content);
-
-        Toast.show({
-          type: "info",
-          text1: notification.request.content.title as string,
-          text2: notification.request.content.body as string,
-        });
-
-        try {
-          const tagGame = await getTagGames(gameId);
-          tagGameStore.putPrisonArea(tagGame.prisonArea);
-        } catch (error) {
-          console.error("Error: ", error);
-        }
-      });
-
-    const rejectUserNotificationListener =
-      Notifications.addNotificationReceivedListener(async (notification) => {
-        if (
-          notification.request.content.data.notification_type !== "rejectUser"
-        )
-          return;
-        console.log("脱落push通知", notification.request.content);
-
-        Toast.show({
-          type: "error",
-          text1: notification.request.content.title as string,
-          text2: notification.request.content.body as string,
-        });
-
-        try {
-          const tagGame = await getTagGames(gameId);
-          tagGameStore.putRejectUsers(tagGame.rejectUsers);
-        } catch (error) {
-          console.error("Error: ", error);
-        }
-      });
-
-    const reviveUserNotificationListener =
-      Notifications.addNotificationReceivedListener(async (notification) => {
-        if (
-          notification.request.content.data.notification_type !== "reviveUser"
-        )
-          return;
-        console.log("復活push通知", notification.request.content);
-
-        Toast.show({
-          type: "success",
-          text1: notification.request.content.title as string,
-          text2: notification.request.content.body as string,
-        });
-
-        try {
-          const tagGame = await getTagGames(gameId);
-          tagGameStore.putLiveUsers(tagGame.liveUsers);
-        } catch (error) {
-          console.error("Error: ", error);
-        }
-      });
-
-    gameStart();
-    // gameIdが変わるたびに別のゲームのエリアで更新されてしまわないよう、イベントリスナーを削除し新規のイベントリスナーを生成する。
-    return () => {
-      changeValidAreaNotificationListener.remove();
-      changePrisonAreaNotificationListener.remove();
-      rejectUserNotificationListener.remove();
-      reviveUserNotificationListener.remove();
-    };
-  }, [tagGameStore.getTagGame().getId()]);
 
   const onChangeCurrentPosition = async (position: [longitude, latitude]) => {
     if (
@@ -202,141 +77,12 @@ function EditMap({
     }
   };
 
-  const gameStart = () => {
-    // TODO: ゲームスタート時はエリアの中にいることが前提なので、エリア外にいる場合は警告を出す
-    // TODO: 初期値はtrueだが念のため代入する
-    setIsCurrentUserLive(true);
-  };
-
-  const setDataSettings = async ({ data: gameId }: { data: string }) => {
-    // NOTE: カメラモーダルを閉じた際にtrueに戻します。
-    // NOTE: QRが画面上にある限り廉造スキャンしてしまうので最初のスキャン以外は早期リターンしている
-    if (!firstScan.current || !userStore.getCurrentUser().getDeviceId()) return;
-
-    firstScan.current = false;
-    console.log("ScanData: ", gameId);
-    setCameraVisible(false);
-    tagGameStore.getTagGame().setId(gameId);
-    await patchDevices(gameId, userStore.getCurrentUser().getDeviceId());
-
-    const updatedLiveUsers = await joinUser(
-      gameId,
-      userStore.getCurrentUser().getDeviceId(),
-    );
-
-    const tagGame = new TagGameModel({
-      id: gameId,
-      validAreas: tagGameStore.getTagGame().getValidAreas(),
-      liveUsers: updatedLiveUsers.liveUsers,
-      rejectUsers: [],
-      // TODO: ゲームマスターを取得できるようにしたい。現状は自分がげーむマスターでないことしかわからない
-      gameMasterDeviceId: "",
-    });
-    tagGameStore.putTagGame(tagGame);
-  };
-
   const isGameMaster = () => {
-    return userStore
-      .getCurrentUser()
-      .isCurrentGameMaster(tagGameStore.getTagGame());
+    return userStore.isCurrentUserGameMaster(tagGameStore.getTagGame());
   };
 
   return (
     <>
-      <View style={{ position: "absolute", top: 150, right: 5, zIndex: 1 }}>
-        <View style={{ display: "flex", gap: 5 }}>
-          {(isGameMaster() || !tagGameStore.getTagGame().isSetGame()) && (
-            <>
-              {/* TODO: MapコンポーネントにQR表示ボタンとカメラ起動ボタンがあるのは適切ではないため、Mapコンポーネント外に切りだす(マップ上に表示しない) */}
-              <Button
-                type="solid"
-                onPress={() => {
-                  setQrVisible(true);
-                }}
-                disabled={
-                  !(isGameMaster() || !tagGameStore.getTagGame().isSetGame())
-                }
-              >
-                <IconSymbol size={28} name={"qrcode"} color={"white"} />
-              </Button>
-              <Button
-                type="solid"
-                onPress={() => {
-                  setCameraVisible(true);
-                }}
-              >
-                <IconSymbol size={28} name={"camera"} color={"white"} />
-              </Button>
-            </>
-          )}
-          <Button
-            type="solid"
-            color={isCurrentUserLive ? "gray" : "success"}
-            onPress={
-              isCurrentUserLive
-                ? undefined
-                : () => {
-                    Alert.alert("復活", "復活してもよいですか？", [
-                      { text: "Cancel", onPress: undefined },
-                      {
-                        text: "OK",
-                        onPress: async () => {
-                          if (!userStore.getCurrentUser().getDeviceId()) return;
-
-                          try {
-                            await reviveUser(
-                              tagGameStore.getTagGame().getId(),
-                              userStore.getCurrentUser().getDeviceId(),
-                            );
-                            setIsCurrentUserLive(true);
-                          } catch (error) {
-                            console.error(error);
-                          }
-                        },
-                      },
-                    ]);
-                  }
-            }
-          >
-            <IconSymbol size={28} name={"person.badge.plus"} color={"white"} />
-          </Button>
-          <Button
-            type="solid"
-            color={
-              !isCurrentUserLive || !tagGameStore.getTagGame().getId()
-                ? "gray"
-                : "error"
-            }
-            onPress={
-              !isCurrentUserLive || !tagGameStore.getTagGame().getId()
-                ? undefined
-                : () => {
-                    Alert.alert("脱落", "脱落してもよいですか？", [
-                      { text: "Cancel", onPress: undefined },
-                      {
-                        text: "OK",
-                        onPress: async () => {
-                          if (!userStore.getCurrentUser().getDeviceId()) return;
-
-                          try {
-                            await rejectUser(
-                              tagGameStore.getTagGame().getId(),
-                              userStore.getCurrentUser().getDeviceId(),
-                            );
-                            setIsCurrentUserLive(false);
-                          } catch (error) {
-                            console.error(error);
-                          }
-                        },
-                      },
-                    ]);
-                  }
-            }
-          >
-            <IconSymbol size={28} name={"person.badge.minus"} color={"white"} />
-          </Button>
-        </View>
-      </View>
       {mapVisible && (
         <MapView
           style={styles.map}
@@ -402,69 +148,6 @@ function EditMap({
           )}
         </MapView>
       )}
-      {/* TODO: MapコンポーネントにQR表示ボタンとカメラ起動ボタンの移動に伴いQRモーダルとカメラモーダルも移設する */}
-      <ReactNativeModal style={{ margin: "auto" }} isVisible={qrVisible}>
-        <View style={{ backgroundColor: "white", width: 330, padding: 20 }}>
-          {tagGameStore.getTagGame().getId() ? (
-            <>
-              <Text style={{ fontSize: 30 }}>参加QR</Text>
-              <Text>
-                {"友達にスキャンしてもらい\nゲームに参加してもらいましょう"}
-              </Text>
-              <View style={{ alignItems: "center", marginVertical: 20 }}>
-                <QRCode size={150} value={tagGameStore.getTagGame().getId()} />
-              </View>
-            </>
-          ) : (
-            <View style={{ height: 100 }}>
-              <Text style={{ fontSize: 15 }}>
-                {
-                  "ゲームグループQRを表示するためには\nゲームをスタートしてください"
-                }
-              </Text>
-            </View>
-          )}
-          <Button
-            type="solid"
-            color={"red"}
-            onPress={() => {
-              setQrVisible(false);
-            }}
-          >
-            閉じる
-          </Button>
-        </View>
-      </ReactNativeModal>
-      <ReactNativeModal style={{ margin: "auto" }} isVisible={cameraVisible}>
-        <View style={{ backgroundColor: "white", width: 330, padding: 20 }}>
-          <Text style={{ fontSize: 18 }}>
-            {"QRを読み込ませてもらって\nゲームグループに参加しましょう!!"}
-          </Text>
-          <CameraView
-            style={{
-              width: 250,
-              height: 300,
-              marginHorizontal: "auto",
-              marginBottom: 20,
-            }}
-            barcodeScannerSettings={{
-              barcodeTypes: ["qr"],
-            }}
-            onBarcodeScanned={setDataSettings}
-            facing={"back"}
-          />
-          <Button
-            type="solid"
-            color={"red"}
-            onPress={() => {
-              setCameraVisible(false);
-              firstScan.current = true;
-            }}
-          >
-            閉じる
-          </Button>
-        </View>
-      </ReactNativeModal>
     </>
   );
 }
