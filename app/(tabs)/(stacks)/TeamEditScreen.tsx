@@ -12,7 +12,11 @@ import TagGameStore from "@/stores/TagGameStore";
 import UserList from "@/components/UserList";
 import _ from "lodash";
 
-import { putTagGames } from "@/utils/APIs";
+import {
+  getCurrentGameUsersInfo,
+  getTagGames,
+  putTagGames,
+} from "@/utils/APIs";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import ReactNativeModal from "react-native-modal";
 import QRCode from "react-native-qrcode-svg";
@@ -50,6 +54,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
     UserTypeForList[]
   >(formatForListData(tagGameStore.getTagGame().getRejectUsers()));
   const [qrVisible, setQrVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const deviceId = useRef("");
 
@@ -69,6 +74,15 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
       setLocationPermissionStatus(status);
     });
   }, []);
+
+  useEffect(() => {
+    const gameId = tagGameStore.getTagGame().getId();
+    getTagGames(gameId).then(async (tagGame) => {
+      const gameUsers = await getCurrentGameUsersInfo(gameId);
+      tagGameStore.updateAllUsers(tagGame, gameUsers);
+    });
+    setLoading(false);
+  }, [loading]);
 
   useEffect(() => {
     if (locationPermissionStatus === "granted") {
@@ -119,10 +133,11 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
     });
 
   return (
-    <View style={{ flex: 1, backgroundColor: "white" }}>
+    <View style={{ flex: 1, backgroundColor: "white", position: "relative" }}>
       <View style={{ flex: 1, margin: 10 }}>
         <EButton
           onPress={() => {
+            setLoading(true);
           }}
           icon={
             <IconSymbol

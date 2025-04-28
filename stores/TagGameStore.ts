@@ -2,6 +2,7 @@ import { action, makeObservable, observable } from "mobx";
 
 import TagGameModel, { LocalTagGameModelTypes } from "@/models/TagGameModel";
 import UserModel from "@/models/UserModel";
+import { DynamoTagGame, DynamoUser } from "@/interfaces/api";
 
 export default class TagGameStore {
   @observable.deep
@@ -168,6 +169,7 @@ export default class TagGameStore {
     this.putPoliceUsers(filteredUsers);
   }
 
+  // TODO updateAllUsersと似ているため統一する
   @action
   public putAllUsers(usersLists: {
     liveUsers: UserModel[];
@@ -210,11 +212,42 @@ export default class TagGameStore {
     this.addRejectThiefUsers(users);
   }
 
+  @action
+  public updateAllUsers(tagGame: DynamoTagGame, gameUsers: DynamoUser[]) {
+    this.putLiveUsers(
+      TagGameStore.convertUserInstances(gameUsers, tagGame.liveUsers),
+    );
+    this.putPoliceUsers(
+      TagGameStore.convertUserInstances(gameUsers, tagGame.policeUsers),
+    );
+    this.putRejectUsers(
+      TagGameStore.convertUserInstances(gameUsers, tagGame.rejectUsers),
+    );
+  }
+
   public getTagGame() {
     return this.currentTagGame;
   }
 
   public belongingGameGroup(gameId: string) {
     return this.currentTagGame.getId() == gameId;
+  }
+
+  // TODO: 引数をテレコにしたい
+  static convertUserInstances(
+    dynamoResponseUsers: DynamoUser[],
+    gameUserIds: string[],
+  ) {
+    return gameUserIds.map((gameUserId) => {
+      const findUserInfo = dynamoResponseUsers.find(
+        (gameUser) => gameUser.userId == gameUserId,
+      ) as DynamoUser;
+
+      return new UserModel({
+        id: findUserInfo.userId,
+        name: findUserInfo.name,
+        deviceId: "",
+      });
+    });
   }
 }
