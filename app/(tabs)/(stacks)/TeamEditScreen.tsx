@@ -6,6 +6,7 @@ import * as Notifications from "expo-notifications";
 import UserStore from "@/stores/UserStore";
 import { inject, observer } from "mobx-react";
 import { Button, Text, TouchableOpacity, View } from "react-native";
+import { Button as EButton } from "@rneui/themed";
 import { UserTypeForList } from "@/components/UserList";
 import TagGameStore from "@/stores/TagGameStore";
 import UserList from "@/components/UserList";
@@ -120,6 +121,29 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
       <View style={{ flex: 1, margin: 10 }}>
+        <EButton
+          onPress={() => {
+          }}
+          icon={
+            <IconSymbol
+              size={28}
+              name={"arrow.counterclockwise"}
+              color={"white"}
+            />
+          }
+          containerStyle={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            zIndex: 1,
+          }}
+          buttonStyle={{
+            width: 48,
+            height: 48,
+            borderRadius: 24,
+          }}
+          color={"error"}
+        />
         <Text style={{ textAlign: "center", fontSize: 20 }}>警察</Text>
         <View style={{ flex: 1, borderRadius: 5, borderWidth: 2 }}>
           <UserList
