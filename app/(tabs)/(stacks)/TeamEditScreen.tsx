@@ -82,6 +82,20 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
   }, [cameraPermission]);
 
   useEffect(() => {
+    setLiveUsersForList(
+      formatForListData(tagGameStore.getTagGame().getLiveUsers()),
+    );
+    setRejectUsersForList(
+      formatForListData(tagGameStore.getTagGame().getRejectUsers() ?? []),
+    );
+    setPoliceUsersForList(formatForListData(tagGameStore.getPoliceUsers()));
+  }, [
+    tagGameStore.getTagGame().getLiveUsers(),
+    tagGameStore.getTagGame().getRejectUsers(),
+    tagGameStore.getPoliceUsers(),
+  ]);
+
+  useEffect(() => {
     if (!_.isEmpty(selectedUsers)) return;
 
     setPoliceUsersForList(formatForListData(tagGameStore.getPoliceUsers()));

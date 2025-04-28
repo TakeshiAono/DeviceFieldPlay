@@ -20,10 +20,10 @@ export default class TagGameStore {
       id: "",
       liveUsers: [],
       rejectUsers: [],
+      policeUsers: [],
       validAreas: [],
       prisonArea: [],
       gameMasterId: "",
-      policeUsers: [],
       gameTimeLimit: null,
       isGameStarted: null,
     });

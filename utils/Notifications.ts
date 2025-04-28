@@ -76,7 +76,6 @@ export const joinUserNotificationHandler = async (
   notification: Notifications.Notification,
   gameId: string,
   tagGameStore: TagGameStore,
-  userStore: UserStore,
 ) => {
   if (notification.request.content.data.notification_type !== "joinUser")
     return;
