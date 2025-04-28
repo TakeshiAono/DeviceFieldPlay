@@ -55,28 +55,10 @@ export const validAreaNotificationHandler = async (
   }
 };
 
-const convertUserInstances = (
-  dynamoResponseUsers: DynamoUser[],
-  gameUserIds: string[],
-) => {
-  return gameUserIds.map((gameUserId) => {
-    const findUserInfo = dynamoResponseUsers.find(
-      (gameUser) => gameUser.userId == gameUserId,
-    ) as DynamoUser;
-
-    return new UserModel({
-      id: findUserInfo.userId,
-      name: findUserInfo.name,
-      deviceId: "",
-    });
-  });
-};
-
 export const joinUserNotificationHandler = async (
   notification: Notifications.Notification,
   gameId: string,
   tagGameStore: TagGameStore,
-  userStore: UserStore,
 ) => {
   if (notification.request.content.data.notification_type !== "joinUser")
     return;
@@ -91,9 +73,7 @@ export const joinUserNotificationHandler = async (
   try {
     const tagGame = await getTagGames(gameId);
     const gameUsers = await getCurrentGameUsersInfo(gameId);
-    tagGameStore.putLiveUsers(
-      convertUserInstances(gameUsers, tagGame.liveUsers) ?? [],
-    );
+    tagGameStore.updateAllUsers(tagGame, gameUsers);
   } catch (error) {
     console.error("Error: ", error);
   }
@@ -118,9 +98,18 @@ export const kickOutUsersNotificationHandler = async (
     const tagGame = await getTagGames(gameId);
     const gameUsers = await getCurrentGameUsersInfo(gameId);
     tagGameStore.putAllUsers({
-      liveUsers: convertUserInstances(gameUsers, tagGame.liveUsers),
-      policeUsers: convertUserInstances(gameUsers, tagGame.policeUsers),
-      rejectUsers: convertUserInstances(gameUsers, tagGame.rejectUsers),
+      liveUsers: TagGameStore.convertUserInstances(
+        gameUsers,
+        tagGame.liveUsers,
+      ),
+      policeUsers: TagGameStore.convertUserInstances(
+        gameUsers,
+        tagGame.policeUsers,
+      ),
+      rejectUsers: TagGameStore.convertUserInstances(
+        gameUsers,
+        tagGame.rejectUsers,
+      ),
     });
   } catch (error) {
     console.error("Error: ", error);
@@ -146,7 +135,7 @@ export const rejectUserNotificationHandler = async (
     const tagGame = await getTagGames(gameId);
     const gameUsers = await getCurrentGameUsersInfo(gameId);
     tagGameStore.putRejectUsers(
-      convertUserInstances(gameUsers, tagGame.rejectUsers),
+      TagGameStore.convertUserInstances(gameUsers, tagGame.rejectUsers),
     );
   } catch (error) {
     console.error("Error: ", error);
@@ -172,7 +161,7 @@ export const liveUserNotificationHandler = async (
     const tagGame = await getTagGames(gameId);
     const gameUsers = await getCurrentGameUsersInfo(gameId);
     tagGameStore.putLiveUsers(
-      convertUserInstances(gameUsers, tagGame.liveUsers),
+      TagGameStore.convertUserInstances(gameUsers, tagGame.liveUsers),
     );
   } catch (error) {
     console.error("Error: ", error);

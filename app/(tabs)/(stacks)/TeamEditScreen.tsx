@@ -6,12 +6,17 @@ import * as Notifications from "expo-notifications";
 import UserStore from "@/stores/UserStore";
 import { inject, observer } from "mobx-react";
 import { Button, Text, TouchableOpacity, View } from "react-native";
+import { Button as EButton } from "@rneui/themed";
 import { UserTypeForList } from "@/components/UserList";
 import TagGameStore from "@/stores/TagGameStore";
 import UserList from "@/components/UserList";
 import _ from "lodash";
 
-import { putTagGames } from "@/utils/APIs";
+import {
+  getCurrentGameUsersInfo,
+  getTagGames,
+  putTagGames,
+} from "@/utils/APIs";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import ReactNativeModal from "react-native-modal";
 import QRCode from "react-native-qrcode-svg";
@@ -49,6 +54,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
     UserTypeForList[]
   >(formatForListData(tagGameStore.getTagGame().getRejectUsers()));
   const [qrVisible, setQrVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const deviceId = useRef("");
 
@@ -70,6 +76,15 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
   }, []);
 
   useEffect(() => {
+    const gameId = tagGameStore.getTagGame().getId();
+    getTagGames(gameId).then(async (tagGame) => {
+      const gameUsers = await getCurrentGameUsersInfo(gameId);
+      tagGameStore.updateAllUsers(tagGame, gameUsers);
+    });
+    setLoading(false);
+  }, [loading]);
+
+  useEffect(() => {
     if (locationPermissionStatus === "granted") {
       Location.getCurrentPositionAsync({});
     }
@@ -80,6 +95,20 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
       requestCameraPermission();
     }
   }, [cameraPermission]);
+
+  useEffect(() => {
+    setLiveUsersForList(
+      formatForListData(tagGameStore.getTagGame().getLiveUsers()),
+    );
+    setRejectUsersForList(
+      formatForListData(tagGameStore.getTagGame().getRejectUsers() ?? []),
+    );
+    setPoliceUsersForList(formatForListData(tagGameStore.getPoliceUsers()));
+  }, [
+    tagGameStore.getTagGame().getLiveUsers(),
+    tagGameStore.getTagGame().getRejectUsers(),
+    tagGameStore.getPoliceUsers(),
+  ]);
 
   useEffect(() => {
     if (!_.isEmpty(selectedUsers)) return;
@@ -104,8 +133,32 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
     });
 
   return (
-    <View style={{ flex: 1, backgroundColor: "white" }}>
+    <View style={{ flex: 1, backgroundColor: "white", position: "relative" }}>
       <View style={{ flex: 1, margin: 10 }}>
+        <EButton
+          onPress={() => {
+            setLoading(true);
+          }}
+          icon={
+            <IconSymbol
+              size={28}
+              name={"arrow.counterclockwise"}
+              color={"white"}
+            />
+          }
+          containerStyle={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            zIndex: 1,
+          }}
+          buttonStyle={{
+            width: 48,
+            height: 48,
+            borderRadius: 24,
+          }}
+          color={"error"}
+        />
         <Text style={{ textAlign: "center", fontSize: 20 }}>警察</Text>
         <View style={{ flex: 1, borderRadius: 5, borderWidth: 2 }}>
           <UserList

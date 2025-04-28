@@ -58,7 +58,7 @@ function ShowMap({
 
     const joinUserNotificationListener =
       Notifications.addNotificationReceivedListener((event) => {
-        joinUserNotificationHandler(event, gameId, tagGameStore, userStore);
+        joinUserNotificationHandler(event, gameId, tagGameStore);
       });
 
     const kickOutUsersNotificationListener =
