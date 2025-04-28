@@ -5,16 +5,16 @@ import plugin from "@typescript-eslint/eslint-plugin";
 export default [
   js.configs.recommended,
   {
-    files: ["**/*.ts", "**/*.tsx"],
+    files: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.mjs"],
     languageOptions: {
       parser: parser,
       parserOptions: {
         ecmaVersion: "latest",
         sourceType: "module",
       },
-      globals: {
-        console: true,
-      },
+    },
+    env: {
+      node: true,
     },
     plugins: {
       "@typescript-eslint": plugin,
