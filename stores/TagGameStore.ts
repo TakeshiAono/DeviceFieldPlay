@@ -150,6 +150,10 @@ export default class TagGameStore {
     this.currentTagGame.setPoliceUsers(policeUsers);
   }
 
+  public getLiveUsers() {
+    return this.currentTagGame.getLiveUsers();
+  }
+
   public getPoliceUsers() {
     return this.currentTagGame.getPoliceUsers();
   }
@@ -231,6 +235,10 @@ export default class TagGameStore {
 
   public belongingGameGroup(gameId: string) {
     return this.currentTagGame.getId() == gameId;
+  }
+
+  public isCurrentUserJoined(userId: string) {
+    return this.currentTagGame.joinedUserIds().includes(userId);
   }
 
   // TODO: 引数をテレコにしたい

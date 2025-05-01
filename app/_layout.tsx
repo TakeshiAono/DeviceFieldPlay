@@ -19,7 +19,7 @@ import * as Crypto from "expo-crypto";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import UserStore from "@/stores/UserStore";
 import TagGameStore from "@/stores/TagGameStore";
-import { putUser } from "@/utils/APIs";
+import { joinUser, putUser } from "@/utils/APIs";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -114,9 +114,13 @@ export default function RootLayout() {
                 if (isGameMaster) {
                   stores._tagGameStore
                     .getTagGame()
-                    .setGameMasterId(
-                      stores._userStore.getCurrentUser().getId(),
-                    );
+                    .setGameMasterId(stores._userStore.getCurrentUser().getId())
+                    .addLiveUser(stores._userStore.getCurrentUser());
+
+                  await joinUser(
+                    gameId,
+                    stores._userStore.getCurrentUser().getId(),
+                  );
                 }
               }}
             />

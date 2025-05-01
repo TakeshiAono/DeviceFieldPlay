@@ -97,8 +97,9 @@ export default class TagGameModel {
     return this.gameMasterId;
   }
 
-  setGameMasterId(gameMasterId: DynamoTagGame["gameMasterId"]): void {
+  setGameMasterId(gameMasterId: DynamoTagGame["gameMasterId"]) {
     this.gameMasterId = gameMasterId;
+    return this;
   }
 
   // gameTimeLimit
@@ -151,6 +152,18 @@ export default class TagGameModel {
 
   isSetGame() {
     return this.id != "";
+  }
+
+  addLiveUser(user: UserModel) {
+    this.setLiveUsers([...this.getLiveUsers(), user]);
+  }
+
+  joinedUserIds() {
+    return [
+      ...this.liveUsers.map((user) => user.getId()),
+      ...this.policeUsers.map((user) => user.getId()),
+      ...this.rejectUsers.map((user) => user.getId()),
+    ];
   }
 
   toObject(): DynamoTagGame {

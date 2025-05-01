@@ -27,7 +27,6 @@ function PrisonAreaScreen({ _userStore, _tagGameStore }: Props) {
 
   const storeGameStartSetting = async (gameId: string) => {
     try {
-      await joinUser(gameId, userStore.getCurrentUser().getId());
       if (!isGameStartDone.current)
         await putDevices(gameId, userStore.getCurrentUser().getDeviceId());
 
