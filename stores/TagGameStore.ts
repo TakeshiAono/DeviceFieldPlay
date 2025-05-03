@@ -241,6 +241,27 @@ export default class TagGameStore {
     return this.currentTagGame.joinedUserIds().includes(userId);
   }
 
+  public isCurrentUserPolice(user: UserModel) {
+    return this.currentTagGame
+      .getPoliceUsers()
+      .map((user) => user.getId())
+      .includes(user.getId());
+  }
+
+  public isCurrentUserLive(user: UserModel) {
+    return this.currentTagGame
+      .getLiveUsers()
+      .map((user) => user.getId())
+      .includes(user.getId());
+  }
+
+  public isCurrentUserReject(user: UserModel) {
+    return this.currentTagGame
+      .getRejectUsers()
+      .map((user) => user.getId())
+      .includes(user.getId());
+  }
+
   // TODO: 引数をテレコにしたい
   static convertUserInstances(
     dynamoResponseUsers: DynamoUser[],
