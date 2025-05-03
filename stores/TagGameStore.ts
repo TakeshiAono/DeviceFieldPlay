@@ -150,6 +150,10 @@ export default class TagGameStore {
     this.currentTagGame.setPoliceUsers(policeUsers);
   }
 
+  public getLiveUsers() {
+    return this.currentTagGame.getLiveUsers();
+  }
+
   public getPoliceUsers() {
     return this.currentTagGame.getPoliceUsers();
   }
@@ -231,6 +235,31 @@ export default class TagGameStore {
 
   public belongingGameGroup(gameId: string) {
     return this.currentTagGame.getId() == gameId;
+  }
+
+  public isCurrentUserJoined(userId: string) {
+    return this.currentTagGame.joinedUserIds().includes(userId);
+  }
+
+  public isCurrentUserPolice(user: UserModel) {
+    return this.currentTagGame
+      .getPoliceUsers()
+      .map((user) => user.getId())
+      .includes(user.getId());
+  }
+
+  public isCurrentUserLive(user: UserModel) {
+    return this.currentTagGame
+      .getLiveUsers()
+      .map((user) => user.getId())
+      .includes(user.getId());
+  }
+
+  public isCurrentUserReject(user: UserModel) {
+    return this.currentTagGame
+      .getRejectUsers()
+      .map((user) => user.getId())
+      .includes(user.getId());
   }
 
   // TODO: 引数をテレコにしたい

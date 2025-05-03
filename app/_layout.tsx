@@ -19,29 +19,31 @@ import * as Crypto from "expo-crypto";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import UserStore from "@/stores/UserStore";
 import TagGameStore from "@/stores/TagGameStore";
-import { putUser } from "@/utils/APIs";
+import { joinUser, putUser } from "@/utils/APIs";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
-
-const stores = {
-  _userStore: new UserStore(),
-  _tagGameStore: new TagGameStore(),
-};
-
-const id = Crypto.randomUUID();
-
-Notifications.getDevicePushTokenAsync().then(({ data }) => {
-  console.log("deviceId:", data);
-  stores._userStore.getCurrentUser().setDeviceId(data);
-});
-stores._userStore.getCurrentUser().setId(id);
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [userName, setUserName] = useState<string | undefined>(undefined);
   const [modalView, setModalView] = useState<boolean>(true);
   const [isGameMaster, setIsGameMaster] = useState<boolean>(false);
+  // NOTE: ホットリロードが走るたびにエラーとなるためuseStateでリロードのたびに各storeが再生成されないようにする
+  const [stores] = useState(() => ({
+    _userStore: new UserStore(),
+    _tagGameStore: new TagGameStore(),
+  }));
+
+  useEffect(() => {
+    const id = Crypto.randomUUID();
+    stores._userStore.getCurrentUser().setId(id);
+
+    Notifications.getDevicePushTokenAsync().then(({ data }) => {
+      console.log("deviceId:", data);
+      stores._userStore.getCurrentUser().setDeviceId(data);
+    });
+  }, [stores]);
 
   useEffect(() => {
     async function registerForPushNotificationsAsync() {
@@ -69,7 +71,7 @@ export default function RootLayout() {
             <Text
               style={{ fontWeight: "bold", fontSize: 20, marginBottom: 20 }}
             >
-              名前登録
+              名前登録addyr
             </Text>
             <Text>ゲームで使用する名前を入力してください</Text>
             <TextInput
@@ -114,9 +116,13 @@ export default function RootLayout() {
                 if (isGameMaster) {
                   stores._tagGameStore
                     .getTagGame()
-                    .setGameMasterId(
-                      stores._userStore.getCurrentUser().getId(),
-                    );
+                    .setGameMasterId(stores._userStore.getCurrentUser().getId())
+                    .addLiveUser(stores._userStore.getCurrentUser());
+
+                  await joinUser(
+                    gameId,
+                    stores._userStore.getCurrentUser().getId(),
+                  );
                 }
               }}
             />

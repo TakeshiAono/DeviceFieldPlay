@@ -23,6 +23,8 @@ import {
   rejectUserNotificationHandler,
   validAreaNotificationHandler,
 } from "@/utils/Notifications";
+import { Text } from "react-native";
+import { getPlayerRoleColor } from "@/constants/Colors";
 
 export type Props = {
   mapVisible?: boolean;
@@ -224,61 +226,82 @@ function ShowMap({
         </View>
       </View>
       {mapVisible && (
-        <MapView
-          style={styles.map}
-          showsUserLocation={true}
-          followsUserLocation={true}
-          showsMyLocationButton={true}
-          region={region}
-          onUserLocationChange={(event) => {
-            if (!event.nativeEvent.coordinate) return;
-            const currentPosition: [number, number] = [
-              event.nativeEvent.coordinate.longitude,
-              event.nativeEvent.coordinate.latitude,
-            ];
-            onChangeCurrentPosition(currentPosition);
+        <View style={{ position: "relative" }}>
+          <MapView
+            style={styles.map}
+            showsUserLocation={true}
+            followsUserLocation={true}
+            showsMyLocationButton={true}
+            region={region}
+            onUserLocationChange={(event) => {
+              if (!event.nativeEvent.coordinate) return;
+              const currentPosition: [number, number] = [
+                event.nativeEvent.coordinate.longitude,
+                event.nativeEvent.coordinate.latitude,
+              ];
+              onChangeCurrentPosition(currentPosition);
 
-            // NOTE: 初期マップ表示の時にだけ発火し、現在位置の表示範囲に書き換える
-            if (!isFirstUpdate) return;
-            event.persist();
-            setRegion({
-              latitude:
-                event.nativeEvent.coordinate?.latitude ??
-                initialJapanRegion.latitude,
-              longitude:
-                event.nativeEvent.coordinate?.longitude ??
-                initialJapanRegion.longitude,
-              latitudeDelta: region.latitudeDelta,
-              longitudeDelta: region.longitudeDelta,
-            });
-            setIsFirstUpdate(false);
-          }}
-          onRegionChange={(_, details) => {
-            if (details.isGesture) {
-              setRegion((prev) => {
-                return {
-                  latitude: prev.latitude,
-                  longitude: prev.longitude,
-                  latitudeDelta: prev.latitudeDelta,
-                  longitudeDelta: prev.longitudeDelta,
-                };
+              // NOTE: 初期マップ表示の時にだけ発火し、現在位置の表示範囲に書き換える
+              if (!isFirstUpdate) return;
+              event.persist();
+              setRegion({
+                latitude:
+                  event.nativeEvent.coordinate?.latitude ??
+                  initialJapanRegion.latitude,
+                longitude:
+                  event.nativeEvent.coordinate?.longitude ??
+                  initialJapanRegion.longitude,
+                latitudeDelta: region.latitudeDelta,
+                longitudeDelta: region.longitudeDelta,
               });
-            }
-          }}
-        >
-          {validPoints.length > 0 && (
-            <Polygon
-              fillColor={validPointsDrawColor}
-              coordinates={validPoints} // 東京
-            />
+              setIsFirstUpdate(false);
+            }}
+            onRegionChange={(_, details) => {
+              if (details.isGesture) {
+                setRegion((prev) => {
+                  return {
+                    latitude: prev.latitude,
+                    longitude: prev.longitude,
+                    latitudeDelta: prev.latitudeDelta,
+                    longitudeDelta: prev.longitudeDelta,
+                  };
+                });
+              }
+            }}
+          >
+            {validPoints.length > 0 && (
+              <Polygon
+                fillColor={validPointsDrawColor}
+                coordinates={validPoints} // 東京
+              />
+            )}
+            {prisonPoints.length > 0 && (
+              <Polygon
+                fillColor={prisonPointsDrawColor}
+                coordinates={prisonPoints} // 東京
+              />
+            )}
+          </MapView>
+          {userStore.getCurrentUser().getName() !== "" && (
+            <View
+              style={{
+                backgroundColor: "white",
+                width: "auto",
+                position: "absolute",
+                top: 0,
+                borderColor: getPlayerRoleColor(tagGameStore, userStore),
+                borderWidth: 10,
+                padding: 5,
+              }}
+            >
+              <Text style={{ fontWeight: "900" }}>
+                {userStore.getPlayerRoleName(tagGameStore) +
+                  ": " +
+                  userStore.getCurrentUser().getName()}
+              </Text>
+            </View>
           )}
-          {prisonPoints.length > 0 && (
-            <Polygon
-              fillColor={prisonPointsDrawColor}
-              coordinates={prisonPoints} // 東京
-            />
-          )}
-        </MapView>
+        </View>
       )}
     </>
   );

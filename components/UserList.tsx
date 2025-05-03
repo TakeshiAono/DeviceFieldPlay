@@ -18,6 +18,13 @@ export default function UserList({
   onChecked,
   onUnChecked,
 }: Props) {
+  const pressHandler = (item: UserTypeForList) => {
+    const beforeChangeCheckedProp = item.checked;
+    beforeChangeCheckedProp
+      ? onUnChecked({ ...item, checked: !item.checked })
+      : onChecked({ ...item, checked: !item.checked });
+  };
+
   return (
     <FlatList
       data={userRecords}
@@ -25,13 +32,15 @@ export default function UserList({
         return (
           <ListItem
             onPress={() => {
-              const beforeChangeCheckedProp = item.checked;
-              beforeChangeCheckedProp
-                ? onUnChecked({ ...item, checked: !item.checked })
-                : onChecked({ ...item, checked: !item.checked });
+              pressHandler(item);
             }}
           >
-            <ListItem.CheckBox checked={item.checked} />
+            <ListItem.CheckBox
+              checked={item.checked}
+              onPress={() => {
+                pressHandler(item);
+              }}
+            />
             <ListItem.Content>
               <ListItem.Title>{item.name}</ListItem.Title>
             </ListItem.Content>
