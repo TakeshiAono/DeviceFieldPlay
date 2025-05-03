@@ -294,7 +294,11 @@ function ShowMap({
                 padding: 5,
               }}
             >
-              <Text>{userStore.getCurrentUser().getName()}</Text>
+              <Text style={{ fontWeight: "900" }}>
+                {userStore.getPlayerRoleName(tagGameStore) +
+                  ": " +
+                  userStore.getCurrentUser().getName()}
+              </Text>
             </View>
           )}
         </View>
