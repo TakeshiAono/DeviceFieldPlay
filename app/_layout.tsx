@@ -36,6 +36,10 @@ export default function RootLayout() {
   }));
 
   useEffect(() => {
+    SplashScreen.hideAsync();
+  }, []);
+
+  useEffect(() => {
     const id = Crypto.randomUUID();
     stores._userStore.getCurrentUser().setId(id);
 
