@@ -5,7 +5,7 @@ import ReactNativeModal from "react-native-modal";
 
 import TagGameStore from "@/stores/TagGameStore";
 import UserStore from "@/stores/UserStore";
-import { joinUser, patchDevices, putTagGames, putUser } from "@/utils/APIs";
+import { joinUser, putTagGames, putUser } from "@/utils/APIs";
 import { Button } from "@rneui/themed";
 import { useRef, useState } from "react";
 import { CameraView } from "expo-camera";
@@ -49,7 +49,6 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
     console.log("ScanData: ", gameId);
     setCameraVisible(false);
     tagGameStore.getTagGame().setId(gameId);
-    await patchDevices(gameId, userStore.getCurrentUser().getDeviceId());
     await putUser(gameId, userStore.getCurrentUser());
 
     const updatedLiveUsers = await joinUser(
