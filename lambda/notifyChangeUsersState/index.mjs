@@ -93,6 +93,9 @@ export const handler = async (event) => {
       event.Records[0].dynamodb.OldImage?.liveUsers?.L.length;
     const newLiveUsersCount =
       event.Records[0].dynamodb.NewImage?.liveUsers?.L.length;
+      event.Records[0].dynamodb.OldImage?.policeUsers?.L.length;
+    const newPoliceUsersCount =
+      event.Records[0].dynamodb.NewImage?.policeUsers?.L.length;
     // liveUserの増減をみて復活通知、脱落通知をするか判断してFCMへ送信している。
     if (prevLiveUsersCount < newLiveUsersCount) {
       androidMessages = androidDeviceIds.map((token) => {
@@ -124,6 +127,26 @@ export const handler = async (event) => {
               body: "ユーザーが脱落しました",
             },
             data: { notification_type: "rejectUser" },
+            android: {
+              priority: "high",
+              notification: {
+                channelId: "high_priority",
+                sound: "default",
+              },
+            },
+          },
+        };
+      });
+    } else if (prevPoliceUsersCount < newPoliceUsersCount) {
+      androidMessages = androidDeviceIds.map((token) => {
+        return {
+          message: {
+            token,
+            notification: {
+              title: "ユーザー変更通知",
+              body: "ユーザーが警察になりました",
+            },
+            data: { notification_type: "policeUser" },
             android: {
               priority: "high",
               notification: {
