@@ -39,21 +39,6 @@ export const handler = async (event) => {
     };
   }
 
-  const oldRejectUsers = JSON.stringify(
-    event.Records[0].dynamodb.OldImage.rejectUsers,
-  );
-  const newRejectUsers = JSON.stringify(
-    event.Records[0].dynamodb.NewImage.rejectUsers,
-  );
-
-  if (oldRejectUsers == newRejectUsers) {
-    // rejectUserの変更がない場合は早期リターンで処理を中断
-    return {
-      statusCode: 200,
-      body: "rejectUsersの変更はありません",
-    };
-  }
-
   const newImage = event.Records[0].dynamodb.NewImage;
   const liveUserIds = newImage?.liveUsers?.L.map((user) => user.S) ?? [];
   const rejectUserIds = newImage?.rejectUsers?.L.map((user) => user.S) ?? [];
@@ -93,6 +78,11 @@ export const handler = async (event) => {
       event.Records[0].dynamodb.OldImage?.liveUsers?.L.length;
     const newLiveUsersCount =
       event.Records[0].dynamodb.NewImage?.liveUsers?.L.length;
+    const prevRejectUsersCount =
+      event.Records[0].dynamodb.OldImage?.rejectUsers?.L.length;
+    const newRejectUsersCount =
+      event.Records[0].dynamodb.NewImage?.rejectUsers?.L.length;
+    const prevPoliceUsersCount =
       event.Records[0].dynamodb.OldImage?.policeUsers?.L.length;
     const newPoliceUsersCount =
       event.Records[0].dynamodb.NewImage?.policeUsers?.L.length;
@@ -103,7 +93,7 @@ export const handler = async (event) => {
           message: {
             token,
             notification: {
-              title: "ユーザー通知",
+              title: "ユーザー変更通知",
               body: "ユーザーが復活しました",
             },
             data: { notification_type: "reviveUser" },
@@ -117,13 +107,13 @@ export const handler = async (event) => {
           },
         };
       });
-    } else {
+    } else if (prevRejectUsersCount < newRejectUsersCount) {
       androidMessages = androidDeviceIds.map((token) => {
         return {
           message: {
             token,
             notification: {
-              title: "ユーザー通知",
+              title: "ユーザー変更通知",
               body: "ユーザーが脱落しました",
             },
             data: { notification_type: "rejectUser" },

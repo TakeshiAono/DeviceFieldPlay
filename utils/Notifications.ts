@@ -180,9 +180,7 @@ export const rejectUserNotificationHandler = async (
   try {
     const tagGame = await getTagGames(gameId);
     const gameUsers = await getCurrentGameUsersInfo(gameId);
-    tagGameStore.putRejectUsers(
-      TagGameStore.convertUserInstances(gameUsers, tagGame.rejectUsers),
-    );
+    asyncDynamoTagGameUsers(tagGameStore, tagGame, gameUsers);
   } catch (error) {
     console.error("Error: ", error);
   }
@@ -206,9 +204,7 @@ export const liveUserNotificationHandler = async (
   try {
     const tagGame = await getTagGames(gameId);
     const gameUsers = await getCurrentGameUsersInfo(gameId);
-    tagGameStore.putLiveUsers(
-      TagGameStore.convertUserInstances(gameUsers, tagGame.liveUsers),
-    );
+    asyncDynamoTagGameUsers(tagGameStore, tagGame, gameUsers);
   } catch (error) {
     console.error("Error: ", error);
   }
