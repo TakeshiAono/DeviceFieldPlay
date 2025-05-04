@@ -1,11 +1,9 @@
-import { useRef } from "react";
-
 import UserStore from "@/stores/UserStore";
 import { inject, observer } from "mobx-react";
 import { View } from "react-native";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { Button } from "@rneui/themed";
-import { joinUser, putDevices, putTagGames } from "@/utils/APIs";
+import { putTagGames } from "@/utils/APIs";
 import TagGameStore from "@/stores/TagGameStore";
 import _ from "lodash";
 import { ValidAreaEditMap } from "@/components/ValidAreaEditMap";
@@ -18,24 +16,9 @@ interface Props {
 function ValidAreaScreen({ _userStore, _tagGameStore }: Props) {
   const userStore = _userStore!;
   const tagGameStore = _tagGameStore!;
-  // const [isSetDoneArea, setIsSetDoneArea] = useState(false);
-
-  const isGameStartDone = useRef(false);
 
   const isGameMaster = () => {
     return userStore.isCurrentUserGameMaster(tagGameStore.getTagGame());
-  };
-
-  const storeGameStartSetting = async (gameId: string) => {
-    try {
-      if (!isGameStartDone.current)
-        await putDevices(gameId, userStore.getCurrentUser().getDeviceId());
-
-      console.log("通知設定をdynamoへセット完了");
-      isGameStartDone.current = true;
-    } catch (error) {
-      console.log(error);
-    }
   };
 
   const resetValidArea = () => {
@@ -72,9 +55,6 @@ function ValidAreaScreen({ _userStore, _tagGameStore }: Props) {
               await putTagGames(tagGame.toObject());
               // setIsSetDoneArea(true);
               tagGameStore.setIsSetValidAreaDone(true);
-
-              if (!userStore.getCurrentUser().getDeviceId()) return;
-              await storeGameStartSetting(tagGame.getId());
             }}
           >
             <IconSymbol size={28} name={"mappin.and.ellipse"} color={"white"} />

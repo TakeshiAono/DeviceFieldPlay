@@ -19,7 +19,7 @@ import * as Crypto from "expo-crypto";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import UserStore from "@/stores/UserStore";
 import TagGameStore from "@/stores/TagGameStore";
-import { joinUser, putUser } from "@/utils/APIs";
+import { joinUser, putDevice, putUser } from "@/utils/APIs";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -75,7 +75,7 @@ export default function RootLayout() {
             <Text
               style={{ fontWeight: "bold", fontSize: 20, marginBottom: 20 }}
             >
-              名前登録addyr
+              名前登録
             </Text>
             <Text>ゲームで使用する名前を入力してください</Text>
             <TextInput
@@ -117,6 +117,10 @@ export default function RootLayout() {
                 setModalView(false);
                 stores._userStore.setCurrentUserName(userName);
                 await putUser(gameId, stores._userStore.getCurrentUser());
+
+                const currentUser = stores._userStore.getCurrentUser();
+                await putDevice(currentUser.getId(), currentUser.getDeviceId());
+
                 if (isGameMaster) {
                   stores._tagGameStore
                     .getTagGame()

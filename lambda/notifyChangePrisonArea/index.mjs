@@ -2,10 +2,7 @@ import axios from "axios";
 import { readFileSync } from "fs";
 import googleAuthLibrary from "google-auth-library";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import {
-  DynamoDBDocumentClient,
-  GetCommand,
-} from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, BatchGetCommand } from "@aws-sdk/lib-dynamodb";
 
 const AWS_ACCESS_KEY_ID = process.env.ACCESS_KEY;
 const AWS_SECRET_ACCESS_KEY = process.env.SECRET_KEY;
@@ -50,20 +47,36 @@ export const handler = async (event) => {
     };
   }
 
-  const gameId = event.Records[0].dynamodb.Keys.id.S; 
+  const newImage = event.Records[0].dynamodb.NewImage;
+  const liveUserIds = newImage?.liveUsers?.L.map((user) => user.S) ?? [];
+  const rejectUserIds = newImage?.rejectUsers?.L.map((user) => user.S) ?? [];
+  const policeUserIds = newImage?.policeUsers?.L.map((user) => user.S) ?? [];
+  const allUserIds = [...liveUserIds, ...rejectUserIds, ...policeUserIds];
+
   try {
-    const command = new GetCommand({
-      TableName: "devices",
-      Key: {
-        gameId: gameId,
+    const command = new BatchGetCommand({
+      RequestItems: {
+        devices: {
+          Keys: allUserIds.map((userId) => ({ userId })),
+        },
       },
     });
-    const deviceResponse = await docClient.send(command);
-    console.log("getDevices:", deviceResponse);
 
-    const androidDeviceIds = deviceResponse.Item.androidDeviceIds
+    const response = await docClient.send(command);
+    const devices = response.Responses?.devices;
+    const androidDeviceIds = devices.map((deviceRecord) => {
+      if (deviceRecord.deviceType === "android") {
+        return deviceRecord.deviceId;
+      }
+    });
+
     // TODO: iOSの通知が実装できていないので、実装する
-    // const iOSDeviceIds = deviceResponse.Item.iOSDeviceIds
+    // const iOSDeviceIds = devices.map(deviceRecord => {
+    //   if(deviceRecord.deviceType === "iOS") {
+    //     return deviceRecord.deviceId
+    //   }
+    // })
+    // console.log("iOSDeviceIds", iOSDeviceIds)
 
     const accessToken = await getAccessToken();
     const fcmUrl = `https://fcm.googleapis.com/v1/projects/${firebaseConfig.project_id}/messages:send`;
@@ -72,11 +85,12 @@ export const handler = async (event) => {
         message: {
           token,
           notification: {
-            title: "エリア変更通知",
-            body: "エリアが変更されました",
+            title: "監獄エリア変更通知",
+            body: "監獄エリアが変更されました",
           },
-          data: {notification_type: "changePrisonArea"},
-          android: { // ✅ ここで `priority: "high"` を設定
+          data: { notification_type: "changePrisonArea" },
+          android: {
+            // ✅ ここで `priority: "high"` を設定
             priority: "high", // 🚀 高優先度にする
             notification: {
               channelId: "high_priority", // 🚀 事前に `setNotificationChannelAsync()` で作成
@@ -84,17 +98,19 @@ export const handler = async (event) => {
             },
           },
         },
-      }
+      };
     });
 
-    await Promise.all(androidMessages.map(message => {
-      return axios.post(fcmUrl, message, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`, // ✅ OAuth 2.0 アクセストークンを使用
-          "Content-Type": "application/json",
-        },
-      });
-    }));
+    await Promise.all(
+      androidMessages.map((message) => {
+        return axios.post(fcmUrl, message, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`, // ✅ OAuth 2.0 アクセストークンを使用
+            "Content-Type": "application/json",
+          },
+        });
+      }),
+    );
 
     return {
       statusCode: 200,
@@ -103,7 +119,7 @@ export const handler = async (event) => {
   } catch (error) {
     console.error(
       "FCM API Error:",
-      error.response ? error.response.data : error.message
+      error.response ? error.response.data : error.message,
     );
     return {
       statusCode: 500,
@@ -113,13 +129,15 @@ export const handler = async (event) => {
 };
 
 async function getAccessToken() {
-  const serviceAccount = JSON.parse(readFileSync("./service-account.json", "utf8"));
+  const serviceAccount = JSON.parse(
+    readFileSync("./service-account.json", "utf8"),
+  );
 
   const client = new JWT(
     serviceAccount.client_email,
     null,
     serviceAccount.private_key,
-    ["https://www.googleapis.com/auth/firebase.messaging"]
+    ["https://www.googleapis.com/auth/firebase.messaging"],
   );
 
   const token = await client.authorize();
