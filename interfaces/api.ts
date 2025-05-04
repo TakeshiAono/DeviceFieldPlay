@@ -28,7 +28,7 @@ export type DynamoUser = {
 };
 
 export type DynamoDevice = {
-  gameId: GameId;
-  androidDeviceIds: string[];
-  iOSDeviceIds: string[];
+  userId: string;
+  deviceId: string;
+  deviceType: "ios" | "android";
 };

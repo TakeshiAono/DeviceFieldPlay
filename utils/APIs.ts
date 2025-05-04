@@ -68,19 +68,31 @@ export const joinUser = async <T extends DynamoTagGame>(
   userId: string,
 ): Promise<Pick<T, "liveUsers">> => {
   try {
-    const command = new UpdateCommand({
+    const getCommand = new GetCommand({
       TableName: "tagGames",
       Key: { id: gameId },
-      UpdateExpression: `SET liveUsers = list_append(if_not_exists(liveUsers, :emptyList), :newUserId)`,
+      ProjectionExpression: "liveUsers",
+    });
+    const result = await docClient.send(getCommand);
+    const currentUsers = result.Item?.liveUsers ?? [];
+
+    if (currentUsers.includes(userId)) {
+      console.log("ユーザーはすでに存在します");
+      return { liveUsers: currentUsers };
+    }
+
+    // 存在しないなら追加
+    const updateCommand = new UpdateCommand({
+      TableName: "tagGames",
+      Key: { id: gameId },
+      UpdateExpression: "SET liveUsers = list_append(liveUsers, :newUserId)",
       ExpressionAttributeValues: {
         ":newUserId": [userId],
-        ":emptyList": [],
       },
       ReturnValues: "UPDATED_NEW",
     });
 
-    const response = await docClient.send(command);
-    console.log("joinUser:", response);
+    const response = await docClient.send(updateCommand);
     return response.Attributes as Pick<T, "liveUsers">;
   } catch (error) {
     console.error("joinUser:", error);
@@ -216,70 +228,25 @@ export const reviveUser = async <T extends DynamoTagGame>(
   }
 };
 
-export const putDevices = async <T extends DynamoDevice>(
-  gameId: T["gameId"],
+export const putDevice = async <T extends DynamoDevice>(
+  userId: T["userId"],
   deviceId: string,
 ) => {
-  const [iOSDeviceList, androidDeviceList] = _getIdsByPlatform(deviceId);
-
   try {
     const command = new PutCommand({
       TableName: "devices",
       Item: {
-        gameId: gameId,
-        iOSDeviceIds: iOSDeviceList,
-        androidDeviceIds: androidDeviceList,
+        userId: userId,
+        deviceId: deviceId,
+        deviceType: Platform.OS,
       },
     });
 
     const response = await docClient.send(command);
-    console.log("putDevices:", response);
-    return gameId;
+    console.log("putDevice:", response);
+    return userId;
   } catch (error) {
-    console.error("putDevices:", error);
+    console.error("putDevice:", error);
     throw error;
   }
-};
-
-export const patchDevices = async <T extends DynamoDevice>(
-  gameId: T["gameId"],
-  deviceId: string,
-): Promise<Pick<T, "androidDeviceIds">> => {
-  const platformKey =
-    Platform.OS === "ios" ? "iOSDeviceIds" : "androidDeviceIds";
-
-  try {
-    const command = new UpdateCommand({
-      TableName: "devices",
-      Key: { gameId: gameId }, // 🔹 更新対象のキー
-      UpdateExpression: `SET #deviceIds = list_append(if_not_exists(#deviceIds, :emptyList), :newDevice)`,
-      ExpressionAttributeNames: {
-        "#deviceIds": platformKey, // 🔹 iOSかAndroidのキーを動的に指定
-      },
-      ExpressionAttributeValues: {
-        ":newDevice": [deviceId], // 🔹 追加する `deviceId`
-        ":emptyList": [], // 🔹 `deviceIds` が未定義なら空リストをセット
-      },
-      ReturnValues: "UPDATED_NEW",
-    });
-
-    const response = await docClient.send(command);
-    console.log("patchDevices:", response);
-    return response.Attributes as Pick<T, "androidDeviceIds">;
-  } catch (error) {
-    console.error("patchDevices:", error);
-    throw error;
-  }
-};
-
-const _getIdsByPlatform = (deviceId: string) => {
-  const iOSDeviceList = [];
-  const androidDeviceList = [];
-  if (Platform.OS === "ios") {
-    iOSDeviceList.push(deviceId);
-  } else {
-    androidDeviceList.push(deviceId);
-  }
-
-  return [iOSDeviceList, androidDeviceList];
 };

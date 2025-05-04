@@ -2,10 +2,7 @@ import axios from "axios";
 import { readFileSync } from "fs";
 import googleAuthLibrary from "google-auth-library";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import {
-  DynamoDBDocumentClient,
-  GetCommand,
-} from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, BatchGetCommand } from "@aws-sdk/lib-dynamodb";
 
 const AWS_ACCESS_KEY_ID = process.env.ACCESS_KEY;
 const AWS_SECRET_ACCESS_KEY = process.env.SECRET_KEY;
@@ -29,18 +26,25 @@ const firebaseConfig = {
 
 // Lambda ハンドラー
 export const handler = async (event) => {
-  console.log("イベント", event.Records)
+  console.log("イベント", event.Records);
 
   // ゲームスタート時の最初の処理は早期リターンする
-  if (event.Records[0].dynamodb.OldImage == undefined || event.Records[0].dynamodb.NewImage == undefined) {
+  if (
+    event.Records[0].dynamodb.OldImage == undefined ||
+    event.Records[0].dynamodb.NewImage == undefined
+  ) {
     return {
       statusCode: 200,
       body: "",
-    };  
+    };
   }
 
-  const oldRejectUsers = JSON.stringify(event.Records[0].dynamodb.OldImage.rejectUsers);
-  const newRejectUsers = JSON.stringify(event.Records[0].dynamodb.NewImage.rejectUsers);
+  const oldRejectUsers = JSON.stringify(
+    event.Records[0].dynamodb.OldImage.rejectUsers,
+  );
+  const newRejectUsers = JSON.stringify(
+    event.Records[0].dynamodb.NewImage.rejectUsers,
+  );
 
   if (oldRejectUsers == newRejectUsers) {
     // rejectUserの変更がない場合は早期リターンで処理を中断
@@ -50,29 +54,47 @@ export const handler = async (event) => {
     };
   }
 
-  const gameId = event.Records[0].dynamodb.Keys.id.S; 
+  const newImage = event.Records[0].dynamodb.NewImage;
+  const liveUserIds = newImage?.liveUsers?.L.map((user) => user.S) ?? [];
+  const rejectUserIds = newImage?.rejectUsers?.L.map((user) => user.S) ?? [];
+  const policeUserIds = newImage?.policeUsers?.L.map((user) => user.S) ?? [];
+  const allUserIds = [...liveUserIds, ...rejectUserIds, ...policeUserIds];
+
   try {
-    const command = new GetCommand({
-      TableName: "devices",
-      Key: {
-          gameId: gameId,
+    const command = new BatchGetCommand({
+      RequestItems: {
+        devices: {
+          Keys: allUserIds.map((userId) => ({ userId })),
         },
-      });
-    const deviceResponse = await docClient.send(command);
-    console.log("getDevices:", deviceResponse);
-    
-    const androidDeviceIds = deviceResponse.Item.androidDeviceIds
+      },
+    });
+
+    const response = await docClient.send(command);
+    const devices = response.Responses?.devices;
+    const androidDeviceIds = devices.map((deviceRecord) => {
+      if (deviceRecord.deviceType === "android") {
+        return deviceRecord.deviceId;
+      }
+    });
+
     // TODO: iOSの通知が実装できていないので、実装する
-    // const iOSDeviceIds = deviceResponse.Item.iOSDeviceIds
-    
+    // const iOSDeviceIds = devices.map(deviceRecord => {
+    //   if(deviceRecord.deviceType === "iOS") {
+    //     return deviceRecord.deviceId
+    //   }
+    // })
+    // console.log("iOSDeviceIds", iOSDeviceIds)
+
     const accessToken = await getAccessToken();
     const fcmUrl = `https://fcm.googleapis.com/v1/projects/${firebaseConfig.project_id}/messages:send`;
 
     let androidMessages = [];
-    const prevLiveUsersCount = event.Records[0].dynamodb.OldImage?.liveUsers?.L.length
-    const newLiveUsersCount = event.Records[0].dynamodb.NewImage?.liveUsers?.L.length
+    const prevLiveUsersCount =
+      event.Records[0].dynamodb.OldImage?.liveUsers?.L.length;
+    const newLiveUsersCount =
+      event.Records[0].dynamodb.NewImage?.liveUsers?.L.length;
     // liveUserの増減をみて復活通知、脱落通知をするか判断してFCMへ送信している。
-    if(prevLiveUsersCount < newLiveUsersCount) {
+    if (prevLiveUsersCount < newLiveUsersCount) {
       androidMessages = androidDeviceIds.map((token) => {
         return {
           message: {
@@ -81,7 +103,7 @@ export const handler = async (event) => {
               title: "ユーザー通知",
               body: "ユーザーが復活しました",
             },
-            data: {notification_type: "reviveUser"},
+            data: { notification_type: "reviveUser" },
             android: {
               priority: "high",
               notification: {
@@ -90,7 +112,7 @@ export const handler = async (event) => {
               },
             },
           },
-        }
+        };
       });
     } else {
       androidMessages = androidDeviceIds.map((token) => {
@@ -101,7 +123,7 @@ export const handler = async (event) => {
               title: "ユーザー通知",
               body: "ユーザーが脱落しました",
             },
-            data: {notification_type: "rejectUser"},
+            data: { notification_type: "rejectUser" },
             android: {
               priority: "high",
               notification: {
@@ -110,18 +132,20 @@ export const handler = async (event) => {
               },
             },
           },
-        }
+        };
       });
     }
 
-    await Promise.all(androidMessages.map(message => 
-      axios.post(fcmUrl, message, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      })
-    ));
+    await Promise.all(
+      androidMessages.map((message) =>
+        axios.post(fcmUrl, message, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }),
+      ),
+    );
 
     return {
       statusCode: 200,
@@ -130,7 +154,7 @@ export const handler = async (event) => {
   } catch (error) {
     console.error(
       "FCM API Error:",
-      error.response ? error.response.data : error.message
+      error.response ? error.response.data : error.message,
     );
     return {
       statusCode: 500,
@@ -140,13 +164,15 @@ export const handler = async (event) => {
 };
 
 async function getAccessToken() {
-  const serviceAccount = JSON.parse(readFileSync("./service-account.json", "utf8"));
+  const serviceAccount = JSON.parse(
+    readFileSync("./service-account.json", "utf8"),
+  );
 
   const client = new JWT(
     serviceAccount.client_email,
     null,
     serviceAccount.private_key,
-    ["https://www.googleapis.com/auth/firebase.messaging"]
+    ["https://www.googleapis.com/auth/firebase.messaging"],
   );
 
   const token = await client.authorize();
