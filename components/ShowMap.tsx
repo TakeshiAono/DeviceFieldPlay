@@ -188,7 +188,6 @@ function ShowMap({
                                     tagGameStore.getTagGame().getId(),
                                     userStore.getCurrentUser().getId(),
                                   );
-                                  // setIsCurrentUserLive(true);
                                 } catch (error) {
                                   console.error(error);
                                 }
@@ -228,7 +227,6 @@ function ShowMap({
                                     tagGameStore.getTagGame().getId(),
                                     userStore.getCurrentUser().getId(),
                                   );
-                                  // setIsCurrentUserLive(false);
                                 } catch (error) {
                                   console.error(error);
                                 }
