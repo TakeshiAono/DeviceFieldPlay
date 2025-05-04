@@ -38,6 +38,14 @@ export const handler = async (event) => {
   const oldAreasString = JSON.stringify(oldAreas);
   const newAreasString = JSON.stringify(newAreas);
 
+  if (!oldAreas) {
+    // エリア変更がない場合は早期リターンで処理を中断
+    return {
+      statusCode: 200,
+      body: "初期のエリア定義です",
+    };
+  }
+
   if (oldAreasString == newAreasString) {
     // エリア変更がない場合は早期リターンで処理を中断
     return {

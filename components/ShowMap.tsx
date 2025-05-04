@@ -19,6 +19,7 @@ import {
   joinUserNotificationHandler,
   kickOutUsersNotificationHandler,
   liveUserNotificationHandler,
+  policeUserNotificationHandler,
   prisonAreaNotificationHandler,
   rejectUserNotificationHandler,
   validAreaNotificationHandler,
@@ -53,7 +54,6 @@ function ShowMap({
   const tagGameStore = _tagGameStore!;
 
   const [isFirstUpdate, setIsFirstUpdate] = useState(true);
-  const [isCurrentUserLive, setIsCurrentUserLive] = useState(true);
 
   useEffect(() => {
     const gameId = tagGameStore.getTagGame().getId();
@@ -92,6 +92,11 @@ function ShowMap({
         liveUserNotificationHandler(event, gameId, tagGameStore);
       });
 
+    const policeUserNotificationListener =
+      Notifications.addNotificationReceivedListener((event) => {
+        policeUserNotificationHandler(event, gameId, tagGameStore);
+      });
+
     const gameStartNotificationListener =
       Notifications.addNotificationReceivedListener((event) => {
         gameStartNotificationHandler(event, gameId, tagGameStore);
@@ -110,6 +115,7 @@ function ShowMap({
       changePrisonAreaNotificationListener.remove();
       rejectUserNotificationListener.remove();
       reviveUserNotificationListener.remove();
+      policeUserNotificationListener.remove();
       gameStartNotificationListener.remove();
       gameStopNotificationListener.remove();
     };
@@ -140,13 +146,12 @@ function ShowMap({
     if (!userStore.getCurrentUser().getDeviceId()) return;
 
     if (!isInside) {
-      if (isCurrentUserLive === false) return;
+      if (tagGameStore.isCurrentUserReject(userStore.getCurrentUser())) return;
 
       await rejectUser(
         tagGameStore.getTagGame().getId(),
         userStore.getCurrentUser().getDeviceId(),
       );
-      setIsCurrentUserLive(false);
       Alert.alert("脱落通知", "エリア外に出たため脱落となりました。", [
         { text: "OK" },
       ]);
@@ -157,72 +162,89 @@ function ShowMap({
     <>
       <View style={{ position: "absolute", top: 150, right: 5, zIndex: 1 }}>
         <View style={{ display: "flex", gap: 5 }}>
-          <Button
-            type="solid"
-            color={isCurrentUserLive ? "gray" : "success"}
-            onPress={
-              isCurrentUserLive
-                ? undefined
-                : () => {
-                    Alert.alert("復活", "復活してもよいですか？", [
-                      { text: "Cancel", onPress: undefined },
-                      {
-                        text: "OK",
-                        onPress: async () => {
-                          if (!userStore.getCurrentUser().getDeviceId()) return;
-
-                          try {
-                            await reviveUser(
-                              tagGameStore.getTagGame().getId(),
-                              userStore.getCurrentUser().getId(),
-                            );
-                            setIsCurrentUserLive(true);
-                          } catch (error) {
-                            console.error(error);
-                          }
-                        },
-                      },
-                    ]);
+          {tagGameStore.getTagGame().getIsGameStarted() &&
+            !tagGameStore.isCurrentUserPolice(userStore.getCurrentUser()) && (
+              <>
+                <Button
+                  type="solid"
+                  color={
+                    tagGameStore.isCurrentUserReject(userStore.getCurrentUser())
+                      ? "success"
+                      : "gray"
                   }
-            }
-          >
-            <IconSymbol size={28} name={"person.badge.plus"} color={"white"} />
-          </Button>
-          <Button
-            type="solid"
-            color={
-              !isCurrentUserLive || !tagGameStore.getTagGame().getId()
-                ? "gray"
-                : "error"
-            }
-            onPress={
-              !isCurrentUserLive || !tagGameStore.getTagGame().getId()
-                ? undefined
-                : () => {
-                    Alert.alert("脱落", "脱落してもよいですか？", [
-                      { text: "Cancel", onPress: undefined },
-                      {
-                        text: "OK",
-                        onPress: async () => {
-                          if (!userStore.getCurrentUser().getDeviceId()) return;
+                  onPress={
+                    tagGameStore.isCurrentUserReject(userStore.getCurrentUser())
+                      ? () => {
+                          Alert.alert("復活", "復活してもよいですか？", [
+                            { text: "Cancel", onPress: undefined },
+                            {
+                              text: "OK",
+                              onPress: async () => {
+                                if (!userStore.getCurrentUser().getDeviceId())
+                                  return;
 
-                          try {
-                            await rejectUser(
-                              tagGameStore.getTagGame().getId(),
-                              userStore.getCurrentUser().getId(),
-                            );
-                            setIsCurrentUserLive(false);
-                          } catch (error) {
-                            console.error(error);
-                          }
-                        },
-                      },
-                    ]);
+                                try {
+                                  await reviveUser(
+                                    tagGameStore.getTagGame().getId(),
+                                    userStore.getCurrentUser().getId(),
+                                  );
+                                } catch (error) {
+                                  console.error(error);
+                                }
+                              },
+                            },
+                          ]);
+                        }
+                      : undefined
                   }
-            }
-          >
-            <IconSymbol size={28} name={"person.badge.minus"} color={"white"} />
-          </Button>
+                >
+                  <IconSymbol
+                    size={28}
+                    name={"person.badge.plus"}
+                    color={"white"}
+                  />
+                </Button>
+                <Button
+                  type="solid"
+                  color={
+                    tagGameStore.isCurrentUserLive(userStore.getCurrentUser())
+                      ? "error"
+                      : "gray"
+                  }
+                  onPress={
+                    tagGameStore.isCurrentUserLive(userStore.getCurrentUser())
+                      ? () => {
+                          Alert.alert("脱落", "脱落してもよいですか？", [
+                            { text: "Cancel", onPress: undefined },
+                            {
+                              text: "OK",
+                              onPress: async () => {
+                                if (!userStore.getCurrentUser().getDeviceId())
+                                  return;
+
+                                try {
+                                  await rejectUser(
+                                    tagGameStore.getTagGame().getId(),
+                                    userStore.getCurrentUser().getId(),
+                                  );
+                                } catch (error) {
+                                  console.error(error);
+                                }
+                              },
+                            },
+                          ]);
+                        }
+                      : undefined
+                  }
+                >
+                  <IconSymbol
+                    size={28}
+                    name={"person.badge.minus"}
+                    color={"white"}
+                  />
+                </Button>
+              </>
+            )}
         </View>
       </View>
       {mapVisible && (
