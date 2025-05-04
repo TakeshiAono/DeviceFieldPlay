@@ -214,6 +214,30 @@ export const liveUserNotificationHandler = async (
   }
 };
 
+export const policeUserNotificationHandler = async (
+  notification: Notifications.Notification,
+  gameId: string,
+  tagGameStore: TagGameStore,
+) => {
+  if (notification.request.content.data.notification_type !== "policeUser")
+    return;
+  console.log("警察push通知", notification.request.content);
+
+  Toast.show({
+    type: "success",
+    text1: notification.request.content.title as string,
+    text2: notification.request.content.body as string,
+  });
+
+  try {
+    const tagGame = await getTagGames(gameId);
+    const gameUsers = await getCurrentGameUsersInfo(gameId);
+    asyncDynamoTagGameUsers(tagGameStore, tagGame, gameUsers);
+  } catch (error) {
+    console.error("Error: ", error);
+  }
+};
+
 const asyncDynamoTagGameAllProperties = (
   tagGameStore: TagGameStore,
   tagGame: DynamoTagGame,
@@ -235,4 +259,22 @@ const asyncDynamoTagGameAllProperties = (
   tagGameStore.getTagGame().setGameMasterId(tagGame.gameMasterId);
   tagGameStore.getTagGame().setGameTimeLimit(dayjs(tagGame.gameTimeLimit));
   tagGameStore.getTagGame().setIsGameStarted(tagGame.isGameStarted);
+};
+
+const asyncDynamoTagGameUsers = (
+  tagGameStore: TagGameStore,
+  tagGame: DynamoTagGame,
+  gameUsers: DynamoUser[],
+) => {
+  tagGameStore.putAllUsers({
+    liveUsers: TagGameStore.convertUserInstances(gameUsers, tagGame.liveUsers),
+    policeUsers: TagGameStore.convertUserInstances(
+      gameUsers,
+      tagGame.policeUsers,
+    ),
+    rejectUsers: TagGameStore.convertUserInstances(
+      gameUsers,
+      tagGame.rejectUsers,
+    ),
+  });
 };

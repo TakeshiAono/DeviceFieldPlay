@@ -19,6 +19,7 @@ import {
   joinUserNotificationHandler,
   kickOutUsersNotificationHandler,
   liveUserNotificationHandler,
+  policeUserNotificationHandler,
   prisonAreaNotificationHandler,
   rejectUserNotificationHandler,
   validAreaNotificationHandler,
@@ -92,6 +93,11 @@ function ShowMap({
         liveUserNotificationHandler(event, gameId, tagGameStore);
       });
 
+    const policeUserNotificationListener =
+      Notifications.addNotificationReceivedListener((event) => {
+        policeUserNotificationHandler(event, gameId, tagGameStore);
+      });
+
     const gameStartNotificationListener =
       Notifications.addNotificationReceivedListener((event) => {
         gameStartNotificationHandler(event, gameId, tagGameStore);
@@ -110,6 +116,7 @@ function ShowMap({
       changePrisonAreaNotificationListener.remove();
       rejectUserNotificationListener.remove();
       reviveUserNotificationListener.remove();
+      policeUserNotificationListener.remove();
       gameStartNotificationListener.remove();
       gameStopNotificationListener.remove();
     };
