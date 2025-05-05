@@ -62,7 +62,7 @@ export async function createSchedule({
   targetLambdaArn, // Lambda 関数の ARN
   roleArn, // スケジューラーが Lambda を呼び出すための IAM ロール
   scheduleTimeUtc, // 例: "2025-05-06T06:30:00Z"
-  dynamoId, // 任意の ID を渡したい
+  gameId, // 任意の ID を渡したい
 }) {
   const command = new CreateScheduleCommand({
     Name: scheduleName,
@@ -73,7 +73,7 @@ export async function createSchedule({
       Arn: targetLambdaArn,
       RoleArn: roleArn,
       Input: JSON.stringify({
-        dynamoId,
+        gameId,
       }),
     },
     ActionAfterCompletion: "DELETE",
