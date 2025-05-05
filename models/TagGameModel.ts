@@ -111,6 +111,10 @@ export default class TagGameModel {
     this.gameTimeLimit = gameTimeLimit;
   }
 
+  resetGameTimeLimit(): void {
+    this.gameTimeLimit = null;
+  }
+
   // isSetValidAreaDone
   getIsSetValidAreaDone(): LocalTagGameModelTypes["isSetValidAreaDone"] {
     return this.isSetValidAreaDone;
