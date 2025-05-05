@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { inject, observer } from "mobx-react";
-import { View } from "react-native";
+import { Text, View } from "react-native";
 import { TimerPickerModal } from "react-native-timer-picker";
 import { Button } from "@rneui/themed";
 import dayjs from "dayjs";
@@ -38,6 +38,10 @@ function GameTimeScreen({ _tagGameStore }: Props) {
     >
       <View style={{ flexDirection: "row", alignItems: "center" }}>
         <View>
+          <Text style={{ color: "red" }}>
+            {selectedDay?.isBefore(dayjs(), "minute") &&
+              "過去の時間になっています"}
+          </Text>
           <Button
             onPress={() => {
               setModalVisible(true);
