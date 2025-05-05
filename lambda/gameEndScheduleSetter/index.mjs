@@ -76,6 +76,7 @@ export async function createSchedule({
         dynamoId,
       }),
     },
+    ActionAfterCompletion: "DELETE",
   });
 
   try {
