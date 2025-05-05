@@ -20,11 +20,12 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import UserStore from "@/stores/UserStore";
 import TagGameStore from "@/stores/TagGameStore";
 import { joinUser, putDevice, putTagGames, putUser } from "@/utils/APIs";
+import { observer } from "mobx-react-lite";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+const RootLayout = observer(() => {
   const colorScheme = useColorScheme();
   const [userName, setUserName] = useState<string | undefined>(undefined);
   const [modalView, setModalView] = useState<boolean>(true);
@@ -40,6 +41,8 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
+    if (!modalView) return;
+
     const id = Crypto.randomUUID();
     stores._userStore.getCurrentUser().setId(id);
 
@@ -47,7 +50,8 @@ export default function RootLayout() {
       console.log("deviceId:", data);
       stores._userStore.getCurrentUser().setDeviceId(data);
     });
-  }, [stores]);
+    // TODO: storesはいらないので削除したい
+  }, [stores, modalView]);
 
   useEffect(() => {
     async function registerForPushNotificationsAsync() {
@@ -147,6 +151,45 @@ export default function RootLayout() {
         <StatusBar style="auto" />
       </ThemeProvider>
       <Toast />
+      <ReactNativeModal
+        style={{ margin: "auto" }}
+        isVisible={stores._tagGameStore.getIsGameEnd()}
+      >
+        <View style={{ backgroundColor: "white", width: 350, padding: 20 }}>
+          <Text style={{ fontWeight: "bold", fontSize: 20, marginBottom: 20 }}>
+            ゲーム終了通知
+          </Text>
+          <Text>{"ゲームが終了しました。\n次のゲームを行いますか？"}</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-around",
+              marginTop: 20,
+            }}
+          >
+            <Button
+              title={"ゲームをやめる"}
+              color={"red"}
+              onPress={() => {
+                stores._userStore.initialize();
+                stores._tagGameStore.initialize();
+                setModalView(true);
+                setUserName("");
+              }}
+            ></Button>
+            <Button
+              title={"次ゲームへ設定を引き継ぐ"}
+              onPress={() => {
+                stores._tagGameStore.setIsGameEnd(false);
+                stores._tagGameStore.getTagGame().resetGameTimeLimit();
+                stores._tagGameStore.getTagGame().setIsGameStarted(false);
+              }}
+            ></Button>
+          </View>
+        </View>
+      </ReactNativeModal>
     </Provider>
   );
-}
+});
+
+export default RootLayout;
