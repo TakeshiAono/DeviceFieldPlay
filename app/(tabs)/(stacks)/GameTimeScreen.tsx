@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { inject, observer } from "mobx-react";
 import { View } from "react-native";
 import { TimerPickerModal } from "react-native-timer-picker";
@@ -15,6 +15,17 @@ function GameTimeScreen({ _tagGameStore }: Props) {
   const tagGameStore = _tagGameStore!;
 
   const [modalVisible, setModalVisible] = useState(false);
+  const [selectedDay, setSelectedDay] = useState(
+    tagGameStore.getTagGame().getGameTimeLimit() ?? dayjs(),
+  );
+
+  useEffect(() => {
+    if (selectedDay.isAfter(dayjs(), "minute")) {
+      tagGameStore.getTagGame().setGameTimeLimit(selectedDay);
+    } else {
+      tagGameStore.getTagGame().resetGameTimeLimit();
+    }
+  }, [selectedDay]);
 
   return (
     <View
@@ -26,31 +37,31 @@ function GameTimeScreen({ _tagGameStore }: Props) {
       }}
     >
       <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <Button
-          onPress={() => {
-            setModalVisible(true);
-          }}
-        >
-          ゲーム時間設定
-        </Button>
+        <View>
+          <Button
+            onPress={() => {
+              setModalVisible(true);
+            }}
+          >
+            ゲーム時間設定
+          </Button>
+        </View>
         <TimerPickerModal
           initialValue={{
-            hours: dayjs().hour(),
-            minutes: dayjs().minute(),
+            hours: selectedDay.hour(),
+            minutes: selectedDay.minute(),
             seconds: 0,
           }}
           hideSeconds={true}
           visible={modalVisible}
           setIsVisible={setModalVisible}
           onConfirm={(pickedDuration) => {
-            tagGameStore
-              .getTagGame()
-              .setGameTimeLimit(
-                dayjs()
-                  .set("hour", pickedDuration.hours)
-                  .set("minute", pickedDuration.minutes)
-                  .set("second", pickedDuration.seconds),
-              );
+            setSelectedDay(
+              dayjs()
+                .set("hour", pickedDuration.hours)
+                .set("minute", pickedDuration.minutes)
+                .set("second", pickedDuration.seconds),
+            );
             setModalVisible(false);
           }}
           modalTitle="ゲーム終了時間"
