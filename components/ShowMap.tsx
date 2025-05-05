@@ -14,6 +14,7 @@ import UserStore from "@/stores/UserStore";
 import TagGameStore from "@/stores/TagGameStore";
 import { initialJapanRegion } from "./EditMap";
 import {
+  gameEndNotificationHandler,
   gameStartNotificationHandler,
   gameStopNotificationHandler,
   joinUserNotificationHandler,
@@ -102,6 +103,11 @@ function ShowMap({
         gameStartNotificationHandler(event, gameId, tagGameStore);
       });
 
+    const gameEndNotificationListener =
+      Notifications.addNotificationReceivedListener((event) => {
+        gameEndNotificationHandler(event, tagGameStore);
+      });
+
     const gameStopNotificationListener =
       Notifications.addNotificationReceivedListener((event) => {
         gameStopNotificationHandler(event, gameId, tagGameStore);
@@ -117,6 +123,7 @@ function ShowMap({
       reviveUserNotificationListener.remove();
       policeUserNotificationListener.remove();
       gameStartNotificationListener.remove();
+      gameEndNotificationListener.remove();
       gameStopNotificationListener.remove();
     };
   }, [tagGameStore.getTagGame().getId()]);

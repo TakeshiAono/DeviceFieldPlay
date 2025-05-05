@@ -11,12 +11,16 @@ export default class TagGameStore {
   @observable
   private isEditTeams!: boolean;
 
+  @observable
+  private isGameEnd!: boolean;
+
   constructor() {
     makeObservable(this);
-    this._initialize();
+    this.initialize();
   }
 
-  private _initialize() {
+  @action
+  public initialize() {
     this.currentTagGame = new TagGameModel({
       id: "",
       liveUsers: [],
@@ -29,6 +33,7 @@ export default class TagGameStore {
       isGameStarted: false,
     });
     this.isEditTeams = false;
+    this.isGameEnd = false;
   }
 
   @action
@@ -227,6 +232,15 @@ export default class TagGameStore {
     this.putRejectUsers(
       TagGameStore.convertUserInstances(gameUsers, tagGame.rejectUsers),
     );
+  }
+
+  @action
+  public setIsGameEnd(isGameEnd: boolean) {
+    this.isGameEnd = isGameEnd;
+  }
+
+  public getIsGameEnd() {
+    return this.isGameEnd;
   }
 
   public getTagGame() {
