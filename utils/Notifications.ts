@@ -139,6 +139,26 @@ export const gameStartNotificationHandler = async (
   }
 };
 
+export const gameTimeUpNotificationHandler = async (
+  notification: Notifications.Notification,
+  tagGameStore: TagGameStore,
+) => {
+  if (notification.request.content.data.notification_type !== "gameEnd") return;
+  console.log("ゲーム終了push通知", notification.request.content);
+
+  Toast.show({
+    type: "error",
+    text1: notification.request.content.title as string,
+    text2: notification.request.content.body as string,
+  });
+
+  try {
+    tagGameStore.setIsGameTimeUp(true);
+  } catch (error) {
+    console.error("Error: ", error);
+  }
+};
+
 export const gameStopNotificationHandler = async (
   notification: Notifications.Notification,
   gameId: string,

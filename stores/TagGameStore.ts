@@ -11,12 +11,16 @@ export default class TagGameStore {
   @observable
   private isEditTeams!: boolean;
 
+  @observable
+  private isGameTimeUp!: boolean;
+
   constructor() {
     makeObservable(this);
-    this._initialize();
+    this.initialize();
   }
 
-  private _initialize() {
+  @action
+  public initialize() {
     this.currentTagGame = new TagGameModel({
       id: "",
       liveUsers: [],
@@ -29,6 +33,7 @@ export default class TagGameStore {
       isGameStarted: false,
     });
     this.isEditTeams = false;
+    this.isGameTimeUp = false;
   }
 
   @action
@@ -229,6 +234,15 @@ export default class TagGameStore {
     );
   }
 
+  @action
+  public setIsGameTimeUp(isGameTimeUp: boolean) {
+    this.isGameTimeUp = isGameTimeUp;
+  }
+
+  public getIsGameTimeUp() {
+    return this.isGameTimeUp;
+  }
+
   public getTagGame() {
     return this.currentTagGame;
   }
@@ -260,6 +274,27 @@ export default class TagGameStore {
       .getRejectUsers()
       .map((user) => user.getId())
       .includes(user.getId());
+  }
+
+  public isLiveUsersEmpty() {
+    return this.getLiveUsers().length === 0;
+  }
+
+  public getWinnerSide(): "police" | "thief" {
+    return this.isLiveUsersEmpty() ? "police" : "thief";
+  }
+
+  public getWinnerMessage(): string {
+    return this.getWinnerSide() === "police"
+      ? "警察側の勝利です!"
+      : "泥棒側の勝利です!";
+  }
+
+  public isGameEnd() {
+    return (
+      this.getTagGame().getIsGameStarted() &&
+      (this.getIsGameTimeUp() || this.isLiveUsersEmpty())
+    );
   }
 
   // TODO: 引数をテレコにしたい
