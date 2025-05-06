@@ -153,7 +153,7 @@ const RootLayout = observer(() => {
       <Toast />
       <ReactNativeModal
         style={{ margin: "auto" }}
-        isVisible={stores._tagGameStore.getIsGameEnd()}
+        isVisible={stores._tagGameStore.getIsGameTimeUp()}
       >
         <View style={{ backgroundColor: "white", width: 350, padding: 20 }}>
           <Text style={{ fontWeight: "bold", fontSize: 20, marginBottom: 20 }}>
@@ -180,7 +180,7 @@ const RootLayout = observer(() => {
             <Button
               title={"次ゲームへ設定を引き継ぐ"}
               onPress={() => {
-                stores._tagGameStore.setIsGameEnd(false);
+                stores._tagGameStore.setIsGameTimeUp(false);
                 stores._tagGameStore.getTagGame().resetGameTimeLimit();
                 stores._tagGameStore.getTagGame().setIsGameStarted(false);
               }}

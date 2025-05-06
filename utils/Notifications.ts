@@ -139,7 +139,7 @@ export const gameStartNotificationHandler = async (
   }
 };
 
-export const gameEndNotificationHandler = async (
+export const gameTimeUpNotificationHandler = async (
   notification: Notifications.Notification,
   tagGameStore: TagGameStore,
 ) => {
@@ -153,7 +153,7 @@ export const gameEndNotificationHandler = async (
   });
 
   try {
-    tagGameStore.setIsGameEnd(true);
+    tagGameStore.setIsGameTimeUp(true);
   } catch (error) {
     console.error("Error: ", error);
   }
