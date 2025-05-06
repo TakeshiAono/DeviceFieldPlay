@@ -276,6 +276,17 @@ export default class TagGameStore {
       .includes(user.getId());
   }
 
+  public isLiveUsersEmpty() {
+    return this.getLiveUsers().length === 0;
+  }
+
+  public isGameEnd() {
+    return (
+      this.getTagGame().getIsGameStarted() &&
+      (this.getIsGameTimeUp() || this.isLiveUsersEmpty())
+    );
+  }
+
   // TODO: 引数をテレコにしたい
   static convertUserInstances(
     dynamoResponseUsers: DynamoUser[],
