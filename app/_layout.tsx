@@ -156,9 +156,15 @@ const RootLayout = observer(() => {
         isVisible={stores._tagGameStore.isGameEnd()}
       >
         <View style={{ backgroundColor: "white", width: 350, padding: 20 }}>
-          <Text style={{ fontWeight: "bold", fontSize: 20, marginBottom: 20 }}>
+          <Text style={{ fontWeight: "bold", fontSize: 25, marginBottom: 20 }}>
             ゲーム終了通知
           </Text>
+          <View style={{ marginBottom: 20 }}>
+            <Text style={{ fontSize: 20 }}>おめでとうございます！🎉</Text>
+            <Text style={{ fontSize: 20 }}>
+              {stores._tagGameStore.getWinnerMessage()}
+            </Text>
+          </View>
           <Text>{"ゲームが終了しました。\n次のゲームを行いますか？"}</Text>
           <View
             style={{
