@@ -12,7 +12,7 @@ export default class TagGameStore {
   private isEditTeams!: boolean;
 
   @observable
-  private isGameEnd!: boolean;
+  private isGameTimeUp!: boolean;
 
   constructor() {
     makeObservable(this);
@@ -33,7 +33,7 @@ export default class TagGameStore {
       isGameStarted: false,
     });
     this.isEditTeams = false;
-    this.isGameEnd = false;
+    this.isGameTimeUp = false;
   }
 
   @action
@@ -235,12 +235,12 @@ export default class TagGameStore {
   }
 
   @action
-  public setIsGameEnd(isGameEnd: boolean) {
-    this.isGameEnd = isGameEnd;
+  public setIsGameTimeUp(isGameTimeUp: boolean) {
+    this.isGameTimeUp = isGameTimeUp;
   }
 
-  public getIsGameEnd() {
-    return this.isGameEnd;
+  public getIsGameTimeUp() {
+    return this.isGameTimeUp;
   }
 
   public getTagGame() {
