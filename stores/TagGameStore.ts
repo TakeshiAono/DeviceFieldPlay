@@ -284,6 +284,12 @@ export default class TagGameStore {
     return this.isLiveUsersEmpty() ? "police" : "thief";
   }
 
+  public getWinnerMessage(): string {
+    return this.getWinnerSide() === "police"
+      ? "警察側の勝利です!"
+      : "泥棒側の勝利です!";
+  }
+
   public isGameEnd() {
     return (
       this.getTagGame().getIsGameStarted() &&
