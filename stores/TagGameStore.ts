@@ -280,6 +280,10 @@ export default class TagGameStore {
     return this.getLiveUsers().length === 0;
   }
 
+  public getWinnerSide(): "police" | "thief" {
+    return this.isLiveUsersEmpty() ? "police" : "thief";
+  }
+
   public isGameEnd() {
     return (
       this.getTagGame().getIsGameStarted() &&
