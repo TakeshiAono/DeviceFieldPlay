@@ -153,7 +153,7 @@ const RootLayout = observer(() => {
       <Toast />
       <ReactNativeModal
         style={{ margin: "auto" }}
-        isVisible={stores._tagGameStore.getIsGameTimeUp()}
+        isVisible={stores._tagGameStore.isGameEnd()}
       >
         <View style={{ backgroundColor: "white", width: 350, padding: 20 }}>
           <Text style={{ fontWeight: "bold", fontSize: 20, marginBottom: 20 }}>
