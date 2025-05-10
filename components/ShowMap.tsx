@@ -191,112 +191,112 @@ function ShowMap({
     <>
       <View style={{ position: "absolute", top: 150, right: 5, zIndex: 1 }}>
         <View style={{ display: "flex", gap: 5 }}>
-          <CopilotStep text={liveButtonExplanation} order={3} name="plusButton">
-            {shouldShowButton() ? (
-              <CopilotTouchableOpacity
-                style={{
-                  height: 50,
-                  width: 50,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  borderRadius: 2,
-                  backgroundColor: tagGameStore.isCurrentUserReject(
-                    userStore.getCurrentUser(),
-                  )
-                    ? "success"
-                    : "gray",
-                }}
-                onPress={
-                  tagGameStore.isCurrentUserReject(userStore.getCurrentUser())
-                    ? () => {
-                        Alert.alert("復活", "復活してもよいですか？", [
-                          { text: "Cancel", onPress: undefined },
-                          {
-                            text: "OK",
-                            onPress: async () => {
-                              if (!userStore.getCurrentUser().getDeviceId())
-                                return;
-
-                              try {
-                                await reviveUser(
-                                  tagGameStore.getTagGame().getId(),
-                                  userStore.getCurrentUser().getId(),
-                                );
-                              } catch (error) {
-                                console.error(error);
-                              }
-                            },
-                          },
-                        ]);
-                      }
-                    : undefined
-                }
+          {shouldShowButton() && (
+            <>
+              <CopilotStep
+                text={liveButtonExplanation}
+                order={3}
+                name="plusButton"
               >
-                <IconSymbol
-                  size={28}
-                  name={"person.badge.plus"}
-                  color={"white"}
-                />
-              </CopilotTouchableOpacity>
-            ) : (
-              <></>
-            )}
-          </CopilotStep>
-          <CopilotStep
-            text={rejectButtonExplanation}
-            order={2}
-            name="minusButton"
-          >
-            {shouldShowButton() ? (
-              <CopilotTouchableOpacity
-                style={{
-                  height: 50,
-                  width: 50,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  borderRadius: 2,
-                  backgroundColor: tagGameStore.isCurrentUserReject(
-                    userStore.getCurrentUser(),
-                  )
-                    ? "success"
-                    : "gray",
-                }}
-                onPress={
-                  tagGameStore.isCurrentUserReject(userStore.getCurrentUser())
-                    ? () => {
-                        Alert.alert("復活", "復活してもよいですか？", [
-                          { text: "Cancel", onPress: undefined },
-                          {
-                            text: "OK",
-                            onPress: async () => {
-                              if (!userStore.getCurrentUser().getDeviceId())
-                                return;
+                <CopilotTouchableOpacity
+                  style={{
+                    height: 50,
+                    width: 50,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    borderRadius: 2,
+                    backgroundColor: tagGameStore.isCurrentUserReject(
+                      userStore.getCurrentUser(),
+                    )
+                      ? "success"
+                      : "gray",
+                  }}
+                  onPress={
+                    tagGameStore.isCurrentUserReject(userStore.getCurrentUser())
+                      ? () => {
+                          Alert.alert("復活", "復活してもよいですか？", [
+                            { text: "Cancel", onPress: undefined },
+                            {
+                              text: "OK",
+                              onPress: async () => {
+                                if (!userStore.getCurrentUser().getDeviceId())
+                                  return;
 
-                              try {
-                                await reviveUser(
-                                  tagGameStore.getTagGame().getId(),
-                                  userStore.getCurrentUser().getId(),
-                                );
-                              } catch (error) {
-                                console.error(error);
-                              }
+                                try {
+                                  await reviveUser(
+                                    tagGameStore.getTagGame().getId(),
+                                    userStore.getCurrentUser().getId(),
+                                  );
+                                } catch (error) {
+                                  console.error(error);
+                                }
+                              },
                             },
-                          },
-                        ]);
-                      }
-                    : undefined
-                }
+                          ]);
+                        }
+                      : undefined
+                  }
+                >
+                  <IconSymbol
+                    size={28}
+                    name={"person.badge.plus"}
+                    color={"white"}
+                  />
+                </CopilotTouchableOpacity>
+              </CopilotStep>
+              <CopilotStep
+                text={rejectButtonExplanation}
+                order={2}
+                name="minusButton"
               >
-                <IconSymbol
-                  size={28}
-                  name={"person.badge.plus"}
-                  color={"white"}
-                />
-              </CopilotTouchableOpacity>
-            ) : (
-              <></>
-            )}
-          </CopilotStep>
+                <CopilotTouchableOpacity
+                  style={{
+                    height: 50,
+                    width: 50,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    borderRadius: 2,
+                    backgroundColor: tagGameStore.isCurrentUserReject(
+                      userStore.getCurrentUser(),
+                    )
+                      ? "success"
+                      : "gray",
+                  }}
+                  onPress={
+                    tagGameStore.isCurrentUserReject(userStore.getCurrentUser())
+                      ? () => {
+                          Alert.alert("復活", "復活してもよいですか？", [
+                            { text: "Cancel", onPress: undefined },
+                            {
+                              text: "OK",
+                              onPress: async () => {
+                                if (!userStore.getCurrentUser().getDeviceId())
+                                  return;
+
+                                try {
+                                  await reviveUser(
+                                    tagGameStore.getTagGame().getId(),
+                                    userStore.getCurrentUser().getId(),
+                                  );
+                                } catch (error) {
+                                  console.error(error);
+                                }
+                              },
+                            },
+                          ]);
+                        }
+                      : undefined
+                  }
+                >
+                  <IconSymbol
+                    size={28}
+                    name={"person.badge.plus"}
+                    color={"white"}
+                  />
+                </CopilotTouchableOpacity>
+              </CopilotStep>
+            </>
+          )}
         </View>
       </View>
 
