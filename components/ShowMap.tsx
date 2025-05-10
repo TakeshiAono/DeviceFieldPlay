@@ -173,6 +173,13 @@ function ShowMap({
     }
   };
 
+  const shouldShowButton = () => {
+    return (
+      tagGameStore.getTagGame().getIsGameStarted() &&
+      !tagGameStore.isCurrentUserPolice(userStore.getCurrentUser())
+    );
+  };
+
   return (
     <>
       <View style={{ position: "absolute", top: 150, right: 5, zIndex: 1 }}>
@@ -182,8 +189,7 @@ function ShowMap({
             order={3}
             name="plusButton"
           >
-            {tagGameStore.getTagGame().getIsGameStarted() &&
-            !tagGameStore.isCurrentUserPolice(userStore.getCurrentUser()) ? (
+            {shouldShowButton() ? (
               <CopilotTouchableOpacity
                 style={{
                   height: 50,
@@ -238,8 +244,7 @@ function ShowMap({
             order={2}
             name="minusButton"
           >
-            {tagGameStore.getTagGame().getIsGameStarted() &&
-            !tagGameStore.isCurrentUserPolice(userStore.getCurrentUser()) ? (
+            {shouldShowButton() ? (
               <CopilotTouchableOpacity
                 style={{
                   height: 50,
