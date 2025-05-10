@@ -14,6 +14,9 @@ export default class TagGameStore {
   @observable
   private isGameTimeUp!: boolean;
 
+  @observable
+  private shouldShowGameExplanation!: boolean;
+
   constructor() {
     makeObservable(this);
     this.initialize();
@@ -34,6 +37,7 @@ export default class TagGameStore {
     });
     this.isEditTeams = false;
     this.isGameTimeUp = false;
+    this.shouldShowGameExplanation = false;
   }
 
   @action
@@ -313,5 +317,14 @@ export default class TagGameStore {
         deviceId: "",
       });
     });
+  }
+
+  public getShouldShowGameExplanation() {
+    return this.shouldShowGameExplanation;
+  }
+
+  @action
+  public setShouldShowGameExplanation(shouldShow: boolean) {
+    this.shouldShowGameExplanation = shouldShow;
   }
 }
