@@ -357,7 +357,11 @@ function ShowMap({
               />
             )}
           </MapView>
-          <CopilotStep text={roleDisplayExplanation} order={1} name="role">
+          <CopilotStep
+            text={roleDisplayExplanation}
+            order={1}
+            name="roleDisplay"
+          >
             {userStore.getCurrentUser().getName().length > 0 &&
             userStore.getPlayerRoleName(tagGameStore).length > 0 ? (
               <CopilotView
