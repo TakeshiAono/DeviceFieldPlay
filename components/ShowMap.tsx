@@ -185,7 +185,7 @@ function ShowMap({
   const rejectButtonExplanation =
     "警察に捕まった時に泥棒ユーザーはこのボタンを押してください";
   const roleDisplayExplanation =
-    "あなたの役職名とユーザー名が表示されます。\n 泥棒(生存中)は黒\n泥棒(捕縛中)は赤\n警察は青色\nで表示されます";
+    "あなたの役職名とユーザー名が表示されます。\n泥棒(生存中)は黒\n泥棒(捕縛中)は赤\n警察は青色\nで表示されます";
 
   return (
     <>
