@@ -180,15 +180,16 @@ function ShowMap({
     );
   };
 
+  const liveButtonExplanation =
+    "監獄エリアで味方に生還してもらった時にこのボタンを押してください";
+  const rejectButtonExplanation =
+    "警察に捕まった時に泥棒ユーザーはこのボタンを押してください";
+
   return (
     <>
       <View style={{ position: "absolute", top: 150, right: 5, zIndex: 1 }}>
         <View style={{ display: "flex", gap: 5 }}>
-          <CopilotStep
-            text={"生還ボタンです。監獄エリア"}
-            order={3}
-            name="plusButton"
-          >
+          <CopilotStep text={liveButtonExplanation} order={3} name="plusButton">
             {shouldShowButton() ? (
               <CopilotTouchableOpacity
                 style={{
@@ -240,7 +241,7 @@ function ShowMap({
             )}
           </CopilotStep>
           <CopilotStep
-            text={"脱落ボタンです。警察に捕まった際に押してください。"}
+            text={rejectButtonExplanation}
             order={2}
             name="minusButton"
           >
