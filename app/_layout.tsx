@@ -95,7 +95,7 @@ const RootLayout = observer(() => {
                 }
                 checkedIcon="dot-circle-o"
                 uncheckedIcon="circle-o"
-                title={"各機能の説明を見る"}
+                title={"アプリの使い方をみる"}
               />
               <Text>ゲームで使用する名前を入力してください</Text>
               <TextInput
