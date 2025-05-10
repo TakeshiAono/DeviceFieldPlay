@@ -58,11 +58,26 @@ function ShowMap({
 
   const CopilotView = walkthroughable(View);
   const CopilotTouchableOpacity = walkthroughable(TouchableOpacity);
-  const { start } = useCopilot();
+  const { start, stop } = useCopilot();
 
   useEffect(() => {
-    start();
+    // console.log("なし");
+    // start("minusButton");
+    // start();
+    // stop();
+  }, []);
+
+  useEffect(() => {
+    console.log("なし");
+    start("minusButton");
+    // start();
+    // stop();
   }, [userStore.getPlayerRoleName(tagGameStore)]);
+
+  // useEffect(() => {
+  //   console.log("aa");
+  //   stop();
+  // }, [tagGameStore.getTagGame().getIsGameStarted()]);
 
   useEffect(() => {
     const gameId = tagGameStore.getTagGame().getId();
