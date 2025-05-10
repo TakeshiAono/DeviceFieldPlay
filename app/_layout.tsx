@@ -73,8 +73,16 @@ const RootLayout = observer(() => {
   }, []);
 
   return (
-    // NOTE: 説明欄コンポーネントにステップ番号を出したくないためEmptyComponentを格納している
-    <CopilotProvider stepNumberComponent={EmptyComponent}>
+    <CopilotProvider
+      // NOTE: 説明欄コンポーネントにステップ番号を出したくないためEmptyComponentを格納している
+      stepNumberComponent={EmptyComponent}
+      labels={{
+        skip: "スキップ",
+        previous: "前に戻る",
+        next: "次へ",
+        finish: "完了",
+      }}
+    >
       <Provider {...stores}>
         <ThemeProvider
           value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
