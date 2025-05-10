@@ -27,6 +27,7 @@ import {
 } from "@/utils/Notifications";
 import { Text } from "react-native";
 import { getPlayerRoleColor } from "@/constants/Colors";
+import { router } from "expo-router";
 
 export type Props = {
   mapVisible?: boolean;
@@ -58,7 +59,10 @@ function ShowMap({
 
   const CopilotView = walkthroughable(View);
   const CopilotTouchableOpacity = walkthroughable(TouchableOpacity);
-  const { start } = useCopilot();
+  const { start, copilotEvents } = useCopilot();
+  copilotEvents.on("stop", () => {
+    router.navigate("/(tabs)/(stacks)");
+  });
 
   useEffect(() => {
     start();
@@ -175,8 +179,9 @@ function ShowMap({
 
   const shouldShowButton = () => {
     return (
-      tagGameStore.getTagGame().getIsGameStarted() &&
-      !tagGameStore.isCurrentUserPolice(userStore.getCurrentUser())
+      tagGameStore.getShouldShowGameExplanation() ||
+      (tagGameStore.getTagGame().getIsGameStarted() &&
+        !tagGameStore.isCurrentUserPolice(userStore.getCurrentUser()))
     );
   };
 
