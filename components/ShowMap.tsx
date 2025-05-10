@@ -184,6 +184,8 @@ function ShowMap({
     "監獄エリアで味方に生還してもらった時にこのボタンを押してください";
   const rejectButtonExplanation =
     "警察に捕まった時に泥棒ユーザーはこのボタンを押してください";
+  const roleDisplayExplanation =
+    "あなたの役職名とユーザー名が表示されます。\n 泥棒(生存中)は黒\n泥棒(捕縛中)は赤\n警察は青色\nで表示されます";
 
   return (
     <>
@@ -355,13 +357,7 @@ function ShowMap({
               />
             )}
           </MapView>
-          <CopilotStep
-            text={
-              "あなたの役職名とユーザー名が表示されます。\n 泥棒(生存中)は黒\n泥棒(捕縛中)は赤\n警察は青色\nで表示されます。"
-            }
-            order={1}
-            name="role"
-          >
+          <CopilotStep text={roleDisplayExplanation} order={1} name="role">
             {userStore.getCurrentUser().getName().length > 0 &&
             userStore.getPlayerRoleName(tagGameStore).length > 0 ? (
               <CopilotView
