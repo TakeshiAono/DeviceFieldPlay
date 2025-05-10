@@ -14,16 +14,16 @@ export default function Layout() {
       <Stack.Screen name="index" options={{ title: "設定画面" }} />
       <Stack.Screen
         name="ValidAreaScreen"
-        options={{ title: "ゲーム範囲設定" }}
+        options={{ title: "ゲーム有効エリア設定" }}
       />
       <Stack.Screen
         name="PrisonAreaScreen"
-        options={{ title: "刑務所範囲設定" }}
+        options={{ title: "監獄エリア設定" }}
       />
       <Stack.Screen name="TeamEditScreen" options={{ title: "チーム設定" }} />
       <Stack.Screen
         name="GameTimeScreen"
-        options={{ title: "ゲーム時間設定" }}
+        options={{ title: "タイムリミット設定" }}
       />
     </Stack>
   );

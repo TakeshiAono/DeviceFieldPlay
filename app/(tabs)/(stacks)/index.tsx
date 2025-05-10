@@ -93,7 +93,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                   ? "success"
                   : "error"
               }
-              title="ゲーム範囲設定"
+              title="ゲーム有効エリア設定"
               onPress={() => {
                 router.push("/ValidAreaScreen");
               }}
