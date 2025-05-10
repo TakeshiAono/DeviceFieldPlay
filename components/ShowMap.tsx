@@ -67,7 +67,6 @@ function ShowMap({
     // stop();
   }, []);
 
-
   useEffect(() => {
     console.log("なし");
     start("minusButton");
