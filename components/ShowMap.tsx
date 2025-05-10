@@ -56,6 +56,13 @@ function ShowMap({
 
   const [isFirstUpdate, setIsFirstUpdate] = useState(true);
 
+  const CopilotView = walkthroughable(View);
+  const { start } = useCopilot();
+
+  useEffect(() => {
+    start();
+  }, [userStore.getPlayerRoleName(tagGameStore)]);
+
   useEffect(() => {
     const gameId = tagGameStore.getTagGame().getId();
     // TODO: このブロックの処理が新規作成時と更新時両方で発火し複雑なためリファクタリングが必要
@@ -311,25 +318,36 @@ function ShowMap({
               />
             )}
           </MapView>
-          {userStore.getCurrentUser().getName() !== "" && (
-            <View
-              style={{
-                backgroundColor: "white",
-                width: "auto",
-                position: "absolute",
-                top: 0,
-                borderColor: getPlayerRoleColor(tagGameStore, userStore),
-                borderWidth: 10,
-                padding: 5,
-              }}
-            >
-              <Text style={{ fontWeight: "900" }}>
-                {userStore.getPlayerRoleName(tagGameStore) +
-                  ": " +
-                  userStore.getCurrentUser().getName()}
-              </Text>
-            </View>
-          )}
+          <CopilotStep
+            text={
+              "あなたの役職名とユーザー名が表示されます。\n 泥棒(生存中)は黒\n泥棒(捕縛中)は赤\n警察は青色\nで表示されます。"
+            }
+            order={1}
+            name="role"
+          >
+            {userStore.getCurrentUser().getName().length > 0 &&
+            userStore.getPlayerRoleName(tagGameStore).length > 0 ? (
+              <CopilotView
+                style={{
+                  backgroundColor: "white",
+                  width: "auto",
+                  position: "absolute",
+                  top: 0,
+                  borderColor: getPlayerRoleColor(tagGameStore, userStore),
+                  borderWidth: 10,
+                  padding: 5,
+                }}
+              >
+                <Text style={{ fontWeight: "900" }}>
+                  {userStore.getPlayerRoleName(tagGameStore) +
+                    ": " +
+                    userStore.getCurrentUser().getName()}
+                </Text>
+              </CopilotView>
+            ) : (
+              <></>
+            )}
+          </CopilotStep>
         </View>
       )}
     </>
