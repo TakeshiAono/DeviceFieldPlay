@@ -99,6 +99,8 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
     "泥棒を収容する監獄エリアを編集する画面に移動します。捕まえた泥棒を収容するエリアを設定します。";
   const teamEditButtonExplanation =
     "警察、泥棒の役割を編集する画面に移動します。";
+  const gameTimeButtonExplanation =
+    "ゲーム終了時間を編集する画面に移動します。";
 
     <View
       style={{ height: "100%", alignItems: "center", backgroundColor: "white" }}
@@ -171,6 +173,29 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                 }}
               >
                 <Text>チーム設定</Text>
+              </CopilotTouchableOpacity>
+            </CopilotStep>
+            <CopilotStep
+              text={gameTimeButtonExplanation}
+              order={7}
+              name="gameTime"
+            >
+              <CopilotTouchableOpacity
+                style={[
+                  styles.button,
+                  {
+                    backgroundColor: tagGameStore
+                      .getTagGame()
+                      .getGameTimeLimit()
+                      ? Colors.primary
+                      : Colors.inactive,
+                  },
+                ]}
+                onPress={() => {
+                  router.push("/GameTimeScreen");
+                }}
+              >
+                <Text>タイムリミット設定</Text>
               </CopilotTouchableOpacity>
             </CopilotStep>
             {/* </View> */}
