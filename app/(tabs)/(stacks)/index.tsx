@@ -7,7 +7,7 @@ import TagGameStore from "@/stores/TagGameStore";
 import UserStore from "@/stores/UserStore";
 import { joinUser, putTagGames, putUser } from "@/utils/APIs";
 import { Button } from "@rneui/themed";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CameraView } from "expo-camera";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import TagGameModel from "@/models/TagGameModel";
@@ -24,6 +24,16 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
   const [cameraVisible, setCameraVisible] = useState(false);
 
   const firstScan = useRef(true);
+
+  const { unregisterStep } = useCopilot();
+  // TODO: registerStepを使えばCopilotStepでラップしなくても良くなり、jsxエリアが汚染されないため、
+  // 将来的にはregisterStepを使いたい、またカスタムふっくすにuseEffect内のメソッドを切り出し、かつ説明内容などはExplanation.tsx
+  // 定数ファイルに切り出し実コンポーネントとは分離した形にしたい。
+  useEffect(() => {
+    unregisterStep("plusButton");
+    unregisterStep("roleDisplay");
+    unregisterStep("minusButton");
+  }, []);
 
   const gameStart = () => {
     tagGameStore.getTagGame().setIsGameStarted(true);
