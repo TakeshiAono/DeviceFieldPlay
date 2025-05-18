@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import { CameraView } from "expo-camera";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import TagGameModel from "@/models/TagGameModel";
+import { CopilotStep, useCopilot, walkthroughable } from "react-native-copilot";
 
 interface Props {
   _userStore?: UserStore;
@@ -25,6 +26,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
 
   const firstScan = useRef(true);
 
+  const CopilotTouchableOpacity = walkthroughable(TouchableOpacity);
   const { unregisterStep } = useCopilot();
   // TODO: registerStepを使えばCopilotStepでラップしなくても良くなり、jsxエリアが汚染されないため、
   // 将来的にはregisterStepを使いたい、またカスタムふっくすにuseEffect内のメソッドを切り出し、かつ説明内容などはExplanation.tsx
@@ -90,24 +92,38 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
     );
   };
 
-  return (
+  const validGameAreaButtonExplanation =
+    "ゲーム内の有効エリアを編集する画面に移動します。ゲーム内から出た泥棒は強制的に脱落扱いとなります。";
+
     <View
       style={{ height: "100%", alignItems: "center", backgroundColor: "white" }}
     >
       <View style={{ gap: 100, height: "80%" }}>
         {userStore.isCurrentUserGameMaster(tagGameStore.getTagGame()) ? (
           <>
-            <Button
-              color={
-                tagGameStore.getTagGame().getIsSetValidAreaDone()
-                  ? "success"
-                  : "error"
-              }
-              title="ゲーム有効エリア設定"
-              onPress={() => {
-                router.push("/ValidAreaScreen");
-              }}
-            ></Button>
+            <CopilotStep
+              text={validGameAreaButtonExplanation}
+              order={4}
+              name="validGameArea"
+            >
+              <CopilotTouchableOpacity
+                style={[
+                  styles.button,
+                  {
+                    backgroundColor: tagGameStore
+                      .getTagGame()
+                      .getIsSetValidAreaDone()
+                      ? Colors.primary
+                      : Colors.inactive,
+                  },
+                ]}
+                onPress={() => {
+                  router.push("/ValidAreaScreen");
+                }}
+              >
+                <Text>ゲーム有効エリア設定</Text>
+              </CopilotTouchableOpacity>
+            </CopilotStep>
             <Button
               color={
                 tagGameStore.getTagGame().getIsSetPrisonAreaDone()
