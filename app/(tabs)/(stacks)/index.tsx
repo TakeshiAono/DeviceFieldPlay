@@ -12,6 +12,7 @@ import { CameraView } from "expo-camera";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import TagGameModel from "@/models/TagGameModel";
 import { CopilotStep, useCopilot, walkthroughable } from "react-native-copilot";
+import { Colors } from "@/constants/Colors";
 
 interface Props {
   _userStore?: UserStore;
@@ -94,6 +95,8 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
 
   const validGameAreaButtonExplanation =
     "ゲーム内の有効エリアを編集する画面に移動します。ゲーム内から出た泥棒は強制的に脱落扱いとなります。";
+  const prisonAreaButtonExplanation =
+    "泥棒を収容する監獄エリアを編集する画面に移動します。捕まえた泥棒を収容するエリアを設定します。";
 
     <View
       style={{ height: "100%", alignItems: "center", backgroundColor: "white" }}
@@ -124,35 +127,29 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                 <Text>ゲーム有効エリア設定</Text>
               </CopilotTouchableOpacity>
             </CopilotStep>
-            <Button
-              color={
-                tagGameStore.getTagGame().getIsSetPrisonAreaDone()
-                  ? "success"
-                  : "error"
-              }
-              title="監獄エリア設定"
-              onPress={() => {
-                router.push("/PrisonAreaScreen");
-              }}
-            ></Button>
-            <Button
-              color={tagGameStore.getIsEditTeams() ? "success" : "error"}
-              title="チーム設定"
-              onPress={() => {
-                router.push("/TeamEditScreen");
-              }}
-            ></Button>
-            <Button
-              color={
-                tagGameStore.getTagGame().getGameTimeLimit()
-                  ? "success"
-                  : "error"
-              }
-              title="タイムリミット設定"
-              onPress={() => {
-                router.push("/GameTimeScreen");
-              }}
-            ></Button>
+            <CopilotStep
+              text={prisonAreaButtonExplanation}
+              order={5}
+              name="prisonArea"
+            >
+              <CopilotTouchableOpacity
+                style={[
+                  styles.button,
+                  {
+                    backgroundColor: tagGameStore
+                      .getTagGame()
+                      .getIsSetPrisonAreaDone()
+                      ? Colors.primary
+                      : Colors.inactive,
+                  },
+                ]}
+                onPress={() => {
+                  router.push("/PrisonAreaScreen");
+                }}
+              >
+                <Text>監獄エリア設定</Text>
+              </CopilotTouchableOpacity>
+            </CopilotStep>
             {/* </View> */}
             {tagGameStore.getTagGame().getIsGameStarted() === true ? (
               <Button
