@@ -27,9 +27,10 @@ export const MapAreaColors = {
 };
 
 export const RoleColors = {
-  police: "blue",
-  liveUser: "green",
-  rejectUser: "red",
+  police: Colors.info,
+  liveUser: Colors.success,
+  rejectUser: Colors.error,
+  undefined: Colors.inactive,
 };
 
 export const getPlayerRoleColor = (
