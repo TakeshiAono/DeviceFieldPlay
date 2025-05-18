@@ -101,6 +101,8 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
     "警察、泥棒の役割を編集する画面に移動します。";
   const gameTimeButtonExplanation =
     "ゲーム終了時間を編集する画面に移動します。";
+  const gameStartButtonExplanation =
+    "全ての設定が終了した後にボタンが押せるようになり、ゲームスタートできるようになります。";
 
     <View
       style={{ height: "100%", alignItems: "center", backgroundColor: "white" }}
@@ -208,14 +210,30 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                 }}
               />
             ) : (
-              <Button
-                title={"ゲームスタート"}
-                color={"primary"}
-                disabled={!canGameStart()}
-                onPress={() => {
-                  gameStart();
-                }}
-              />
+              <CopilotStep
+                text={gameStartButtonExplanation}
+                order={8}
+                name="gameStart"
+              >
+                <CopilotTouchableOpacity
+                  style={[
+                    styles.button,
+                    {
+                      backgroundColor: tagGameStore
+                        .getTagGame()
+                        .getGameTimeLimit()
+                        ? Colors.primary
+                        : Colors.inactive,
+                    },
+                  ]}
+                  disabled={!canGameStart()}
+                  onPress={() => {
+                    gameStart();
+                  }}
+                >
+                  <Text>ゲームスタート</Text>
+                </CopilotTouchableOpacity>
+              </CopilotStep>
             )}
           </>
         ) : (
