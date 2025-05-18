@@ -1,6 +1,6 @@
 import { inject, observer } from "mobx-react";
 import { router } from "expo-router";
-import { Text, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import ReactNativeModal from "react-native-modal";
 
 import TagGameStore from "@/stores/TagGameStore";
@@ -224,5 +224,14 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  button: {
+    paddingVertical: 15,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+    alignItems: "center",
+  },
+});
 
 export default inject("_userStore", "_tagGameStore")(observer(SettingScreen));
