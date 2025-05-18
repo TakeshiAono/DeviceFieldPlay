@@ -97,6 +97,8 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
     "ゲーム内の有効エリアを編集する画面に移動します。ゲーム内から出た泥棒は強制的に脱落扱いとなります。";
   const prisonAreaButtonExplanation =
     "泥棒を収容する監獄エリアを編集する画面に移動します。捕まえた泥棒を収容するエリアを設定します。";
+  const teamEditButtonExplanation =
+    "警察、泥棒の役割を編集する画面に移動します。";
 
     <View
       style={{ height: "100%", alignItems: "center", backgroundColor: "white" }}
@@ -148,6 +150,27 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                 }}
               >
                 <Text>監獄エリア設定</Text>
+              </CopilotTouchableOpacity>
+            </CopilotStep>
+            <CopilotStep
+              text={teamEditButtonExplanation}
+              order={6}
+              name="teamEdit"
+            >
+              <CopilotTouchableOpacity
+                style={[
+                  styles.button,
+                  {
+                    backgroundColor: tagGameStore.getIsEditTeams()
+                      ? Colors.primary
+                      : Colors.inactive,
+                  },
+                ]}
+                onPress={() => {
+                  router.push("/TeamEditScreen");
+                }}
+              >
+                <Text>チーム設定</Text>
               </CopilotTouchableOpacity>
             </CopilotStep>
             {/* </View> */}
