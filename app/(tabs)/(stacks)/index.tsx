@@ -9,7 +9,6 @@ import { joinUser, putTagGames, putUser } from "@/utils/APIs";
 import { Button } from "@rneui/themed";
 import { useEffect, useRef, useState } from "react";
 import { CameraView } from "expo-camera";
-import { IconSymbol } from "@/components/ui/IconSymbol";
 import TagGameModel from "@/models/TagGameModel";
 import { CopilotStep, useCopilot, walkthroughable } from "react-native-copilot";
 import { Colors } from "@/constants/Colors";
@@ -200,7 +199,6 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                 <Text>タイムリミット設定</Text>
               </CopilotTouchableOpacity>
             </CopilotStep>
-            {/* </View> */}
             {tagGameStore.getTagGame().getIsGameStarted() === true ? (
               <Button
                 title={"ゲーム中止"}
