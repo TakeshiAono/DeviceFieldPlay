@@ -13,6 +13,7 @@ import { CameraView } from "expo-camera";
 import TagGameModel from "@/models/TagGameModel";
 import { CopilotStep, useCopilot, walkthroughable } from "react-native-copilot";
 import { Colors } from "@/constants/Colors";
+import { IconSymbol } from "@/components/ui/IconSymbol";
 
 interface Props {
   _userStore?: UserStore;
@@ -31,7 +32,9 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
 
   const { unregisterStep, copilotEvents } = useCopilot();
   copilotEvents.on("stop", () => {
-    router.push("/ValidAreaScreen");
+    if (userStore.isCurrentUserGameMaster(tagGameStore.getTagGame())) {
+      router.push("/ValidAreaScreen");
+    }
   });
 
   // TODO: registerStepを使えばCopilotStepでラップしなくても良くなり、jsxエリアが汚染されないため、
@@ -108,6 +111,8 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
     "ゲーム終了時間を編集する画面に移動します。";
   const gameStartButtonExplanation =
     "全ての設定が終了した後にボタンが押せるようになり、ゲームスタートできるようになります。";
+  const gameJoinCameraButtonExplanation =
+    "ゲームマスターのQRコードを読み取ることで、ゲームマスターが主催しているゲームに参加することができます。";
 
   return (
     <View
@@ -119,12 +124,18 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
       }}
     >
       {!tagGameStore.getExplainedSettingScreen &&
-        tagGameStore.getShouldShowGameExplanation() && (
+        tagGameStore.getShouldShowGameExplanation() &&
+        (userStore.isCurrentUserGameMaster(tagGameStore.getTagGame()) ? (
           <ExplanationPanel
             targetScreenName={ScreenNames.SettingScreen}
             startCopilotStepName="validGameArea"
           />
-        )}
+        ) : (
+          <ExplanationPanel
+            targetScreenName={ScreenNames.SettingScreen}
+            startCopilotStepName="gameJoinCamera"
+          />
+        ))}
       <View style={{ gap: 100, height: "80%" }}>
         {userStore.isCurrentUserGameMaster(tagGameStore.getTagGame()) ? (
           <>
@@ -255,14 +266,27 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
           </>
         ) : (
           <>
-            <Button
-              type="solid"
-              onPress={() => {
-                setCameraVisible(true);
-              }}
-              title="ゲームに参加"
-              icon={<IconSymbol size={28} name={"camera"} color={"white"} />}
-            />
+            <CopilotStep
+              text={gameJoinCameraButtonExplanation}
+              order={9}
+              name="gameJoinCamera"
+            >
+              <CopilotTouchableOpacity
+                style={[
+                  styles.button,
+                  {
+                    backgroundColor: Colors.primary,
+                  },
+                ]}
+                disabled={!canGameStart()}
+                onPress={() => {
+                  setCameraVisible(true);
+                }}
+              >
+                <IconSymbol size={28} name={"camera"} color={"white"} />
+                <Text>ゲームに参加</Text>
+              </CopilotTouchableOpacity>
+            </CopilotStep>
             <ReactNativeModal
               style={{ margin: "auto" }}
               isVisible={cameraVisible}
