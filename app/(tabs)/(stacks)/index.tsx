@@ -3,7 +3,8 @@ import { router } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import ReactNativeModal from "react-native-modal";
 
-import TagGameStore from "@/stores/TagGameStore";
+import TagGameStore, { ScreenNames } from "@/stores/TagGameStore";
+import ExplanationPanel from "@/components/ExplanationPanel";
 import UserStore from "@/stores/UserStore";
 import { joinUser, putTagGames, putUser } from "@/utils/APIs";
 import { Button } from "@rneui/themed";
@@ -27,7 +28,12 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
   const firstScan = useRef(true);
 
   const CopilotTouchableOpacity = walkthroughable(TouchableOpacity);
-  const { unregisterStep } = useCopilot();
+
+  const { unregisterStep, copilotEvents } = useCopilot();
+  copilotEvents.on("stop", () => {
+    router.push("/ValidAreaScreen");
+  });
+
   // TODO: registerStepを使えばCopilotStepでラップしなくても良くなり、jsxエリアが汚染されないため、
   // 将来的にはregisterStepを使いたい、またカスタムふっくすにuseEffect内のメソッドを切り出し、かつ説明内容などはExplanation.tsx
   // 定数ファイルに切り出し実コンポーネントとは分離した形にしたい。
@@ -103,9 +109,22 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
   const gameStartButtonExplanation =
     "全ての設定が終了した後にボタンが押せるようになり、ゲームスタートできるようになります。";
 
+  return (
     <View
-      style={{ height: "100%", alignItems: "center", backgroundColor: "white" }}
+      style={{
+        height: "100%",
+        alignItems: "center",
+        backgroundColor: "white",
+        justifyContent: "center",
+      }}
     >
+      {!tagGameStore.getExplainedSettingScreen &&
+        tagGameStore.getShouldShowGameExplanation() && (
+          <ExplanationPanel
+            targetScreenName={ScreenNames.SettingScreen}
+            startCopilotStepName="validGameArea"
+          />
+        )}
       <View style={{ gap: 100, height: "80%" }}>
         {userStore.isCurrentUserGameMaster(tagGameStore.getTagGame()) ? (
           <>
