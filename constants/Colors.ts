@@ -45,6 +45,6 @@ export const getPlayerRoleColor = (
     if (tagGameStore.isCurrentUserReject(userStore.getCurrentUser()))
       return RoleColors.rejectUser;
   } else {
-    return "none";
+    return RoleColors.undefined;
   }
 };
