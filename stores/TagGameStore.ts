@@ -1,8 +1,17 @@
-import { action, makeObservable, observable } from "mobx";
+import { action, computed, makeObservable, observable } from "mobx";
 
 import TagGameModel, { LocalTagGameModelTypes } from "@/models/TagGameModel";
 import UserModel from "@/models/UserModel";
 import { DynamoTagGame, DynamoUser } from "@/interfaces/api";
+
+export const ScreenNames = {
+  SettingScreen: "SettingScreen",
+  ShowMapScreen: "ShowMapScreen",
+  ValidAreaScreen: "ValidAreaScreen",
+  PrisonAreaScreen: "PrisonAreaScreen",
+  GameTimeScreen: "GameTimeScreen",
+  TeamEditScreen: "TeamEditScreen",
+};
 
 export default class TagGameStore {
   @observable.deep
@@ -16,6 +25,24 @@ export default class TagGameStore {
 
   @observable
   private shouldShowGameExplanation!: boolean;
+
+  @observable
+  private explainedSettingScreen!: boolean;
+
+  @observable
+  private explainedShowMapScreen!: boolean;
+
+  @observable
+  private explainedValidAreaScreen!: boolean;
+
+  @observable
+  private explainedPrisonAreaScreen!: boolean;
+
+  @observable
+  private explainedGameTimeScreen!: boolean;
+
+  @observable
+  private explainedTeamEditScreen!: boolean;
 
   constructor() {
     makeObservable(this);
@@ -37,7 +64,14 @@ export default class TagGameStore {
     });
     this.isEditTeams = false;
     this.isGameTimeUp = false;
+
     this.shouldShowGameExplanation = false;
+    this.explainedSettingScreen = false;
+    this.explainedShowMapScreen = false;
+    this.explainedValidAreaScreen = false;
+    this.explainedPrisonAreaScreen = false;
+    this.explainedGameTimeScreen = false;
+    this.explainedTeamEditScreen = false;
   }
 
   @action
@@ -326,5 +360,68 @@ export default class TagGameStore {
   @action
   public setShouldShowGameExplanation(shouldShow: boolean) {
     this.shouldShowGameExplanation = shouldShow;
+  }
+
+  // Getter & Setter for explainedSettingScreen
+  @computed
+  public get getExplainedSettingScreen() {
+    console.log("getter", this.explainedSettingScreen);
+    return this.explainedSettingScreen;
+  }
+
+  @action
+  public setExplainedSettingScreen(value: boolean) {
+    console.log("ばりゅー", value);
+    this.explainedSettingScreen = value;
+  }
+
+  // Getter & Setter for explainedShowMapScreen
+  public getExplainedShowMapScreen() {
+    return this.explainedShowMapScreen;
+  }
+
+  @action
+  public setExplainedShowMapScreen(value: boolean) {
+    this.explainedShowMapScreen = value;
+  }
+
+  // Getter & Setter for explainedValidAreaScreen
+  public getExplainedValidAreaScreen() {
+    return this.explainedValidAreaScreen;
+  }
+
+  @action
+  public setExplainedValidAreaScreen(value: boolean) {
+    this.explainedValidAreaScreen = value;
+  }
+
+  // Getter & Setter for explainedPrisonAreaScreen
+  public getExplainedPrisonAreaScreen() {
+    return this.explainedPrisonAreaScreen;
+  }
+
+  @action
+  public setExplainedPrisonAreaScreen(value: boolean) {
+    this.explainedPrisonAreaScreen = value;
+  }
+
+  // Getter & Setter for explainedGameTimeScreen
+  public getExplainedGameTimeScreen() {
+    return this.explainedGameTimeScreen;
+  }
+
+  @action
+  public setExplainedGameTimeScreen(value: boolean) {
+    this.explainedGameTimeScreen = value;
+  }
+
+  // Getter & Setter for explainedTeamEditScreen
+  public getExplainedTeamEditScreen() {
+    return this.explainedTeamEditScreen;
+  }
+
+  @action
+  public setExplainedTeamEditScreen(value: boolean) {
+    this.explainedTeamEditScreen = value;
   }
 }
