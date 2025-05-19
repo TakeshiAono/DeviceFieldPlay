@@ -361,8 +361,7 @@ function ShowMap({
             order={1}
             name="roleDisplay"
           >
-            {userStore.getCurrentUser().getName().length > 0 &&
-            userStore.getPlayerRoleName(tagGameStore).length > 0 ? (
+            {userStore.getCurrentUser().getName().length > 0 ? (
               <CopilotView
                 style={{
                   backgroundColor: "white",
@@ -375,9 +374,10 @@ function ShowMap({
                 }}
               >
                 <Text style={{ fontWeight: "900" }}>
-                  {userStore.getPlayerRoleName(tagGameStore) +
-                    ": " +
-                    userStore.getCurrentUser().getName()}
+                  {userStore.getPlayerRoleName(tagGameStore) ||
+                    "ロール未設定" +
+                      ": " +
+                      userStore.getCurrentUser().getName()}
                 </Text>
               </CopilotView>
             ) : (
