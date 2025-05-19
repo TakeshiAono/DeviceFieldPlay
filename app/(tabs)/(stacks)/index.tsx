@@ -1,6 +1,6 @@
 import { inject, observer } from "mobx-react";
 import { router } from "expo-router";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import ReactNativeModal from "react-native-modal";
 
 import TagGameStore, { ScreenNames } from "@/stores/TagGameStore";
@@ -11,9 +11,10 @@ import { Button } from "@rneui/themed";
 import { useEffect, useRef, useState } from "react";
 import { CameraView } from "expo-camera";
 import TagGameModel from "@/models/TagGameModel";
-import { CopilotStep, useCopilot, walkthroughable } from "react-native-copilot";
+import { CopilotStep } from "react-native-copilot";
 import { Colors } from "@/constants/Colors";
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import useCopilotHook from "@/hooks/useCopilotHook";
 
 interface Props {
   _userStore?: UserStore;
@@ -28,22 +29,14 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
 
   const firstScan = useRef(true);
 
-  const CopilotTouchableOpacity = walkthroughable(TouchableOpacity);
-
-  const { unregisterStep, copilotEvents } = useCopilot();
-  copilotEvents.on("stop", () => {
-    if (userStore.isCurrentUserGameMaster(tagGameStore.getTagGame())) {
-      router.push("/ValidAreaScreen");
-    }
-  });
-
-  // TODO: registerStepを使えばCopilotStepでラップしなくても良くなり、jsxエリアが汚染されないため、
-  // 将来的にはregisterStepを使いたい、またカスタムふっくすにuseEffect内のメソッドを切り出し、かつ説明内容などはExplanation.tsx
-  // 定数ファイルに切り出し実コンポーネントとは分離した形にしたい。
+  const [setIsStart, CopilotTouchableOpacity, ..._other] = useCopilotHook(
+    userStore,
+    tagGameStore,
+    ["prisonArea", "teamEdit", "gameTime", "gameStart"],
+    "/ValidAreaScreen",
+  );
   useEffect(() => {
-    unregisterStep("plusButton");
-    unregisterStep("roleDisplay");
-    unregisterStep("minusButton");
+    setIsStart(true);
   }, []);
 
   const gameStart = () => {

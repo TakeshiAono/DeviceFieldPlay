@@ -1,4 +1,4 @@
-import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 import React, { useState, useEffect } from "react";
 import MapView, { LatLng, Polygon, Region } from "react-native-maps";
 import { booleanPointInPolygon, point, polygon } from "@turf/turf";
@@ -6,7 +6,7 @@ import "react-native-get-random-values";
 import _ from "lodash";
 import { inject, observer } from "mobx-react";
 import * as Notifications from "expo-notifications";
-import { CopilotStep, useCopilot, walkthroughable } from "react-native-copilot";
+import { CopilotStep } from "react-native-copilot";
 
 import { rejectUser, reviveUser } from "@/utils/APIs";
 import { IconSymbol } from "@/components/ui/IconSymbol";
@@ -27,7 +27,7 @@ import {
 } from "@/utils/Notifications";
 import { Text } from "react-native";
 import { getPlayerRoleColor } from "@/constants/Colors";
-import { router } from "expo-router";
+import useCopilotHook from "@/hooks/useCopilotHook";
 
 export type Props = {
   mapVisible?: boolean;
@@ -56,17 +56,15 @@ function ShowMap({
   const tagGameStore = _tagGameStore!;
 
   const [isFirstUpdate, setIsFirstUpdate] = useState(true);
-
-  const CopilotView = walkthroughable(View);
-  const CopilotTouchableOpacity = walkthroughable(TouchableOpacity);
-  const { start, copilotEvents } = useCopilot();
-  copilotEvents.on("stop", () => {
-    router.navigate("/(tabs)/(stacks)");
-  });
-
+  const [setIsStart, CopilotTouchableOpacity, CopilotView] = useCopilotHook(
+    userStore,
+    tagGameStore,
+    ["plusButton", "roleDisplay", "minusButton"],
+    "/(tabs)/(stacks)",
+  );
   useEffect(() => {
-    start();
-  }, [userStore.getPlayerRoleName(tagGameStore)]);
+    setIsStart(true);
+  }, []);
 
   useEffect(() => {
     const gameId = tagGameStore.getTagGame().getId();
