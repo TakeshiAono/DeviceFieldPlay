@@ -175,12 +175,8 @@ function ShowMap({
     }
   };
 
-  const shouldShowButton = () => {
-    return (
-      tagGameStore.getShouldShowGameExplanation() ||
-      (tagGameStore.getTagGame().getIsGameStarted() &&
-        !tagGameStore.isCurrentUserPolice(userStore.getCurrentUser()))
-    );
+  const shouldStartExplanation = () => {
+    return tagGameStore.getShouldShowGameExplanation();
   };
 
   const liveButtonExplanation =
@@ -194,7 +190,7 @@ function ShowMap({
     <>
       <View style={{ position: "absolute", top: 150, right: 5, zIndex: 1 }}>
         <View style={{ display: "flex", gap: 5 }}>
-          {shouldShowButton() && (
+          {shouldStartExplanation() && (
             <>
               <CopilotStep
                 text={liveButtonExplanation}

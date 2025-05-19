@@ -3,8 +3,7 @@ import { router } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 import ReactNativeModal from "react-native-modal";
 
-import TagGameStore, { ScreenNames } from "@/stores/TagGameStore";
-import ExplanationPanel from "@/components/ExplanationPanel";
+import TagGameStore from "@/stores/TagGameStore";
 import UserStore from "@/stores/UserStore";
 import { joinUser, putTagGames, putUser } from "@/utils/APIs";
 import { Button } from "@rneui/themed";
@@ -116,19 +115,6 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
         justifyContent: "center",
       }}
     >
-      {!tagGameStore.getExplainedSettingScreen &&
-        tagGameStore.getShouldShowGameExplanation() &&
-        (userStore.isCurrentUserGameMaster(tagGameStore.getTagGame()) ? (
-          <ExplanationPanel
-            targetScreenName={ScreenNames.SettingScreen}
-            startCopilotStepName="validGameArea"
-          />
-        ) : (
-          <ExplanationPanel
-            targetScreenName={ScreenNames.SettingScreen}
-            startCopilotStepName="gameJoinCamera"
-          />
-        ))}
       <View style={{ gap: 100, height: "80%" }}>
         {userStore.isCurrentUserGameMaster(tagGameStore.getTagGame()) ? (
           <>

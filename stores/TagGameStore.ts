@@ -4,15 +4,6 @@ import TagGameModel, { LocalTagGameModelTypes } from "@/models/TagGameModel";
 import UserModel from "@/models/UserModel";
 import { DynamoTagGame, DynamoUser } from "@/interfaces/api";
 
-export const ScreenNames = {
-  SettingScreen: "SettingScreen",
-  ShowMapScreen: "ShowMapScreen",
-  ValidAreaScreen: "ValidAreaScreen",
-  PrisonAreaScreen: "PrisonAreaScreen",
-  GameTimeScreen: "GameTimeScreen",
-  TeamEditScreen: "TeamEditScreen",
-};
-
 export default class TagGameStore {
   @observable.deep
   private currentTagGame!: TagGameModel;
