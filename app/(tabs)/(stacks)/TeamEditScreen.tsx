@@ -5,7 +5,7 @@ import * as Notifications from "expo-notifications";
 
 import UserStore from "@/stores/UserStore";
 import { inject, observer } from "mobx-react";
-import { Button, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Button, Text, TouchableOpacity, View } from "react-native";
 import { Button as EButton } from "@rneui/themed";
 import { UserTypeForList } from "@/components/UserList";
 import TagGameStore from "@/stores/TagGameStore";
@@ -21,6 +21,7 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 import ReactNativeModal from "react-native-modal";
 import QRCode from "react-native-qrcode-svg";
 import UserModel from "@/models/UserModel";
+import { router } from "expo-router";
 
 interface Props {
   _userStore?: UserStore;
@@ -63,6 +64,15 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
     deviceId.current = data;
     userStore.getCurrentUser().setDeviceId(data);
   });
+
+  useEffect(() => {
+    if (tagGameStore.getShouldShowGameExplanation()) {
+      Alert.alert(
+        "チーム設定方法",
+        "QRマークを押してみてください。QRが表示されるのでこれをメンバーのアプリ内のメンバー参加リーダーで読み取ってもらってゲームに参加できるようになります。",
+      );
+    }
+  }, []);
 
   useEffect(() => {
     async function getCurrentLocation() {
@@ -352,6 +362,11 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                 >
                   <TouchableOpacity
                     onPress={async () => {
+                      if (tagGameStore.getShouldShowGameExplanation()) {
+                        router.replace("/GameTimeScreen");
+                        return;
+                      }
+
                       setSelectedUsers([]);
                       try {
                         // TODO: 先にエリアを設定しないとidが設定されず、dynamo not keyエラーが発生してしまう

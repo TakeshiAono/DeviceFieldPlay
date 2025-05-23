@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { inject, observer } from "mobx-react";
-import { Text, View } from "react-native";
+import { Alert, Text, View } from "react-native";
 import { TimerPickerModal } from "react-native-timer-picker";
 import { Button } from "@rneui/themed";
 import dayjs from "dayjs";
 
 import TagGameStore from "@/stores/TagGameStore";
+import { router } from "expo-router";
 
 interface Props {
   _tagGameStore?: TagGameStore;
@@ -18,6 +19,12 @@ function GameTimeScreen({ _tagGameStore }: Props) {
   const [selectedDay, setSelectedDay] = useState(
     tagGameStore.getTagGame().getGameTimeLimit() ?? dayjs(),
   );
+
+  useEffect(() => {
+    if (tagGameStore.getShouldShowGameExplanation()) {
+      Alert.alert("終了時間設定方法", "ゲームの終了時間を設定しください");
+    }
+  }, []);
 
   useEffect(() => {
     if (selectedDay.isAfter(dayjs(), "minute")) {
@@ -60,6 +67,15 @@ function GameTimeScreen({ _tagGameStore }: Props) {
           visible={modalVisible}
           setIsVisible={setModalVisible}
           onConfirm={(pickedDuration) => {
+            if (tagGameStore.getShouldShowGameExplanation()) {
+              tagGameStore.setShouldShowGameExplanation(false);
+              router.replace("/(tabs)");
+              Alert.alert(
+                "チュートリアル終了",
+                "これでチュートリアル終了です。\nそれでは「ゲーム有効エリア」〜「タイムリミット」の設定まで全て行いゲームスタートしてゲームを楽しんでください！",
+              );
+            }
+
             setSelectedDay(
               dayjs()
                 .set("hour", pickedDuration.hours)

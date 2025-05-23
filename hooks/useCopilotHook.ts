@@ -24,6 +24,7 @@ export type AllCopilotNames = [
   "gameTime",
   "gameStart",
   "gameJoinCamera",
+  "editMap",
 ];
 
 type AllCopilotName = AllCopilotNames[number];
@@ -49,9 +50,10 @@ const useCopilotHook = (
     "gameTime",
     "gameStart",
     "gameJoinCamera",
+    "editMap",
   ];
 
-  const { start, unregisterStep, copilotEvents } = useCopilot();
+  const { start, unregisterStep, copilotEvents, registerStep } = useCopilot();
 
   // NOTE: 依存配列なしのuseEffectだとcopilotがレンダリングされる前に発火している
   // 可能性があり、start()を実行しても説明文が表示されないため
@@ -98,7 +100,7 @@ const useCopilotHook = (
   const CopilotTouchableOpacity = walkthroughable(TouchableOpacity);
   const CopilotView = walkthroughable(View);
 
-  return [setIsStart, CopilotTouchableOpacity, CopilotView];
+  return [setIsStart, CopilotTouchableOpacity, CopilotView, registerStep];
 };
 
 export default useCopilotHook;

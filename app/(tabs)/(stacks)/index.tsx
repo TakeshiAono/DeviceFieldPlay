@@ -1,5 +1,5 @@
 import { inject, observer } from "mobx-react";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 import ReactNativeModal from "react-native-modal";
 
@@ -43,9 +43,11 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
   );
 
   useEffect(() => {
-    setTimeout(() => {
-      setIsStart(true);
-    }, 500);
+    if (tagGameStore.getShouldShowGameExplanation()) {
+      setTimeout(() => {
+        setIsStart(true);
+      }, 500);
+    }
   }, []);
 
   const gameStart = () => {
@@ -141,7 +143,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                       .getTagGame()
                       .getIsSetValidAreaDone()
                       ? Colors.primary
-                      : Colors.inactive,
+                      : Colors.warning,
                   },
                 ]}
                 onPress={() => {
@@ -164,7 +166,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                       .getTagGame()
                       .getIsSetPrisonAreaDone()
                       ? Colors.primary
-                      : Colors.inactive,
+                      : Colors.warning,
                   },
                 ]}
                 onPress={() => {
@@ -185,7 +187,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                   {
                     backgroundColor: tagGameStore.getIsEditTeams()
                       ? Colors.primary
-                      : Colors.inactive,
+                      : Colors.warning,
                   },
                 ]}
                 onPress={() => {
@@ -208,7 +210,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                       .getTagGame()
                       .getGameTimeLimit()
                       ? Colors.primary
-                      : Colors.inactive,
+                      : Colors.warning,
                   },
                 ]}
                 onPress={() => {
@@ -267,7 +269,6 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                     backgroundColor: Colors.primary,
                   },
                 ]}
-                disabled={!canGameStart()}
                 onPress={() => {
                   setCameraVisible(true);
                 }}

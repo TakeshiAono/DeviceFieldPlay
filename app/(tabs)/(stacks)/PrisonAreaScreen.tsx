@@ -1,14 +1,15 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 
 import UserStore from "@/stores/UserStore";
 import { inject, observer } from "mobx-react";
-import { View } from "react-native";
+import { Alert, View } from "react-native";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { Button } from "@rneui/themed";
 import { putTagGames } from "@/utils/APIs";
 import TagGameStore from "@/stores/TagGameStore";
 import _ from "lodash";
 import { PrisonAreaEditMap } from "@/components/PrisonAreaEditMap";
+import { router } from "expo-router";
 
 interface Props {
   _userStore?: UserStore;
@@ -18,6 +19,15 @@ interface Props {
 function PrisonAreaScreen({ _userStore, _tagGameStore }: Props) {
   const userStore = _userStore!;
   const tagGameStore = _tagGameStore!;
+
+  useEffect(() => {
+    if (tagGameStore.getShouldShowGameExplanation()) {
+      Alert.alert(
+        "監獄エリア選択",
+        "有効エリアと同じく地図上の好きな箇所を3点、指で長押しすればエリアを設定できます。「エリア登録」を押して確定させてください",
+      );
+    }
+  }, []);
 
   const isGameMaster = () => {
     return userStore.isCurrentUserGameMaster(tagGameStore.getTagGame());
@@ -49,6 +59,11 @@ function PrisonAreaScreen({ _userStore, _tagGameStore }: Props) {
               !(isGameMaster() || !tagGameStore.getTagGame().isSetGame())
             }
             onPress={async () => {
+              if (tagGameStore.getShouldShowGameExplanation()) {
+                router.replace("/TeamEditScreen");
+                return;
+              }
+
               const tagGame = tagGameStore.getTagGame();
               if (_.isEmpty(tagGame.getGameMasterId())) {
                 tagGame.setGameMasterId(userStore.getCurrentUser().getId());
