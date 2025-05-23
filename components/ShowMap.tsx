@@ -64,7 +64,7 @@ function ShowMap({
   );
   useEffect(() => {
     setIsStart(true);
-  }, []);
+  }, [userStore.getCurrentUser().getName()]);
 
   useEffect(() => {
     const gameId = tagGameStore.getTagGame().getId();
@@ -73,6 +73,16 @@ function ShowMap({
 
     const joinUserNotificationListener =
       Notifications.addNotificationReceivedListener((event) => {
+        if (tagGameStore.getShouldShowGameExplanation()) {
+          Alert.alert(
+            "チーム設定方法",
+            "メンバーがゲームに参加できましたね。\nゲームマスターさんはゲーム参加者の役割を決めてから確定ボタンで編集を完了しましょう。\nメンバーさんはゲームスタートの通知がくるのを待つだけです。",
+          );
+
+          if (!userStore.isCurrentUserGameMaster(tagGameStore.getTagGame())) {
+            tagGameStore.setShouldShowGameExplanation(false);
+          }
+        }
         joinUserNotificationHandler(event, gameId, tagGameStore);
       });
 
