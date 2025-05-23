@@ -1,13 +1,21 @@
 import TagGameStore from "@/stores/TagGameStore";
 import UserStore from "@/stores/UserStore";
-import { Href, router } from "expo-router";
+import { Href, router, useFocusEffect } from "expo-router";
 import _ from "lodash";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { InteractionManager, TouchableOpacity, View } from "react-native";
 import { useCopilot, walkthroughable } from "react-native-copilot";
 
 // 新しいcopilotを定義する場合はここに名前を追加
 export type AllCopilotNames = [
+  "validGameArea",
   "plusButton",
   "roleDisplay",
   "minusButton",
@@ -15,6 +23,7 @@ export type AllCopilotNames = [
   "teamEdit",
   "gameTime",
   "gameStart",
+  "gameJoinCamera",
 ];
 
 type AllCopilotName = AllCopilotNames[number];
@@ -22,14 +31,16 @@ type AllCopilotName = AllCopilotNames[number];
 const useCopilotHook = (
   userStore: UserStore,
   tagGameStore: TagGameStore,
+  firstExplanationName: string,
   targetCopilotNames: AllCopilotName[],
-  nextScreenPath: Href,
+  nextScreenPath: Href | null,
 ): [
   Dispatch<SetStateAction<boolean>>,
   React.FunctionComponent<any>,
   React.FunctionComponent<any>,
 ] => {
   const allDefinedCopilotNames: AllCopilotNames = [
+    "validGameArea",
     "plusButton",
     "roleDisplay",
     "minusButton",
@@ -37,6 +48,7 @@ const useCopilotHook = (
     "teamEdit",
     "gameTime",
     "gameStart",
+    "gameJoinCamera",
   ];
 
   const { start, unregisterStep, copilotEvents } = useCopilot();
@@ -44,30 +56,41 @@ const useCopilotHook = (
   // NOTE: 依存配列なしのuseEffectだとcopilotがレンダリングされる前に発火している
   // 可能性があり、start()を実行しても説明文が表示されないため
   const [isStart, setIsStart] = useState(false);
+  const registerListenerRef = useRef(false);
 
-  useEffect(() => {
-    const invalidNames = _.difference(
-      allDefinedCopilotNames,
-      targetCopilotNames,
-    );
+  useFocusEffect(
+    useCallback(() => {
+      const invalidNames = _.difference(
+        allDefinedCopilotNames,
+        targetCopilotNames,
+      );
 
-    invalidNames.forEach((copilotName) => {
-      unregisterStep(copilotName);
-    });
+      invalidNames.forEach((copilotName) => {
+        unregisterStep(copilotName);
+      });
 
-    copilotEvents.on("start", () => {
-      copilotEvents.on("stop", copilotEndHandler);
-    });
-  }, []);
+      if (!registerListenerRef.current) {
+        copilotEvents.on("stop", copilotEndHandler);
+      }
+
+      registerListenerRef.current = true;
+
+      return () => {
+        copilotEvents.off("stop", copilotEndHandler);
+      };
+    }, []),
+  );
 
   useEffect(() => {
     // アニメーションが完全に終わってから出ないとずれた位置に説明文が表示されてしまう
     InteractionManager.runAfterInteractions(() => {
-      start();
+      start(firstExplanationName);
     });
   }, [isStart]);
 
   const copilotEndHandler = () => {
+    if (!nextScreenPath) return;
+
     // NOTE: pushだと前画面がアンマウントされておらず前画面のcopilotの説明が流れてしまうためreplace
     router.replace(nextScreenPath);
   };

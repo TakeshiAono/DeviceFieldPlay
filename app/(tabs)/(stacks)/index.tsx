@@ -31,11 +31,21 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
   const [setIsStart, CopilotTouchableOpacity, ..._other] = useCopilotHook(
     userStore,
     tagGameStore,
-    ["prisonArea", "teamEdit", "gameTime", "gameStart"],
-    "/ValidAreaScreen",
+    userStore.isCurrentUserGameMaster(tagGameStore.getTagGame())
+      ? "validGameArea"
+      : "gameJoinCamera",
+    userStore.isCurrentUserGameMaster(tagGameStore.getTagGame())
+      ? ["validGameArea", "prisonArea", "teamEdit", "gameTime", "gameStart"]
+      : ["gameJoinCamera"],
+    userStore.isCurrentUserGameMaster(tagGameStore.getTagGame())
+      ? "/ValidAreaScreen"
+      : null,
   );
+
   useEffect(() => {
-    setIsStart(true);
+    setTimeout(() => {
+      setIsStart(true);
+    }, 500);
   }, []);
 
   const gameStart = () => {

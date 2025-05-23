@@ -59,12 +59,16 @@ function ShowMap({
   const [setIsStart, CopilotTouchableOpacity, CopilotView] = useCopilotHook(
     userStore,
     tagGameStore,
+    "roleDisplay",
     ["plusButton", "roleDisplay", "minusButton"],
     "/(tabs)/(stacks)",
   );
+
   useEffect(() => {
     if (tagGameStore.getShouldShowGameExplanation()) {
-      setIsStart(true);
+      setTimeout(() => {
+        setIsStart(true);
+      }, 500);
     }
   }, [userStore.getCurrentUser().getName()]);
 
