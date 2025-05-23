@@ -63,7 +63,9 @@ function ShowMap({
     "/(tabs)/(stacks)",
   );
   useEffect(() => {
-    setIsStart(true);
+    if (tagGameStore.getShouldShowGameExplanation()) {
+      setIsStart(true);
+    }
   }, [userStore.getCurrentUser().getName()]);
 
   useEffect(() => {
