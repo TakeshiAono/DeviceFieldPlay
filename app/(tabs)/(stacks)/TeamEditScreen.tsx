@@ -330,7 +330,18 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                 <View style={{ width: "33%" }}>
                   <Button
                     title="泥棒(生存)に変更"
-                    onPress={() => {
+                    onPress={async () => {
+                      const location = await Location.getCurrentPositionAsync({});
+                      const userLocation = {
+                        latitude: location.coords.latitude,
+                        longitude: location.coords.longitude,
+                      };
+
+                      if (!tagGameStore.isUserInPrisonArea(userLocation)) {
+                        Alert.alert("エラー", "監獄エリア内でのみ生還ボタンを押すことができます。");
+                        return;
+                      }
+
                       tagGameStore.changeToLiveThief(
                         selectedUsers.map(
                           UserModel.convertListTypeUserToUserModel,

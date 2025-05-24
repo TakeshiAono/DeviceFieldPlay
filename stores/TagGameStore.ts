@@ -1,4 +1,5 @@
 import { action, computed, makeObservable, observable } from "mobx";
+import { booleanPointInPolygon, polygon } from "@turf/turf";
 
 import TagGameModel, { LocalTagGameModelTypes } from "@/models/TagGameModel";
 import UserModel from "@/models/UserModel";
@@ -414,5 +415,17 @@ export default class TagGameStore {
   @action
   public setExplainedTeamEditScreen(value: boolean) {
     this.explainedTeamEditScreen = value;
+  }
+
+  public isUserInPrisonArea(userLocation: { latitude: number; longitude: number }): boolean {
+    const prisonArea = this.currentTagGame.getPrisonArea();
+    if (prisonArea.length < 3) return false; // 3点未満の場合はエリアが無効
+
+    const prisonPolygon = polygon([[
+      ...prisonArea.map((point) => [point.longitude, point.latitude]),
+      [prisonArea[0].longitude, prisonArea[0].latitude], // 閉じるために最初の点を追加
+    ]]);
+
+    return booleanPointInPolygon([userLocation.longitude, userLocation.latitude], prisonPolygon);
   }
 }
