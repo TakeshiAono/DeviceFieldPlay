@@ -199,6 +199,14 @@ function ShowMap({
     );
   };
 
+  const getUserDisplayInfo = () => {
+    const roleBlockDisplay =
+      userStore.getPlayerRoleName(tagGameStore) === ""
+        ? "ロール未設定"
+        : userStore.getPlayerRoleName(tagGameStore);
+    return roleBlockDisplay + ": " + userStore.getCurrentUser().getName();
+  };
+
   const liveButtonExplanation =
     "監獄エリアで味方に生還してもらった時にこのボタンを押してください";
   const rejectButtonExplanation =
@@ -392,10 +400,7 @@ function ShowMap({
                 }}
               >
                 <Text style={{ fontWeight: "900" }}>
-                  {userStore.getPlayerRoleName(tagGameStore) ||
-                    "ロール未設定" +
-                      ": " +
-                      userStore.getCurrentUser().getName()}
+                  {getUserDisplayInfo()}
                 </Text>
               </CopilotView>
             ) : (
