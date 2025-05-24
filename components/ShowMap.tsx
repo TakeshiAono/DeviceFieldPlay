@@ -26,7 +26,7 @@ import {
   validAreaNotificationHandler,
 } from "@/utils/Notifications";
 import { Text } from "react-native";
-import { getPlayerRoleColor } from "@/constants/Colors";
+import { Colors, getPlayerRoleColor } from "@/constants/Colors";
 import useCopilotHook from "@/hooks/useCopilotHook";
 
 export type Props = {
@@ -191,8 +191,20 @@ function ShowMap({
     }
   };
 
-  const shouldStartExplanation = () => {
-    return tagGameStore.getShouldShowGameExplanation();
+  const shouldShowButton = () => {
+    return (
+      tagGameStore.getShouldShowGameExplanation() ||
+      (tagGameStore.getTagGame().getIsGameStarted() &&
+        !tagGameStore.isCurrentUserPolice(userStore.getCurrentUser()))
+    );
+  };
+
+  const getUserDisplayInfo = () => {
+    const roleBlockDisplay =
+      userStore.getPlayerRoleName(tagGameStore) === ""
+        ? "ロール未設定"
+        : userStore.getPlayerRoleName(tagGameStore);
+    return roleBlockDisplay + ": " + userStore.getCurrentUser().getName();
   };
 
   const liveButtonExplanation =
@@ -206,7 +218,7 @@ function ShowMap({
     <>
       <View style={{ position: "absolute", top: 150, right: 5, zIndex: 1 }}>
         <View style={{ display: "flex", gap: 5 }}>
-          {shouldStartExplanation() && (
+          {shouldShowButton() && (
             <>
               <CopilotStep
                 text={liveButtonExplanation}
@@ -223,34 +235,34 @@ function ShowMap({
                     backgroundColor: tagGameStore.isCurrentUserReject(
                       userStore.getCurrentUser(),
                     )
-                      ? "success"
-                      : "gray",
+                      ? Colors.success
+                      : Colors.inactive,
                   }}
-                  onPress={
-                    tagGameStore.isCurrentUserReject(userStore.getCurrentUser())
-                      ? () => {
-                          Alert.alert("復活", "復活してもよいですか？", [
-                            { text: "Cancel", onPress: undefined },
-                            {
-                              text: "OK",
-                              onPress: async () => {
-                                if (!userStore.getCurrentUser().getDeviceId())
-                                  return;
-
-                                try {
-                                  await reviveUser(
-                                    tagGameStore.getTagGame().getId(),
-                                    userStore.getCurrentUser().getId(),
-                                  );
-                                } catch (error) {
-                                  console.error(error);
-                                }
-                              },
-                            },
-                          ]);
-                        }
-                      : undefined
+                  disabled={
+                    !tagGameStore.isCurrentUserReject(
+                      userStore.getCurrentUser(),
+                    )
                   }
+                  onPress={() => {
+                    Alert.alert("復活", "復活してもよいですか？", [
+                      { text: "Cancel", onPress: undefined },
+                      {
+                        text: "OK",
+                        onPress: async () => {
+                          if (!userStore.getCurrentUser().getDeviceId()) return;
+
+                          try {
+                            await reviveUser(
+                              tagGameStore.getTagGame().getId(),
+                              userStore.getCurrentUser().getId(),
+                            );
+                          } catch (error) {
+                            console.error(error);
+                          }
+                        },
+                      },
+                    ]);
+                  }}
                 >
                   <IconSymbol
                     size={28}
@@ -271,41 +283,39 @@ function ShowMap({
                     justifyContent: "center",
                     alignItems: "center",
                     borderRadius: 2,
-                    backgroundColor: tagGameStore.isCurrentUserReject(
+                    backgroundColor: tagGameStore.isCurrentUserLive(
                       userStore.getCurrentUser(),
                     )
-                      ? "success"
-                      : "gray",
+                      ? Colors.success
+                      : Colors.inactive,
                   }}
-                  onPress={
-                    tagGameStore.isCurrentUserReject(userStore.getCurrentUser())
-                      ? () => {
-                          Alert.alert("復活", "復活してもよいですか？", [
-                            { text: "Cancel", onPress: undefined },
-                            {
-                              text: "OK",
-                              onPress: async () => {
-                                if (!userStore.getCurrentUser().getDeviceId())
-                                  return;
-
-                                try {
-                                  await reviveUser(
-                                    tagGameStore.getTagGame().getId(),
-                                    userStore.getCurrentUser().getId(),
-                                  );
-                                } catch (error) {
-                                  console.error(error);
-                                }
-                              },
-                            },
-                          ]);
-                        }
-                      : undefined
+                  disabled={
+                    !tagGameStore.isCurrentUserLive(userStore.getCurrentUser())
                   }
+                  onPress={() => {
+                    Alert.alert("脱落", "脱落してもよいですか？", [
+                      { text: "Cancel", onPress: undefined },
+                      {
+                        text: "OK",
+                        onPress: async () => {
+                          if (!userStore.getCurrentUser().getDeviceId()) return;
+
+                          try {
+                            await rejectUser(
+                              tagGameStore.getTagGame().getId(),
+                              userStore.getCurrentUser().getId(),
+                            );
+                          } catch (error) {
+                            console.error(error);
+                          }
+                        },
+                      },
+                    ]);
+                  }}
                 >
                   <IconSymbol
                     size={28}
-                    name={"person.badge.plus"}
+                    name={"person.badge.minus"}
                     color={"white"}
                   />
                 </CopilotTouchableOpacity>
@@ -390,10 +400,7 @@ function ShowMap({
                 }}
               >
                 <Text style={{ fontWeight: "900" }}>
-                  {userStore.getPlayerRoleName(tagGameStore) ||
-                    "ロール未設定" +
-                      ": " +
-                      userStore.getCurrentUser().getName()}
+                  {getUserDisplayInfo()}
                 </Text>
               </CopilotView>
             ) : (

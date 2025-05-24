@@ -90,7 +90,7 @@ function EditMap({
           followsUserLocation={true}
           showsMyLocationButton={true}
           region={region}
-          onLongPress={(event) => {
+          onPress={(event) => {
             if (
               !(isGameMaster() || !tagGameStore.getTagGame().isSetGame()) ||
               !setPoints
@@ -155,7 +155,7 @@ function EditMap({
 const styles = StyleSheet.create({
   map: {
     width: "100%",
-    height: "100%",
+    flex: 1,
   },
 });
 

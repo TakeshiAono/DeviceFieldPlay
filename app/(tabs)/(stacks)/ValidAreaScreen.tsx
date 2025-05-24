@@ -37,8 +37,7 @@ function ValidAreaScreen({ _userStore, _tagGameStore }: Props) {
   };
 
   return (
-    // NOTE: tab分の高さが7%なので93%に設定している
-    <View style={{ backgroundColor: "blue", height: "93%", width: "100%" }}>
+    <View style={{ flex: 1, width: "100%" }}>
       <ValidAreaEditMap
         points={tagGameStore.getTagGame().getValidAreas()}
         setPoints={(points) => {

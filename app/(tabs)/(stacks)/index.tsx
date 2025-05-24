@@ -127,7 +127,13 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
         justifyContent: "center",
       }}
     >
-      <View style={{ gap: 100, height: "80%" }}>
+      <View
+        style={{
+          flex: 1,
+          height: "100%",
+          justifyContent: "space-around",
+        }}
+      >
         {userStore.isCurrentUserGameMaster(tagGameStore.getTagGame()) ? (
           <>
             <CopilotStep
