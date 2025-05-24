@@ -62,13 +62,18 @@ function ValidAreaScreen({ _userStore, _tagGameStore }: Props) {
                 return;
               }
 
+              // バリデーション: 3点未満ならエラー
+              if (tagGameStore.getTagGame().getValidAreas().length < 3) {
+                Alert.alert("エラー", "有効エリアは3点以上設定してください。");
+                return;
+              }
+
               const tagGame = tagGameStore.getTagGame();
               if (_.isEmpty(tagGame.getGameMasterId())) {
                 tagGame.setGameMasterId(userStore.getCurrentUser().getId());
               }
 
               await putTagGames(tagGame.toObject());
-              // setIsSetDoneArea(true);
               tagGameStore.setIsSetValidAreaDone(true);
             }}
           >
