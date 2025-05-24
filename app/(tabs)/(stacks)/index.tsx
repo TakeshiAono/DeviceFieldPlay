@@ -1,16 +1,19 @@
 import { inject, observer } from "mobx-react";
-import { router } from "expo-router";
-import { Text, View } from "react-native";
+import { router, useLocalSearchParams } from "expo-router";
+import { StyleSheet, Text, View } from "react-native";
 import ReactNativeModal from "react-native-modal";
 
 import TagGameStore from "@/stores/TagGameStore";
 import UserStore from "@/stores/UserStore";
 import { joinUser, putTagGames, putUser } from "@/utils/APIs";
 import { Button } from "@rneui/themed";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CameraView } from "expo-camera";
-import { IconSymbol } from "@/components/ui/IconSymbol";
 import TagGameModel from "@/models/TagGameModel";
+import { CopilotStep } from "react-native-copilot";
+import { Colors } from "@/constants/Colors";
+import { IconSymbol } from "@/components/ui/IconSymbol";
+import useCopilotHook from "@/hooks/useCopilotHook";
 
 interface Props {
   _userStore?: UserStore;
@@ -24,6 +27,28 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
   const [cameraVisible, setCameraVisible] = useState(false);
 
   const firstScan = useRef(true);
+
+  const [setIsStart, CopilotTouchableOpacity, ..._other] = useCopilotHook(
+    userStore,
+    tagGameStore,
+    userStore.isCurrentUserGameMaster(tagGameStore.getTagGame())
+      ? "validGameArea"
+      : "gameJoinCamera",
+    userStore.isCurrentUserGameMaster(tagGameStore.getTagGame())
+      ? ["validGameArea", "prisonArea", "teamEdit", "gameTime", "gameStart"]
+      : ["gameJoinCamera"],
+    userStore.isCurrentUserGameMaster(tagGameStore.getTagGame())
+      ? "/ValidAreaScreen"
+      : null,
+  );
+
+  useEffect(() => {
+    if (tagGameStore.getShouldShowGameExplanation()) {
+      setTimeout(() => {
+        setIsStart(true);
+      }, 500);
+    }
+  }, []);
 
   const gameStart = () => {
     tagGameStore.getTagGame().setIsGameStarted(true);
@@ -80,54 +105,121 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
     );
   };
 
+  const validGameAreaButtonExplanation =
+    "ゲーム内の有効エリアを編集する画面に移動します。ゲーム内から出た泥棒は強制的に脱落扱いとなります。";
+  const prisonAreaButtonExplanation =
+    "泥棒を収容する監獄エリアを編集する画面に移動します。捕まえた泥棒を収容するエリアを設定します。";
+  const teamEditButtonExplanation =
+    "警察、泥棒の役割を編集する画面に移動します。";
+  const gameTimeButtonExplanation =
+    "ゲーム終了時間を編集する画面に移動します。";
+  const gameStartButtonExplanation =
+    "全ての設定が終了した後にボタンが押せるようになり、ゲームスタートできるようになります。";
+  const gameJoinCameraButtonExplanation =
+    "ゲームマスターのQRコードを読み取ることで、ゲームマスターが主催しているゲームに参加することができます。";
+
   return (
     <View
-      style={{ height: "100%", alignItems: "center", backgroundColor: "white" }}
+      style={{
+        height: "100%",
+        alignItems: "center",
+        backgroundColor: "white",
+        justifyContent: "center",
+      }}
     >
       <View style={{ gap: 100, height: "80%" }}>
         {userStore.isCurrentUserGameMaster(tagGameStore.getTagGame()) ? (
           <>
-            <Button
-              color={
-                tagGameStore.getTagGame().getIsSetValidAreaDone()
-                  ? "success"
-                  : "error"
-              }
-              title="ゲーム範囲設定"
-              onPress={() => {
-                router.push("/ValidAreaScreen");
-              }}
-            ></Button>
-            <Button
-              color={
-                tagGameStore.getTagGame().getIsSetPrisonAreaDone()
-                  ? "success"
-                  : "error"
-              }
-              title="監獄エリア設定"
-              onPress={() => {
-                router.push("/PrisonAreaScreen");
-              }}
-            ></Button>
-            <Button
-              color={tagGameStore.getIsEditTeams() ? "success" : "error"}
-              title="チーム設定"
-              onPress={() => {
-                router.push("/TeamEditScreen");
-              }}
-            ></Button>
-            <Button
-              color={
-                tagGameStore.getTagGame().getGameTimeLimit()
-                  ? "success"
-                  : "error"
-              }
-              title="タイムリミット設定"
-              onPress={() => {
-                router.push("/GameTimeScreen");
-              }}
-            ></Button>
-            {/* </View> */}
+            <CopilotStep
+              text={validGameAreaButtonExplanation}
+              order={4}
+              name="validGameArea"
+            >
+              <CopilotTouchableOpacity
+                style={[
+                  styles.button,
+                  {
+                    backgroundColor: tagGameStore
+                      .getTagGame()
+                      .getIsSetValidAreaDone()
+                      ? Colors.primary
+                      : Colors.warning,
+                  },
+                ]}
+                onPress={() => {
+                  router.push("/ValidAreaScreen");
+                }}
+              >
+                <Text>ゲーム有効エリア設定</Text>
+              </CopilotTouchableOpacity>
+            </CopilotStep>
+            <CopilotStep
+              text={prisonAreaButtonExplanation}
+              order={5}
+              name="prisonArea"
+            >
+              <CopilotTouchableOpacity
+                style={[
+                  styles.button,
+                  {
+                    backgroundColor: tagGameStore
+                      .getTagGame()
+                      .getIsSetPrisonAreaDone()
+                      ? Colors.primary
+                      : Colors.warning,
+                  },
+                ]}
+                onPress={() => {
+                  router.push("/PrisonAreaScreen");
+                }}
+              >
+                <Text>監獄エリア設定</Text>
+              </CopilotTouchableOpacity>
+            </CopilotStep>
+            <CopilotStep
+              text={teamEditButtonExplanation}
+              order={6}
+              name="teamEdit"
+            >
+              <CopilotTouchableOpacity
+                style={[
+                  styles.button,
+                  {
+                    backgroundColor: tagGameStore.getIsEditTeams()
+                      ? Colors.primary
+                      : Colors.warning,
+                  },
+                ]}
+                onPress={() => {
+                  router.push("/TeamEditScreen");
+                }}
+              >
+                <Text>チーム設定</Text>
+              </CopilotTouchableOpacity>
+            </CopilotStep>
+            <CopilotStep
+              text={gameTimeButtonExplanation}
+              order={7}
+              name="gameTime"
+            >
+              <CopilotTouchableOpacity
+                style={[
+                  styles.button,
+                  {
+                    backgroundColor: tagGameStore
+                      .getTagGame()
+                      .getGameTimeLimit()
+                      ? Colors.primary
+                      : Colors.warning,
+                  },
+                ]}
+                onPress={() => {
+                  router.push("/GameTimeScreen");
+                }}
+              >
+                <Text>タイムリミット設定</Text>
+              </CopilotTouchableOpacity>
+            </CopilotStep>
             {tagGameStore.getTagGame().getIsGameStarted() === true ? (
               <Button
                 title={"ゲーム中止"}
@@ -137,26 +229,54 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                 }}
               />
             ) : (
-              <Button
-                title={"ゲームスタート"}
-                color={"primary"}
-                disabled={!canGameStart()}
-                onPress={() => {
-                  gameStart();
-                }}
-              />
+              <CopilotStep
+                text={gameStartButtonExplanation}
+                order={8}
+                name="gameStart"
+              >
+                <CopilotTouchableOpacity
+                  style={[
+                    styles.button,
+                    {
+                      backgroundColor: tagGameStore
+                        .getTagGame()
+                        .getGameTimeLimit()
+                        ? Colors.primary
+                        : Colors.inactive,
+                    },
+                  ]}
+                  disabled={!canGameStart()}
+                  onPress={() => {
+                    gameStart();
+                  }}
+                >
+                  <Text>ゲームスタート</Text>
+                </CopilotTouchableOpacity>
+              </CopilotStep>
             )}
           </>
         ) : (
           <>
-            <Button
-              type="solid"
-              onPress={() => {
-                setCameraVisible(true);
-              }}
-              title="ゲームに参加"
-              icon={<IconSymbol size={28} name={"camera"} color={"white"} />}
-            />
+            <CopilotStep
+              text={gameJoinCameraButtonExplanation}
+              order={9}
+              name="gameJoinCamera"
+            >
+              <CopilotTouchableOpacity
+                style={[
+                  styles.button,
+                  {
+                    backgroundColor: Colors.primary,
+                  },
+                ]}
+                onPress={() => {
+                  setCameraVisible(true);
+                }}
+              >
+                <IconSymbol size={28} name={"camera"} color={"white"} />
+                <Text>ゲームに参加</Text>
+              </CopilotTouchableOpacity>
+            </CopilotStep>
             <ReactNativeModal
               style={{ margin: "auto" }}
               isVisible={cameraVisible}
@@ -198,5 +318,14 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  button: {
+    paddingVertical: 15,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+    alignItems: "center",
+  },
+});
 
 export default inject("_userStore", "_tagGameStore")(observer(SettingScreen));

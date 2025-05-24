@@ -1,5 +1,4 @@
 import { Alert, StyleSheet, View } from "react-native";
-import { Button } from "@rneui/themed";
 import React, { useState, useEffect } from "react";
 import MapView, { LatLng, Polygon, Region } from "react-native-maps";
 import { booleanPointInPolygon, point, polygon } from "@turf/turf";
@@ -7,6 +6,7 @@ import "react-native-get-random-values";
 import _ from "lodash";
 import { inject, observer } from "mobx-react";
 import * as Notifications from "expo-notifications";
+import { CopilotStep } from "react-native-copilot";
 
 import { rejectUser, reviveUser } from "@/utils/APIs";
 import { IconSymbol } from "@/components/ui/IconSymbol";
@@ -27,6 +27,7 @@ import {
 } from "@/utils/Notifications";
 import { Text } from "react-native";
 import { getPlayerRoleColor } from "@/constants/Colors";
+import useCopilotHook from "@/hooks/useCopilotHook";
 
 export type Props = {
   mapVisible?: boolean;
@@ -55,6 +56,21 @@ function ShowMap({
   const tagGameStore = _tagGameStore!;
 
   const [isFirstUpdate, setIsFirstUpdate] = useState(true);
+  const [setIsStart, CopilotTouchableOpacity, CopilotView] = useCopilotHook(
+    userStore,
+    tagGameStore,
+    "roleDisplay",
+    ["plusButton", "roleDisplay", "minusButton"],
+    "/(tabs)/(stacks)",
+  );
+
+  useEffect(() => {
+    if (tagGameStore.getShouldShowGameExplanation()) {
+      setTimeout(() => {
+        setIsStart(true);
+      }, 500);
+    }
+  }, [userStore.getCurrentUser().getName()]);
 
   useEffect(() => {
     const gameId = tagGameStore.getTagGame().getId();
@@ -63,6 +79,16 @@ function ShowMap({
 
     const joinUserNotificationListener =
       Notifications.addNotificationReceivedListener((event) => {
+        if (tagGameStore.getShouldShowGameExplanation()) {
+          Alert.alert(
+            "チーム設定方法",
+            "メンバーがゲームに参加できましたね。\nゲームマスターさんはゲーム参加者の役割を決めてから確定ボタンで編集を完了しましょう。\nメンバーさんはゲームスタートの通知がくるのを待つだけです。",
+          );
+
+          if (!userStore.isCurrentUserGameMaster(tagGameStore.getTagGame())) {
+            tagGameStore.setShouldShowGameExplanation(false);
+          }
+        }
         joinUserNotificationHandler(event, gameId, tagGameStore);
       });
 
@@ -165,20 +191,41 @@ function ShowMap({
     }
   };
 
+  const shouldStartExplanation = () => {
+    return tagGameStore.getShouldShowGameExplanation();
+  };
+
+  const liveButtonExplanation =
+    "監獄エリアで味方に生還してもらった時にこのボタンを押してください";
+  const rejectButtonExplanation =
+    "警察に捕まった時に泥棒ユーザーはこのボタンを押してください";
+  const roleDisplayExplanation =
+    "あなたの役職名とユーザー名が表示されます。\n泥棒(生存中)は黒\n泥棒(捕縛中)は赤\n警察は青色\nで表示されます";
+
   return (
     <>
       <View style={{ position: "absolute", top: 150, right: 5, zIndex: 1 }}>
         <View style={{ display: "flex", gap: 5 }}>
-          {tagGameStore.getTagGame().getIsGameStarted() &&
-            !tagGameStore.isCurrentUserPolice(userStore.getCurrentUser()) && (
-              <>
-                <Button
-                  type="solid"
-                  color={
-                    tagGameStore.isCurrentUserReject(userStore.getCurrentUser())
+          {shouldStartExplanation() && (
+            <>
+              <CopilotStep
+                text={liveButtonExplanation}
+                order={3}
+                name="plusButton"
+              >
+                <CopilotTouchableOpacity
+                  style={{
+                    height: 50,
+                    width: 50,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    borderRadius: 2,
+                    backgroundColor: tagGameStore.isCurrentUserReject(
+                      userStore.getCurrentUser(),
+                    )
                       ? "success"
-                      : "gray"
-                  }
+                      : "gray",
+                  }}
                   onPress={
                     tagGameStore.isCurrentUserReject(userStore.getCurrentUser())
                       ? () => {
@@ -210,18 +257,30 @@ function ShowMap({
                     name={"person.badge.plus"}
                     color={"white"}
                   />
-                </Button>
-                <Button
-                  type="solid"
-                  color={
-                    tagGameStore.isCurrentUserLive(userStore.getCurrentUser())
-                      ? "error"
-                      : "gray"
-                  }
+                </CopilotTouchableOpacity>
+              </CopilotStep>
+              <CopilotStep
+                text={rejectButtonExplanation}
+                order={2}
+                name="minusButton"
+              >
+                <CopilotTouchableOpacity
+                  style={{
+                    height: 50,
+                    width: 50,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    borderRadius: 2,
+                    backgroundColor: tagGameStore.isCurrentUserReject(
+                      userStore.getCurrentUser(),
+                    )
+                      ? "success"
+                      : "gray",
+                  }}
                   onPress={
-                    tagGameStore.isCurrentUserLive(userStore.getCurrentUser())
+                    tagGameStore.isCurrentUserReject(userStore.getCurrentUser())
                       ? () => {
-                          Alert.alert("脱落", "脱落してもよいですか？", [
+                          Alert.alert("復活", "復活してもよいですか？", [
                             { text: "Cancel", onPress: undefined },
                             {
                               text: "OK",
@@ -230,7 +289,7 @@ function ShowMap({
                                   return;
 
                                 try {
-                                  await rejectUser(
+                                  await reviveUser(
                                     tagGameStore.getTagGame().getId(),
                                     userStore.getCurrentUser().getId(),
                                   );
@@ -246,14 +305,16 @@ function ShowMap({
                 >
                   <IconSymbol
                     size={28}
-                    name={"person.badge.minus"}
+                    name={"person.badge.plus"}
                     color={"white"}
                   />
-                </Button>
-              </>
-            )}
+                </CopilotTouchableOpacity>
+              </CopilotStep>
+            </>
+          )}
         </View>
       </View>
+
       {mapVisible && (
         <View style={{ position: "relative" }}>
           <MapView
@@ -311,25 +372,34 @@ function ShowMap({
               />
             )}
           </MapView>
-          {userStore.getCurrentUser().getName() !== "" && (
-            <View
-              style={{
-                backgroundColor: "white",
-                width: "auto",
-                position: "absolute",
-                top: 0,
-                borderColor: getPlayerRoleColor(tagGameStore, userStore),
-                borderWidth: 10,
-                padding: 5,
-              }}
-            >
-              <Text style={{ fontWeight: "900" }}>
-                {userStore.getPlayerRoleName(tagGameStore) +
-                  ": " +
-                  userStore.getCurrentUser().getName()}
-              </Text>
-            </View>
-          )}
+          <CopilotStep
+            text={roleDisplayExplanation}
+            order={1}
+            name="roleDisplay"
+          >
+            {userStore.getCurrentUser().getName().length > 0 ? (
+              <CopilotView
+                style={{
+                  backgroundColor: "white",
+                  width: "auto",
+                  position: "absolute",
+                  top: 0,
+                  borderColor: getPlayerRoleColor(tagGameStore, userStore),
+                  borderWidth: 10,
+                  padding: 5,
+                }}
+              >
+                <Text style={{ fontWeight: "900" }}>
+                  {userStore.getPlayerRoleName(tagGameStore) ||
+                    "ロール未設定" +
+                      ": " +
+                      userStore.getCurrentUser().getName()}
+                </Text>
+              </CopilotView>
+            ) : (
+              <></>
+            )}
+          </CopilotStep>
         </View>
       )}
     </>

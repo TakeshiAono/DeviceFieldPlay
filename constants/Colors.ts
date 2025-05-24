@@ -10,22 +10,15 @@ const tintColorLight = "#0a7ea4";
 const tintColorDark = "#fff";
 
 export const Colors = {
-  light: {
-    text: "#11181C",
-    background: "#fff",
-    tint: tintColorLight,
-    icon: "#687076",
-    tabIconDefault: "#687076",
-    tabIconSelected: tintColorLight,
-  },
-  dark: {
-    text: "#ECEDEE",
-    background: "#151718",
-    tint: tintColorDark,
-    icon: "#9BA1A6",
-    tabIconDefault: "#9BA1A6",
-    tabIconSelected: tintColorDark,
-  },
+  primary: "#21D7E0",
+  secondary: "#E06D22",
+
+  success: "#54E189",
+  warning: "#E0DC61",
+  info: "#3F52E0",
+  error: "#E05A53",
+
+  inactive: "#DEE2E0",
 };
 
 export const MapAreaColors = {
@@ -34,9 +27,10 @@ export const MapAreaColors = {
 };
 
 export const RoleColors = {
-  police: "blue",
-  liveUser: "green",
-  rejectUser: "red",
+  police: Colors.info,
+  liveUser: Colors.success,
+  rejectUser: Colors.error,
+  undefined: Colors.inactive,
 };
 
 export const getPlayerRoleColor = (
@@ -51,6 +45,6 @@ export const getPlayerRoleColor = (
     if (tagGameStore.isCurrentUserReject(userStore.getCurrentUser()))
       return RoleColors.rejectUser;
   } else {
-    return "none";
+    return RoleColors.undefined;
   }
 };
