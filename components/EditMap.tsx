@@ -90,7 +90,7 @@ function EditMap({
           followsUserLocation={true}
           showsMyLocationButton={true}
           region={region}
-          onLongPress={(event) => {
+          onPress={(event) => {
             if (
               !(isGameMaster() || !tagGameStore.getTagGame().isSetGame()) ||
               !setPoints
