@@ -362,15 +362,19 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                 >
                   <TouchableOpacity
                     onPress={async () => {
+                      // バリデーション: 泥棒(生)と警察が各1人以上いないとエラー
+                      const liveCount = tagGameStore.getTagGame().getLiveUsers().length;
+                      const policeCount = tagGameStore.getPoliceUsers().length;
+                      if (liveCount < 1 || policeCount < 1) {
+                        Alert.alert("エラー", "泥棒(生)と警察が各1人以上必要です。");
+                        return;
+                      }
                       if (tagGameStore.getShouldShowGameExplanation()) {
                         router.replace("/GameTimeScreen");
                         return;
                       }
-
                       setSelectedUsers([]);
                       try {
-                        // TODO: 先にエリアを設定しないとidが設定されず、dynamo not keyエラーが発生してしまう
-                        // idはマップコンポーネントではなくて設定画面でゲーム生成ボタンなどの押下時に格納するよう変更する
                         await putTagGames(tagGameStore.getTagGame().toObject());
                         tagGameStore.setIsEditTeams(true);
                       } catch (error) {
