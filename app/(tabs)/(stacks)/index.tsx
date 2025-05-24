@@ -320,6 +320,21 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
             </ReactNativeModal>
           </>
         )}
+        <CopilotStep
+          text={"アビリティ設定画面に遷移します。"}
+          order={10}
+          name="abilitySetting"
+        >
+          <CopilotTouchableOpacity
+            style={styles.button}
+            onPress={() => {
+              router.push("/AbilitySettingScreen");
+            }}
+          >
+            <IconSymbol size={28} name="bolt.fill" color={"#333"} />
+            <Text>アビリティ設定</Text>
+          </CopilotTouchableOpacity>
+        </CopilotStep>
       </View>
     </View>
   );

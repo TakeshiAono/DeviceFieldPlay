@@ -35,9 +35,32 @@ export default class TagGameStore {
   @observable
   private explainedTeamEditScreen!: boolean;
 
+  @observable
+  public policeAbilities: Record<string, { method: Function; enable: boolean }> = {};
+  @observable
+  public thiefAbilities: Record<string, { method: Function; enable: boolean }> = {};
+  @observable
+  public currentUserUsedAbilities: { police: string[]; thief: string[] } = { police: [], thief: [] };
+
   constructor() {
     makeObservable(this);
     this.initialize();
+  }
+
+  /**
+   * 全ユーザーのGPS情報を取得するアビリティ
+   */
+  @action
+  public async fetchUsersGPSInfo() {
+    // TODO: 実際のGPS情報取得処理を実装
+    // ここではダミーで返す
+    return this.getLiveUsers().map(user => ({
+      id: user.getId(),
+      name: user.getName(),
+      // 位置情報は仮
+      latitude: 0,
+      longitude: 0,
+    }));
   }
 
   @action
@@ -55,7 +78,6 @@ export default class TagGameStore {
     });
     this.isEditTeams = false;
     this.isGameTimeUp = false;
-
     this.shouldShowGameExplanation = false;
     this.explainedSettingScreen = false;
     this.explainedShowMapScreen = false;
@@ -63,6 +85,15 @@ export default class TagGameStore {
     this.explainedPrisonAreaScreen = false;
     this.explainedGameTimeScreen = false;
     this.explainedTeamEditScreen = false;
+    // アビリティ初期化
+    this.policeAbilities = {
+      fetchUsersGPSInfo: { method: this.fetchUsersGPSInfo.bind(this), enable: true },
+      // 他の警察用アビリティがあればここに追加
+    };
+    this.thiefAbilities = {
+      // 泥棒用アビリティがあればここに追加
+    };
+    this.currentUserUsedAbilities = { police: [], thief: [] };
   }
 
   @action
