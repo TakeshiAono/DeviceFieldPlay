@@ -42,6 +42,15 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="AbilityScreen"
+        options={{
+          title: "Ability",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="bolt.fill" color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

@@ -35,6 +35,27 @@ export default class TagGameStore {
   @observable
   private explainedTeamEditScreen!: boolean;
 
+  // アビリティ管理
+  policeAbilities = {
+    fetchUsersGPSInfo: {
+      method: () => this.fetchUsersGPSInfo(),
+      enable: true,
+    },
+    // 他の警察アビリティをここに追加
+  };
+  thiefAbilities = {
+    // 泥棒用アビリティ例
+    hidePosition: {
+      method: () => {},
+      enable: true,
+    },
+    // 他の泥棒アビリティをここに追加
+  };
+  currentUserUsedAbilities = {
+    police: [],
+    thief: [],
+  };
+
   constructor() {
     makeObservable(this);
     this.initialize();
@@ -414,5 +435,11 @@ export default class TagGameStore {
   @action
   public setExplainedTeamEditScreen(value: boolean) {
     this.explainedTeamEditScreen = value;
+  }
+
+  fetchUsersGPSInfo() {
+    // 全泥棒ユーザーの位置を取得する処理（仮実装）
+    // 実際はAPIやstoreから取得
+    return this.getLiveUsers().map((user) => user.getId());
   }
 }
