@@ -260,6 +260,18 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                 </CopilotTouchableOpacity>
               </CopilotStep>
             )}
+            <CopilotStep
+              text="アビリティ設定画面に遷移します。"
+              order={10}
+              name="abilitySetting"
+            >
+              <CopilotTouchableOpacity
+                style={styles.button}
+                onPress={() => router.push("/AbilitySettingScreen")}
+              >
+                <Text>アビリティ設定</Text>
+              </CopilotTouchableOpacity>
+            </CopilotStep>
           </>
         ) : (
           <>
