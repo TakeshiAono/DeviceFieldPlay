@@ -7,9 +7,8 @@ import UserStore from "@/stores/UserStore";
 import { inject, observer } from "mobx-react";
 import { Alert, Button, Text, TouchableOpacity, View } from "react-native";
 import { Button as EButton } from "@rneui/themed";
-import { UserTypeForList } from "@/components/UserList";
+import UserCheckList, { UserTypeForList } from "@/components/UserCheckList";
 import TagGameStore from "@/stores/TagGameStore";
-import UserList from "@/components/UserList";
 import _ from "lodash";
 
 import {
@@ -28,7 +27,7 @@ interface Props {
   _tagGameStore?: TagGameStore;
 }
 
-function SettingScreen({ _userStore, _tagGameStore }: Props) {
+function TeamEditScreen({ _userStore, _tagGameStore }: Props) {
   const userStore = _userStore!;
   const tagGameStore = _tagGameStore!;
 
@@ -177,7 +176,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
         />
         <Text style={{ textAlign: "center", fontSize: 20 }}>警察</Text>
         <View style={{ flex: 1, borderRadius: 5, borderWidth: 2 }}>
-          <UserList
+          <UserCheckList
             userRecords={policeUsersForList}
             onChecked={(userRecord) => {
               listContentChecked(userRecord);
@@ -208,7 +207,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
         <View style={{ flex: 1, margin: 10 }}>
           <Text style={{ textAlign: "center", fontSize: 20 }}>泥棒(生存)</Text>
           <View style={{ flex: 1, borderRadius: 5, borderWidth: 2 }}>
-            <UserList
+            <UserCheckList
               userRecords={liveUsersForList}
               onChecked={(userRecord) => {
                 listContentChecked(userRecord);
@@ -238,7 +237,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
         <View style={{ flex: 1, margin: 10 }}>
           <Text style={{ textAlign: "center", fontSize: 20 }}>泥棒(脱落)</Text>
           <View style={{ flex: 1, borderRadius: 5, borderWidth: 2 }}>
-            <UserList
+            <UserCheckList
               userRecords={rejectUsersForList}
               onChecked={(userRecord) => {
                 listContentChecked(userRecord);
@@ -451,4 +450,4 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
   );
 }
 
-export default inject("_userStore", "_tagGameStore")(observer(SettingScreen));
+export default inject("_userStore", "_tagGameStore")(observer(TeamEditScreen));

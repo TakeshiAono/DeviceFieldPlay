@@ -1,7 +1,7 @@
 import { makeAutoObservable } from "mobx";
 
 import TagGameModel from "./TagGameModel";
-import { UserTypeForList } from "@/components/UserList";
+import { UserTypeForList } from "@/components/UserCheckList";
 
 type Props = {
   id: string;
