@@ -368,6 +368,14 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                 >
                   <TouchableOpacity
                     onPress={async () => {
+                      if (isInValidRoleCount()) {
+                        Alert.alert(
+                          "エラー",
+                          "泥棒(生)と警察が各1人以上必要です。",
+                        );
+                        return;
+                      }
+
                       if (tagGameStore.getShouldShowGameExplanation()) {
                         router.replace("/GameTimeScreen");
                         return;
