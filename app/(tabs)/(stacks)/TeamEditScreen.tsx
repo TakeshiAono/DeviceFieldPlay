@@ -142,6 +142,12 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
       );
     });
 
+  const isInValidRoleCount = () => {
+    const liveCount = tagGameStore.getTagGame().getLiveUsers().length;
+    const policeCount = tagGameStore.getPoliceUsers().length;
+    return liveCount < 1 || policeCount < 1;
+  };
+
   return (
     <View style={{ flex: 1, backgroundColor: "white", position: "relative" }}>
       <View style={{ flex: 1, margin: 10 }}>
@@ -362,6 +368,14 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                 >
                   <TouchableOpacity
                     onPress={async () => {
+                      if (isInValidRoleCount()) {
+                        Alert.alert(
+                          "エラー",
+                          "泥棒(生)と警察が各1人以上必要です。",
+                        );
+                        return;
+                      }
+
                       if (tagGameStore.getShouldShowGameExplanation()) {
                         router.replace("/GameTimeScreen");
                         return;
