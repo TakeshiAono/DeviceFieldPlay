@@ -294,3 +294,11 @@ const asyncDynamoTagGameUsers = (
     ),
   });
 };
+
+const hasGameCurrentUser = (game: DynamoTagGame, currentUserId: string) => {
+  return (
+    game.policeUsers.includes(currentUserId) ||
+    game.liveUsers.includes(currentUserId) ||
+    game.rejectUsers.includes(currentUserId)
+  );
+};
