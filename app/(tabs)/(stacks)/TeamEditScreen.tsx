@@ -142,6 +142,12 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
       );
     });
 
+  const isInValidRoleCount = () => {
+    const liveCount = tagGameStore.getTagGame().getLiveUsers().length;
+    const policeCount = tagGameStore.getPoliceUsers().length;
+    return liveCount < 1 || policeCount < 1;
+  };
+
   return (
     <View style={{ flex: 1, backgroundColor: "white", position: "relative" }}>
       <View style={{ flex: 1, margin: 10 }}>
