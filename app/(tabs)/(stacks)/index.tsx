@@ -68,7 +68,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
 
     // NOTE: カメラモーダルを閉じた際にtrueに戻します。
     // NOTE: QRが画面上にある限り連続スキャンしてしまうので最初のスキャン以外は早期リターンしている
-    if (!firstScan.current || !userStore.getCurrentUser().getDeviceId()) return;
+    if (!firstScan.current || !userStore.getCurrentUser().getId()) return;
 
     firstScan.current = false;
     console.log("ScanData: ", gameId);
