@@ -27,7 +27,7 @@ interface Props {
   _tagGameStore?: TagGameStore;
 }
 
-function SettingScreen({ _userStore, _tagGameStore }: Props) {
+function TeamEditScreen({ _userStore, _tagGameStore }: Props) {
   const userStore = _userStore!;
   const tagGameStore = _tagGameStore!;
 
@@ -450,4 +450,4 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
   );
 }
 
-export default inject("_userStore", "_tagGameStore")(observer(SettingScreen));
+export default inject("_userStore", "_tagGameStore")(observer(TeamEditScreen));
