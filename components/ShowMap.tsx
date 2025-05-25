@@ -95,7 +95,12 @@ function ShowMap({
 
     const kickOutUsersNotificationListener =
       Notifications.addNotificationReceivedListener((event) => {
-        kickOutUsersNotificationHandler(event, gameId, tagGameStore);
+        kickOutUsersNotificationHandler(
+          event,
+          gameId,
+          tagGameStore,
+          userStore.getCurrentUser().getId(),
+        );
       });
 
     // ゲーム有効エリア変更時の通知を受け取って自分の持っているエリア情報を更新する

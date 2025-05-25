@@ -82,6 +82,7 @@ export const kickOutUsersNotificationHandler = async (
   notification: Notifications.Notification,
   gameId: string,
   tagGameStore: TagGameStore,
+  currentUserId: string,
 ) => {
   if (notification.request.content.data.notification_type !== "kickOutUsers")
     return;
@@ -95,6 +96,14 @@ export const kickOutUsersNotificationHandler = async (
 
   try {
     const tagGame = await getTagGames(gameId);
+    if (!hasGameCurrentUser(tagGame, currentUserId)) {
+      Alert.alert(
+        "追放連絡",
+        "あなたはゲームマスターによって追放されました。ゲームを終了します。",
+      );
+      tagGameStore.initialize();
+      return;
+    }
     const gameUsers = await getCurrentGameUsersInfo(gameId);
     tagGameStore.putAllUsers({
       liveUsers: TagGameStore.convertUserInstances(
