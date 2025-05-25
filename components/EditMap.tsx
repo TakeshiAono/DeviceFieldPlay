@@ -61,14 +61,14 @@ function EditMap({
     const area = polygon([targetPolygon]);
     const isInside: boolean = booleanPointInPolygon(targetPoint, area);
 
-    if (!userStore.getCurrentUser().getDeviceId()) return;
+    if (!userStore.getCurrentUser().getId()) return;
 
     if (!isInside) {
       if (isCurrentUserLive === false) return;
 
       await rejectUser(
         tagGameStore.getTagGame().getId(),
-        userStore.getCurrentUser().getDeviceId(),
+        userStore.getCurrentUser().getId(),
       );
       setIsCurrentUserLive(false);
       Alert.alert("脱落通知", "エリア外に出たため脱落となりました。", [

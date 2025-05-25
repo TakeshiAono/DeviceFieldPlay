@@ -164,6 +164,8 @@ function ShowMap({
     )
       return;
 
+    if (!tagGameStore.getTagGame().getIsGameStarted()) return;
+
     const userPositionPoint = point(userPosition);
 
     // TODO: areaを毎回計算するのはパフォーマンス効率が悪いため、エリア変更時にuseRefで保存するように変更する
@@ -171,20 +173,22 @@ function ShowMap({
       point.longitude,
       point.latitude,
     ]);
+    const firstPoint = targetPolygon[0];
+    targetPolygon.push(firstPoint);
     const areaPoint = polygon([targetPolygon]);
     const isInside: boolean = booleanPointInPolygon(
       userPositionPoint,
       areaPoint,
     );
 
-    if (!userStore.getCurrentUser().getDeviceId()) return;
+    if (!userStore.getCurrentUser().getId()) return;
 
     if (!isInside) {
       if (tagGameStore.isCurrentUserReject(userStore.getCurrentUser())) return;
 
       await rejectUser(
         tagGameStore.getTagGame().getId(),
-        userStore.getCurrentUser().getDeviceId(),
+        userStore.getCurrentUser().getId(),
       );
       Alert.alert("脱落通知", "エリア外に出たため脱落となりました。", [
         { text: "OK" },
@@ -250,7 +254,7 @@ function ShowMap({
                       {
                         text: "OK",
                         onPress: async () => {
-                          if (!userStore.getCurrentUser().getDeviceId()) return;
+                          if (!userStore.getCurrentUser().getId()) return;
 
                           const location =
                             await Location.getCurrentPositionAsync({});
@@ -314,7 +318,7 @@ function ShowMap({
                       {
                         text: "OK",
                         onPress: async () => {
-                          if (!userStore.getCurrentUser().getDeviceId()) return;
+                          if (!userStore.getCurrentUser().getId()) return;
 
                           try {
                             await rejectUser(
