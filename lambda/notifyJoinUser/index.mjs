@@ -121,7 +121,7 @@ export const handler = async (event) => {
               title: "ユーザー追放通知",
               body: "ユーザーがゲームから追放されました",
             },
-            data: { notification_type: "kickOutUser" },
+            data: { notification_type: "kickOutUsers" },
             android: {
               priority: "high",
               notification: {

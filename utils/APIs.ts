@@ -26,7 +26,7 @@ const client = new DynamoDBClient({
 
 const docClient = DynamoDBDocumentClient.from(client);
 
-export const getTagGames = async <T extends DynamoTagGame>(
+export const fetchTagGames = async <T extends DynamoTagGame>(
   id: T["id"],
 ): Promise<DynamoTagGame> => {
   try {
@@ -37,10 +37,10 @@ export const getTagGames = async <T extends DynamoTagGame>(
       },
     });
     const response = await docClient.send(command);
-    console.log("getTagGames:", response);
+    console.log("fetchTagGames:", response);
     return response.Item as DynamoTagGame;
   } catch (error) {
-    console.error("getTagGames:", error);
+    console.error("fetchTagGames:", error);
     throw error;
   }
 };
@@ -100,7 +100,7 @@ export const joinUser = async <T extends DynamoTagGame>(
   }
 };
 
-export const getCurrentGameUsersInfo = async <T extends DynamoUser>(
+export const fetchCurrentGameUsersInfo = async <T extends DynamoUser>(
   gameId: T["gameId"],
 ): Promise<T[]> => {
   try {
@@ -113,12 +113,12 @@ export const getCurrentGameUsersInfo = async <T extends DynamoUser>(
     });
 
     const response = await docClient.send(command);
-    console.log("getCurrentGameUsersInfo:", response);
+    console.log("fetchCurrentGameUsersInfo:", response);
 
     const items = response.Items?.map((item) => unmarshall(item) as T) ?? [];
     return items;
   } catch (error) {
-    console.error("getCurrentGameUsersInfo:", error);
+    console.error("fetchCurrentGameUsersInfo:", error);
     throw error;
   }
 };

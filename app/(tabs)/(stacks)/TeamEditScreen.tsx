@@ -12,8 +12,8 @@ import TagGameStore from "@/stores/TagGameStore";
 import _ from "lodash";
 
 import {
-  getCurrentGameUsersInfo,
-  getTagGames,
+  fetchCurrentGameUsersInfo,
+  fetchTagGames,
   putTagGames,
 } from "@/utils/APIs";
 import { IconSymbol } from "@/components/ui/IconSymbol";
@@ -86,8 +86,8 @@ function TeamEditScreen({ _userStore, _tagGameStore }: Props) {
 
   useEffect(() => {
     const gameId = tagGameStore.getTagGame().getId();
-    getTagGames(gameId).then(async (tagGame) => {
-      const gameUsers = await getCurrentGameUsersInfo(gameId);
+    fetchTagGames(gameId).then(async (tagGame) => {
+      const gameUsers = await fetchCurrentGameUsersInfo(gameId);
       tagGameStore.updateAllUsers(tagGame, gameUsers);
     });
     setLoading(false);
