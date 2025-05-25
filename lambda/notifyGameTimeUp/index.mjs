@@ -39,7 +39,7 @@ export const handler = async (event) => {
   const minTime = gameTimeLimit.subtract(1, "minute");
   if (!(minTime <= gameTimeLimit && gameTimeLimit <= maxTime)) return;
 
-  const tagGame = await getTagGames(gameId);
+  const tagGame = await fetchTagGames(gameId);
   const liveUserIds = tagGame.liveUsers;
   const rejectUserIds = tagGame.rejectUsers;
   const policeUserIds = tagGame.policeUsers;
@@ -134,7 +134,7 @@ async function getAccessToken() {
   return token.access_token;
 }
 
-const getTagGames = async (gameId) => {
+const fetchTagGames = async (gameId) => {
   try {
     const command = new GetCommand({
       TableName: "tagGames",
@@ -143,10 +143,10 @@ const getTagGames = async (gameId) => {
       },
     });
     const response = await docClient.send(command);
-    console.log("getTagGames:", response);
+    console.log("fetchTagGames:", response);
     return response.Item;
   } catch (error) {
-    console.error("getTagGames:", error);
+    console.error("fetchTagGames:", error);
     throw error;
   }
 };
