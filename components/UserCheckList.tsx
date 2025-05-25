@@ -13,7 +13,7 @@ export type UserTypeForList = {
   checked: boolean;
 };
 
-export default function UserList({
+export default function UserCheckList({
   userRecords,
   onChecked,
   onUnChecked,
