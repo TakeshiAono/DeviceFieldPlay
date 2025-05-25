@@ -7,6 +7,7 @@ import _ from "lodash";
 import { inject, observer } from "mobx-react";
 import * as Notifications from "expo-notifications";
 import { CopilotStep } from "react-native-copilot";
+import * as Location from "expo-location";
 
 import { rejectUser, reviveUser } from "@/utils/APIs";
 import { IconSymbol } from "@/components/ui/IconSymbol";
@@ -250,6 +251,21 @@ function ShowMap({
                         text: "OK",
                         onPress: async () => {
                           if (!userStore.getCurrentUser().getDeviceId()) return;
+
+                          const location =
+                            await Location.getCurrentPositionAsync({});
+                          const userLocation = {
+                            latitude: location.coords.latitude,
+                            longitude: location.coords.longitude,
+                          };
+
+                          if (!tagGameStore.isUserInPrisonArea(userLocation)) {
+                            Alert.alert(
+                              "生還失敗",
+                              "監獄エリア内でのみ生還ボタンを押すことができます。",
+                            );
+                            return;
+                          }
 
                           try {
                             await reviveUser(
