@@ -446,6 +446,36 @@ function TeamEditScreen({ _userStore, _tagGameStore }: Props) {
           />
         </View>
       </ReactNativeModal>
+      {/* ここから追加: ゲームから抜けるボタン */}
+      <View style={{ margin: 20 }}>
+        <Button
+          title="ゲームから抜ける"
+          color="red"
+          onPress={async () => {
+            Alert.alert(
+              "確認",
+              "本当にゲームから抜けますか？",
+              [
+                { text: "キャンセル", style: "cancel" },
+                {
+                  text: "抜ける",
+                  style: "destructive",
+                  onPress: async () => {
+                    try {
+                      await tagGameStore.kickOutUsers([
+                        userStore.getCurrentUser(),
+                      ]);
+                      router.replace("/");
+                    } catch (e) {
+                      Alert.alert("エラー", "ゲームから抜ける処理に失敗しました");
+                    }
+                  },
+                },
+              ],
+            );
+          }}
+        />
+      </View>
     </View>
   );
 }
