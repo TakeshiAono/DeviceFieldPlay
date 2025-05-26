@@ -250,3 +250,43 @@ export const putDevice = async <T extends DynamoDevice>(
     throw error;
   }
 };
+
+/**
+ * ゲームから指定ユーザーを完全に外す（liveUsers, rejectUsers, policeUsers すべてから削除）
+ * @param gameId ゲームID
+ * @param userId ユーザーID
+ */
+export const removeUserFromGame = async <T extends DynamoTagGame>(
+  gameId: T["id"],
+  userId: string,
+): Promise<void> => {
+  // まず現在のユーザーリストを取得
+  const getCommand = new GetCommand({
+    TableName: "tagGames",
+    Key: { id: gameId },
+    ProjectionExpression: "liveUsers, rejectUsers, policeUsers",
+  });
+  const result = await docClient.send(getCommand);
+  const liveUsers: string[] = result.Item?.liveUsers ?? [];
+  const rejectUsers: string[] = result.Item?.rejectUsers ?? [];
+  const policeUsers: string[] = result.Item?.policeUsers ?? [];
+
+  // 各リストからuserIdを除外
+  const newLiveUsers = liveUsers.filter((id) => id !== userId);
+  const newRejectUsers = rejectUsers.filter((id) => id !== userId);
+  const newPoliceUsers = policeUsers.filter((id) => id !== userId);
+
+  // DynamoDBをpatch的に更新
+  const updateCommand = new UpdateCommand({
+    TableName: "tagGames",
+    Key: { id: gameId },
+    UpdateExpression:
+      "SET liveUsers = :live, rejectUsers = :reject, policeUsers = :police",
+    ExpressionAttributeValues: {
+      ":live": newLiveUsers,
+      ":reject": newRejectUsers,
+      ":police": newPoliceUsers,
+    },
+  });
+  await docClient.send(updateCommand);
+};

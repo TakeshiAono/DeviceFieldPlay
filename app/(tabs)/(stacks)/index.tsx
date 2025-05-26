@@ -1,6 +1,6 @@
 import { inject, observer } from "mobx-react";
 import { router, useLocalSearchParams } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, Alert } from "react-native";
 import ReactNativeModal from "react-native-modal";
 
 import TagGameStore from "@/stores/TagGameStore";
@@ -14,6 +14,7 @@ import { CopilotStep } from "react-native-copilot";
 import { Colors } from "@/constants/Colors";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import useCopilotHook from "@/hooks/useCopilotHook";
+import { removeUserFromGame } from "@/utils/APIs";
 
 interface Props {
   _userStore?: UserStore;
@@ -283,6 +284,34 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                 <Text>ゲームに参加</Text>
               </CopilotTouchableOpacity>
             </CopilotStep>
+            <Button
+              title="ゲームから抜ける"
+              color="red"
+              onPress={async () => {
+                Alert.alert("確認", "本当にゲームから抜けますか？", [
+                  { text: "キャンセル", style: "cancel" },
+                  {
+                    text: "抜ける",
+                    style: "destructive",
+                    onPress: async () => {
+                      try {
+                        const gameId = tagGameStore.getTagGame().getId();
+                        const userId = userStore.getCurrentUser().getId();
+                        await removeUserFromGame(gameId, userId);
+                        tagGameStore.initialize();
+                        router.replace("/");
+                      } catch (e) {
+                        Alert.alert(
+                          "エラー",
+                          "ゲームから抜ける処理に失敗しました",
+                        );
+                      }
+                    },
+                  },
+                ]);
+              }}
+              style={{ marginTop: 10 }}
+            />
             <ReactNativeModal
               style={{ margin: "auto" }}
               isVisible={cameraVisible}
