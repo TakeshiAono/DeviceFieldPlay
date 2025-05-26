@@ -297,10 +297,12 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                       style: "destructive",
                       onPress: async () => {
                         try {
-                          await tagGameStore.kickOutUsers([
-                            userStore.getCurrentUser(),
-                          ]);
-                          tagGameStore.initialize();
+                          // DynamoDBのみ更新
+                          const gameId = tagGameStore.getTagGame().getId();
+                          const userId = userStore.getCurrentUser().getId();
+                          // removeUserFromGameを呼び出し
+                          const { removeUserFromGame } = await import("@/utils/APIs");
+                          await removeUserFromGame(gameId, userId);
                           router.replace("/");
                         } catch (e) {
                           Alert.alert("エラー", "ゲームから抜ける処理に失敗しました");
