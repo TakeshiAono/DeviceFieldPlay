@@ -14,6 +14,7 @@ import { CopilotStep } from "react-native-copilot";
 import { Colors } from "@/constants/Colors";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import useCopilotHook from "@/hooks/useCopilotHook";
+import { removeUserFromGame } from "@/utils/APIs";
 
 interface Props {
   _userStore?: UserStore;
@@ -287,30 +288,27 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
               title="ゲームから抜ける"
               color="red"
               onPress={async () => {
-                Alert.alert(
-                  "確認",
-                  "本当にゲームから抜けますか？",
-                  [
-                    { text: "キャンセル", style: "cancel" },
-                    {
-                      text: "抜ける",
-                      style: "destructive",
-                      onPress: async () => {
-                        try {
-                          // DynamoDBのみ更新
-                          const gameId = tagGameStore.getTagGame().getId();
-                          const userId = userStore.getCurrentUser().getId();
-                          // removeUserFromGameを呼び出し
-                          const { removeUserFromGame } = await import("@/utils/APIs");
-                          await removeUserFromGame(gameId, userId);
-                          router.replace("/");
-                        } catch (e) {
-                          Alert.alert("エラー", "ゲームから抜ける処理に失敗しました");
-                        }
-                      },
+                Alert.alert("確認", "本当にゲームから抜けますか？", [
+                  { text: "キャンセル", style: "cancel" },
+                  {
+                    text: "抜ける",
+                    style: "destructive",
+                    onPress: async () => {
+                      try {
+                        const gameId = tagGameStore.getTagGame().getId();
+                        const userId = userStore.getCurrentUser().getId();
+                        await removeUserFromGame(gameId, userId);
+                        tagGameStore.initialize();
+                        router.replace("/");
+                      } catch (e) {
+                        Alert.alert(
+                          "エラー",
+                          "ゲームから抜ける処理に失敗しました",
+                        );
+                      }
                     },
-                  ],
-                );
+                  },
+                ]);
               }}
               style={{ marginTop: 10 }}
             />
