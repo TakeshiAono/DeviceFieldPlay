@@ -5,7 +5,7 @@ import ReactNativeModal from "react-native-modal";
 
 import TagGameStore from "@/stores/TagGameStore";
 import UserStore from "@/stores/UserStore";
-import { joinUser, putTagGames, putUser } from "@/utils/APIs";
+import { fetchTagGames, joinUser, putTagGames, putUser } from "@/utils/APIs";
 import { Button } from "@rneui/themed";
 import { useEffect, useRef, useState } from "react";
 import { CameraView } from "expo-camera";
@@ -76,23 +76,10 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
     tagGameStore.getTagGame().setId(gameId);
     await putUser(gameId, userStore.getCurrentUser());
 
-    const updatedLiveUsers = await joinUser(
-      gameId,
-      userStore.getCurrentUser().getId(),
-    );
+    await joinUser(gameId, userStore.getCurrentUser().getId());
 
-    const tagGame = new TagGameModel({
-      id: gameId,
-      validAreas: tagGameStore.getTagGame().getValidAreas(),
-      liveUsers: updatedLiveUsers.liveUsers,
-      rejectUsers: [],
-      // TODO: ゲームマスターを取得できるようにしたい。現状は自分がゲームマスターでないことしかわからない
-      gameMasterId: "",
-      prisonArea: [],
-      policeUsers: [],
-      gameTimeLimit: "",
-      isGameStarted: false,
-    });
+    const fetchedTagGame = await fetchTagGames(gameId);
+    const tagGame = new TagGameModel(fetchedTagGame);
     tagGameStore.putTagGame(tagGame);
   };
 
