@@ -38,8 +38,7 @@ function PrisonAreaScreen({ _userStore, _tagGameStore }: Props) {
   };
 
   return (
-    // NOTE: tab分の高さで下部のボタンが画面外に隠れてしまうため%指定している
-    <View style={{ height: "93%", width: "100%" }}>
+    <View style={{ flex: 1, width: "100%" }}>
       <PrisonAreaEditMap
         points={tagGameStore.getTagGame().getPrisonArea()}
         setPoints={(points) => {
