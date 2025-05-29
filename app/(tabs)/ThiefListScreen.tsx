@@ -36,9 +36,21 @@ function ThiefListScreen({ _tagGameStore }: Props) {
 
   useEffect(() => {
     if (tagGameStore.getShouldShowGameExplanation()) {
+      tagGameStore.setShouldShowGameExplanation(false);
+
       Alert.alert(
-        "チーム設定方法",
-        "QRマークを押してみてください。QRが表示されるのでこれをメンバーのアプリ内のメンバー参加リーダーで読み取ってもらってゲームに参加できるようになります。",
+        "泥棒リストの説明",
+        "この画面では各泥棒が逃亡中か逮捕中を確認することができます。",
+        [
+          {
+            onPress: () => {
+              Alert.alert(
+                "チュートリアル終了",
+                "これでチュートリアル終了です。\nそれでは設定画面に移動して「ゲーム有効エリア」〜「タイムリミット」の設定まで全て行いゲームスタートしてゲームを楽しんでください！",
+              );
+            },
+          },
+        ],
       );
     }
   }, []);

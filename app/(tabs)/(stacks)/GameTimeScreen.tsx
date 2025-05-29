@@ -68,12 +68,7 @@ function GameTimeScreen({ _tagGameStore }: Props) {
           setIsVisible={setModalVisible}
           onConfirm={(pickedDuration) => {
             if (tagGameStore.getShouldShowGameExplanation()) {
-              tagGameStore.setShouldShowGameExplanation(false);
-              router.replace("/(tabs)");
-              Alert.alert(
-                "チュートリアル終了",
-                "これでチュートリアル終了です。\nそれでは「ゲーム有効エリア」〜「タイムリミット」の設定まで全て行いゲームスタートしてゲームを楽しんでください！",
-              );
+              router.replace("/(tabs)/ThiefListScreen");
             }
 
             setSelectedDay(

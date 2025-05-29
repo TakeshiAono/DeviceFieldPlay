@@ -1,5 +1,5 @@
 import { Alert, StyleSheet, View } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import MapView, { LatLng, Polygon, Region } from "react-native-maps";
 import { booleanPointInPolygon, point, polygon } from "@turf/turf";
 import "react-native-get-random-values";
@@ -29,6 +29,7 @@ import {
 import { Text } from "react-native";
 import { Colors, getPlayerRoleColor } from "@/constants/Colors";
 import useCopilotHook from "@/hooks/useCopilotHook";
+import { router } from "expo-router";
 
 export type Props = {
   mapVisible?: boolean;
@@ -65,6 +66,8 @@ function ShowMap({
     "/(tabs)/(stacks)",
   );
 
+  const firstNotification = useRef(true);
+
   useEffect(() => {
     if (tagGameStore.getShouldShowGameExplanation()) {
       setTimeout(() => {
@@ -80,15 +83,22 @@ function ShowMap({
 
     const joinUserNotificationListener =
       Notifications.addNotificationReceivedListener((event) => {
-        if (tagGameStore.getShouldShowGameExplanation()) {
+        if (
+          tagGameStore.getShouldShowGameExplanation() &&
+          firstNotification.current
+        ) {
+          firstNotification.current = false;
           Alert.alert(
-            "チーム設定方法",
-            "メンバーがゲームに参加できましたね。\nゲームマスターさんはゲーム参加者の役割を決めてから確定ボタンで編集を完了しましょう。\nメンバーさんはゲームスタートの通知がくるのを待つだけです。",
+            "ゲーム参加",
+            "メンバーがゲームに参加できましたね。\nゲームマスターさんはゲーム参加者の役割を決めてから確定ボタンで編集を完了しましょう。\nメンバーさんはゲームスタートの通知がくるのを待っていてください。",
+            [
+              {
+                onPress: () => {
+                  router.replace("/(tabs)/ThiefListScreen");
+                },
+              },
+            ],
           );
-
-          if (!userStore.isCurrentUserGameMaster(tagGameStore.getTagGame())) {
-            tagGameStore.setShouldShowGameExplanation(false);
-          }
         }
         joinUserNotificationHandler(event, gameId, tagGameStore);
       });
