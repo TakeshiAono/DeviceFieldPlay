@@ -367,6 +367,11 @@ function TeamEditScreen({ _userStore, _tagGameStore }: Props) {
                 >
                   <TouchableOpacity
                     onPress={async () => {
+                      if (tagGameStore.getShouldShowGameExplanation()) {
+                        router.replace("/GameTimeScreen");
+                        return;
+                      }
+
                       if (isInValidRoleCount()) {
                         Alert.alert(
                           "エラー",
