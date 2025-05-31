@@ -234,7 +234,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                       backgroundColor: tagGameStore
                         .getTagGame()
                         .getGameTimeLimit()
-                        ? Colors.primary
+                        ? Colors.success
                         : Colors.inactive,
                     },
                   ]}
