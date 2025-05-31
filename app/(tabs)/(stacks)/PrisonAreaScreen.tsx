@@ -24,7 +24,7 @@ function PrisonAreaScreen({ _userStore, _tagGameStore }: Props) {
     if (tagGameStore.getShouldShowGameExplanation()) {
       Alert.alert(
         "監獄エリア選択",
-        "有効エリアと同じく地図上の好きな箇所を3点、指で長押しすればエリアを設定できます。「エリア登録」を押して確定させてください",
+        "有効エリアと同じく地図上の好きな箇所を3点、タップすればエリアを設定できます。「エリア登録」を押して確定させてください",
       );
     }
   }, []);

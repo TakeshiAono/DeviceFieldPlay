@@ -46,7 +46,7 @@ function ThiefListScreen({ _tagGameStore }: Props) {
             onPress: () => {
               Alert.alert(
                 "チュートリアル終了",
-                "これでチュートリアル終了です。\nそれでは設定画面に移動して「ゲーム有効エリア」〜「タイムリミット」の設定まで全て行いゲームスタートしてゲームを楽しんでください！",
+                "これでチュートリアル終了です。\nそれでは設定画面に移動して「ゲーム有効エリア」〜「タイムリミット」の設定を行い、ゲームを始めましょう🎉",
               );
             },
           },
@@ -82,7 +82,7 @@ function ThiefListScreen({ _tagGameStore }: Props) {
       <View style={{ backgroundColor: "white", height: "100%" }}>
         <View style={{ flex: 1, margin: 10 }}>
           <Text style={{ textAlign: "center", fontSize: 20 }}>
-            生存(脱落) {tagGameStore.getTagGame().getRejectUsers().length}人
+            生存(逮捕) {tagGameStore.getTagGame().getRejectUsers().length}人
           </Text>
           <View style={{ flex: 1, borderRadius: 5, borderWidth: 2 }}>
             <UserList userRecords={rejectUsersForList} />

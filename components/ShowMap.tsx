@@ -205,7 +205,7 @@ function ShowMap({
         tagGameStore.getTagGame().getId(),
         userStore.getCurrentUser().getId(),
       );
-      Alert.alert("脱落通知", "エリア外に出たため脱落となりました。", [
+      Alert.alert("逮捕通知", "エリア外に出たため逮捕となりました。", [
         { text: "OK" },
       ]);
     }
@@ -232,7 +232,7 @@ function ShowMap({
   const rejectButtonExplanation =
     "警察に捕まった時に泥棒ユーザーはこのボタンを押してください";
   const roleDisplayExplanation =
-    "あなたの役職名とユーザー名が表示されます。\n泥棒(生存中)は黒\n泥棒(捕縛中)は赤\n警察は青色\nで表示されます";
+    "あなたの役職名とユーザー名が表示されます。\n泥棒(生存中)は黒\n泥棒(逮捕中)は赤\n警察は青色\nで表示されます";
 
   return (
     <>
@@ -328,7 +328,7 @@ function ShowMap({
                     !tagGameStore.isCurrentUserLive(userStore.getCurrentUser())
                   }
                   onPress={() => {
-                    Alert.alert("脱落", "脱落してもよいですか？", [
+                    Alert.alert("逮捕", "逮捕されてもよいですか？", [
                       { text: "Cancel", onPress: undefined },
                       {
                         text: "OK",

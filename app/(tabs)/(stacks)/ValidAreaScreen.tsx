@@ -23,7 +23,7 @@ function ValidAreaScreen({ _userStore, _tagGameStore }: Props) {
     if (tagGameStore.getShouldShowGameExplanation()) {
       Alert.alert(
         "エリア設定方法",
-        "地図上の好きな箇所を3点、指で長押しすればエリアを設定できます。「エリア登録」を押して確定させてください",
+        "地図上の好きな箇所を3点、タップすればエリアを設定できます。「エリア登録」を押して確定させてください",
       );
     }
   }, []);

@@ -199,7 +199,7 @@ export const rejectUserNotificationHandler = async (
 ) => {
   if (notification.request.content.data.notification_type !== "rejectUser")
     return;
-  console.log("脱落push通知", notification.request.content);
+  console.log("逮捕push通知", notification.request.content);
 
   Toast.show({
     type: "error",

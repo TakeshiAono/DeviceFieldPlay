@@ -102,7 +102,7 @@ export default class TagGameStore {
   }
 
   /**
-   * 脱落ユーザーとしてユーザーを追加する
+   * 逮捕ユーザーとしてユーザーを追加する
    * @param deviceId
    */
   @action
@@ -114,7 +114,7 @@ export default class TagGameStore {
   }
 
   /**
-   * 脱落ユーザー、生存ユーザー両方からuserを削除する
+   * 逮捕ユーザー、生存ユーザー両方からuserを削除する
    * @param deviceId
    */
   @action

@@ -6,7 +6,7 @@ import TagGameStore from "./TagGameStore";
 const RoleDisplayString = {
   policeUser: "警察",
   liveUser: "泥(生)",
-  rejectUser: "泥(死)",
+  rejectUser: "泥(捕)",
 };
 
 export default class UserStore {
