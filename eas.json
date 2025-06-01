@@ -8,19 +8,27 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
+        "GOOGLE_MAPS_API_KEY": "@project/DEV_GOOGLE_MAPS_API_KEY",
+        "GOOGLE_SERVICES_JSON": "@project/DEV_GOOGLE_SERVICES_JSON",
+        "AWS_ACCESS_KEY_ID": "@project/DEV_AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY": "@project/DEV_AWS_SECRET_ACCESS_KEY",
+        "AWS_REGION": "@project/DEV_AWS_REGION"
+      }
+    },
+    "preview": {
+      "distribution": "internal"
+    },
+    "production": {
+      "autoIncrement": true,
+      "env": {
+        "_comment": "jsonにはコメントが入れられないため、無害なキーでコメントを入力する。",
+        "_commen2": "TODO: まだ本番用の環境を準備できていないためDEVと同じものを使用する",
         "GOOGLE_MAPS_API_KEY": "@project/GOOGLE_MAPS_API_KEY",
         "GOOGLE_SERVICES_JSON": "@project/GOOGLE_SERVICES_JSON",
         "AWS_ACCESS_KEY_ID": "@project/AWS_ACCESS_KEY_ID",
         "AWS_SECRET_ACCESS_KEY": "@project/AWS_SECRET_ACCESS_KEY",
         "AWS_REGION": "@project/AWS_REGION"
       }
-
-    },
-    "preview": {
-      "distribution": "internal"
-    },
-    "production": {
-      "autoIncrement": true
     }
   },
   "submit": {
