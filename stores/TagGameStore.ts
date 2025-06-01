@@ -52,7 +52,7 @@ export default class TagGameStore {
       prisonArea: [],
       gameMasterId: "",
       gameTimeLimit: null,
-      isGameStarted: false,
+      isGameStarted: null,
     });
     this.isEditTeams = false;
     this.isGameTimeUp = false;
@@ -320,11 +320,12 @@ export default class TagGameStore {
       : "泥棒側の勝利です!";
   }
 
-  public isGameEnd() {
-    return (
-      this.getTagGame().getIsGameStarted() &&
-      (this.getIsGameTimeUp() || this.isLiveUsersEmpty())
-    );
+  public thiefWinConditions() {
+    return this.getIsGameTimeUp() && !this.isLiveUsersEmpty();
+  }
+
+  public policeWinConditions() {
+    return this.isLiveUsersEmpty();
   }
 
   // TODO: 引数をテレコにしたい
