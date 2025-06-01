@@ -59,8 +59,6 @@ function ShowMap({
 
   const [isFirstUpdate, setIsFirstUpdate] = useState(true);
   const [setIsStart, CopilotTouchableOpacity, CopilotView] = useCopilotHook(
-    userStore,
-    tagGameStore,
     "roleDisplay",
     ["plusButton", "roleDisplay", "minusButton"],
     "/(tabs)/(stacks)",

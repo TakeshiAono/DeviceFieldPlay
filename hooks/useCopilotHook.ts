@@ -30,8 +30,6 @@ export type AllCopilotNames = [
 type AllCopilotName = AllCopilotNames[number];
 
 const useCopilotHook = (
-  userStore: UserStore,
-  tagGameStore: TagGameStore,
   firstExplanationName: string,
   targetCopilotNames: AllCopilotName[],
   nextScreenPath: Href | null,

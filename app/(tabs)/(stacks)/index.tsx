@@ -29,8 +29,6 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
   const firstScan = useRef(true);
 
   const [setIsStart, CopilotTouchableOpacity, ..._other] = useCopilotHook(
-    userStore,
-    tagGameStore,
     userStore.isCurrentUserGameMaster(tagGameStore.getTagGame())
       ? "validGameArea"
       : "gameJoinCamera",
