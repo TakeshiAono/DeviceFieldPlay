@@ -39,6 +39,7 @@ const useCopilotHook = (
   Dispatch<SetStateAction<boolean>>,
   React.FunctionComponent<any>,
   React.FunctionComponent<any>,
+  (step: any) => void,
 ] => {
   const allDefinedCopilotNames: AllCopilotNames = [
     "validGameArea",
