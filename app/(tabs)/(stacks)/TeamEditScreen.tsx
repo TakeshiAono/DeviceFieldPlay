@@ -68,7 +68,7 @@ function TeamEditScreen({ _userStore, _tagGameStore }: Props) {
     if (tagGameStore.getShouldShowGameExplanation()) {
       Alert.alert(
         "チーム設定方法",
-        "QRマークを押してみてください。QRが表示されるのでこれをメンバーのアプリ内のメンバー参加リーダーで読み取ってもらってゲームに参加できるようになります。",
+        "QRマークを押してみてください。\nQRが表示されるのでこれをメンバーのアプリ内のカメラで読み取ってもらえば、ゲームに参加してもらえます。",
       );
     }
   }, []);
@@ -235,7 +235,7 @@ function TeamEditScreen({ _userStore, _tagGameStore }: Props) {
           </View>
         </View>
         <View style={{ flex: 1, margin: 10 }}>
-          <Text style={{ textAlign: "center", fontSize: 20 }}>泥棒(脱落)</Text>
+          <Text style={{ textAlign: "center", fontSize: 20 }}>泥棒(逮捕)</Text>
           <View style={{ flex: 1, borderRadius: 5, borderWidth: 2 }}>
             <UserCheckList
               userRecords={rejectUsersForList}
@@ -347,7 +347,7 @@ function TeamEditScreen({ _userStore, _tagGameStore }: Props) {
                 </View>
                 <View style={{ width: "33%", marginLeft: 10 }}>
                   <Button
-                    title="泥棒(脱落)に変更"
+                    title="泥棒(逮捕)に変更"
                     onPress={() => {
                       tagGameStore.changeToRejectThief(
                         selectedUsers.map(

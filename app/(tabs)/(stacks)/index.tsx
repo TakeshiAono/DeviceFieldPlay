@@ -30,8 +30,6 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
   const firstScan = useRef(true);
 
   const [setIsStart, CopilotTouchableOpacity, ..._other] = useCopilotHook(
-    userStore,
-    tagGameStore,
     userStore.isCurrentUserGameMaster(tagGameStore.getTagGame())
       ? "validGameArea"
       : "gameJoinCamera",
@@ -94,7 +92,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
   };
 
   const validGameAreaButtonExplanation =
-    "ゲーム内の有効エリアを編集する画面に移動します。ゲーム内から出た泥棒は強制的に脱落扱いとなります。";
+    "ゲーム内の有効エリアを編集する画面に移動します。ゲーム内から出た泥棒は強制的に逮捕扱いとなります。";
   const prisonAreaButtonExplanation =
     "泥棒を収容する監獄エリアを編集する画面に移動します。捕まえた泥棒を収容するエリアを設定します。";
   const teamEditButtonExplanation =
@@ -235,7 +233,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                       backgroundColor: tagGameStore
                         .getTagGame()
                         .getGameTimeLimit()
-                        ? Colors.primary
+                        ? Colors.success
                         : Colors.inactive,
                     },
                   ]}

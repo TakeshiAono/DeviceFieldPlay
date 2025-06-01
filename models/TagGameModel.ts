@@ -146,11 +146,11 @@ export default class TagGameModel {
     this.policeUsers = policeUsers;
   }
 
-  getIsGameStarted(): boolean {
+  getIsGameStarted(): boolean | null {
     return this.isGameStarted;
   }
 
-  setIsGameStarted(isGameStarted: boolean): void {
+  setIsGameStarted(isGameStarted: boolean | null): void {
     this.isGameStarted = isGameStarted;
   }
 

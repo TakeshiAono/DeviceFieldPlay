@@ -86,7 +86,7 @@ export const handler = async (event) => {
       event.Records[0].dynamodb.OldImage?.policeUsers?.L.length;
     const newPoliceUsersCount =
       event.Records[0].dynamodb.NewImage?.policeUsers?.L.length;
-    // liveUserの増減をみて復活通知、脱落通知をするか判断してFCMへ送信している。
+    // liveUserの増減をみて復活通知、逮捕通知をするか判断してFCMへ送信している。
     if (prevLiveUsersCount < newLiveUsersCount) {
       androidMessages = androidDeviceIds.map((token) => {
         return {
@@ -114,7 +114,7 @@ export const handler = async (event) => {
             token,
             notification: {
               title: "ユーザー変更通知",
-              body: "ユーザーが脱落しました",
+              body: "ユーザーが逮捕されました",
             },
             data: { notification_type: "rejectUser" },
             android: {

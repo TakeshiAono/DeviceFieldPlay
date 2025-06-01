@@ -182,7 +182,11 @@ const RootLayout = observer(() => {
         <Toast />
         <ReactNativeModal
           style={{ margin: "auto" }}
-          isVisible={stores._tagGameStore.isGameEnd()}
+          isVisible={
+            stores._tagGameStore.getTagGame().getIsGameStarted() !== null &&
+            (stores._tagGameStore.thiefWinConditions() ||
+              stores._tagGameStore.policeWinConditions())
+          }
         >
           <View style={{ backgroundColor: "white", width: 350, padding: 20 }}>
             <Text

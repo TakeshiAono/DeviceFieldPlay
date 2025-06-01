@@ -18,7 +18,7 @@ export type DynamoTagGame = {
   prisonArea: Marker[];
   gameMasterId: string;
   gameTimeLimit: string | null;
-  isGameStarted: boolean;
+  isGameStarted: boolean | null; // NOTE: ゲームが始まっていない状態はnullとなる
 } & UserLists;
 
 export type DynamoUser = {
