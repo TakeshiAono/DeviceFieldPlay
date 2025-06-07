@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import * as Location from "expo-location";
 import { useCameraPermissions } from "expo-camera";
 import * as Notifications from "expo-notifications";
+import i18next from "i18next";
 
 import UserStore from "@/stores/UserStore";
 import { inject, observer } from "mobx-react";
@@ -205,7 +206,7 @@ function TeamEditScreen({ _userStore, _tagGameStore }: Props) {
       </View>
       <View style={{ flexDirection: "row", flex: 1 }}>
         <View style={{ flex: 1, margin: 10 }}>
-          <Text style={{ textAlign: "center", fontSize: 20 }}>泥棒(生存)</Text>
+          <Text style={{ textAlign: "center", fontSize: 20 }}>{i18next.t("Thief (Alive)")}</Text>
           <View style={{ flex: 1, borderRadius: 5, borderWidth: 2 }}>
             <UserCheckList
               userRecords={liveUsersForList}
@@ -235,7 +236,7 @@ function TeamEditScreen({ _userStore, _tagGameStore }: Props) {
           </View>
         </View>
         <View style={{ flex: 1, margin: 10 }}>
-          <Text style={{ textAlign: "center", fontSize: 20 }}>泥棒(逮捕)</Text>
+          <Text style={{ textAlign: "center", fontSize: 20 }}>{i18next.t("Thief (Arrested)")}</Text>
           <View style={{ flex: 1, borderRadius: 5, borderWidth: 2 }}>
             <UserCheckList
               userRecords={rejectUsersForList}
@@ -334,7 +335,7 @@ function TeamEditScreen({ _userStore, _tagGameStore }: Props) {
               >
                 <View style={{ width: "33%" }}>
                   <Button
-                    title="泥棒(生存)に変更"
+                    title={i18next.t("Change to Thief (Alive)")}
                     onPress={() => {
                       tagGameStore.changeToLiveThief(
                         selectedUsers.map(
@@ -347,7 +348,7 @@ function TeamEditScreen({ _userStore, _tagGameStore }: Props) {
                 </View>
                 <View style={{ width: "33%", marginLeft: 10 }}>
                   <Button
-                    title="泥棒(逮捕)に変更"
+                    title={i18next.t("Change to Thief (Arrested)")}
                     onPress={() => {
                       tagGameStore.changeToRejectThief(
                         selectedUsers.map(
@@ -374,8 +375,8 @@ function TeamEditScreen({ _userStore, _tagGameStore }: Props) {
 
                       if (isInValidRoleCount()) {
                         Alert.alert(
-                          "エラー",
-                          "泥棒(生)と警察が各1人以上必要です。",
+                          i18next.t("Error"),
+                          i18next.t("At least one thief (alive) and one police officer are required."),
                         );
                         return;
                       }
@@ -425,9 +426,9 @@ function TeamEditScreen({ _userStore, _tagGameStore }: Props) {
         <View style={{ backgroundColor: "white", width: 330, padding: 20 }}>
           {tagGameStore.getTagGame().getId() ? (
             <>
-              <Text style={{ fontSize: 30 }}>参加QR</Text>
+              <Text style={{ fontSize: 30 }}>{i18next.t("Participation QR")}</Text>
               <Text>
-                {"友達にスキャンしてもらい\nゲームに参加してもらいましょう"}
+                {i18next.t("Have friends scan to join the game")}
               </Text>
               <View style={{ alignItems: "center", marginVertical: 20 }}>
                 <QRCode size={150} value={tagGameStore.getTagGame().getId()} />
@@ -436,14 +437,12 @@ function TeamEditScreen({ _userStore, _tagGameStore }: Props) {
           ) : (
             <View style={{ height: 100 }}>
               <Text style={{ fontSize: 15 }}>
-                {
-                  "ゲームグループQRを表示するためには\nゲームをスタートしてください"
-                }
+                {i18next.t("To display game group QR, please start the game")}
               </Text>
             </View>
           )}
           <Button
-            title="閉じる"
+            title={i18next.t("Close")}
             color={"red"}
             onPress={() => {
               setQrVisible(false);

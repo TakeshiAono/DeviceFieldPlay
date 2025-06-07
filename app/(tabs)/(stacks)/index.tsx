@@ -2,6 +2,7 @@ import { inject, observer } from "mobx-react";
 import { router, useLocalSearchParams } from "expo-router";
 import { StyleSheet, Text, View, Alert } from "react-native";
 import ReactNativeModal from "react-native-modal";
+import i18next from "i18next";
 
 import TagGameStore from "@/stores/TagGameStore";
 import UserStore from "@/stores/UserStore";
@@ -102,7 +103,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
   const gameStartButtonExplanation =
     "全ての設定が終了した後にボタンが押せるようになり、ゲームスタートできるようになります。";
   const gameJoinCameraButtonExplanation =
-    "ゲームマスターのQRコードを読み取ることで、ゲームマスターが主催しているゲームに参加することができます。";
+    i18next.t("You can join the game hosted by the game master by reading the game master's QR code.");
 
   return (
     <View
@@ -186,7 +187,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                   router.push("/TeamEditScreen");
                 }}
               >
-                <Text>チーム設定</Text>
+                <Text>{i18next.t("Team Settings")}</Text>
               </CopilotTouchableOpacity>
             </CopilotStep>
             <CopilotStep
@@ -209,12 +210,12 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                   router.push("/GameTimeScreen");
                 }}
               >
-                <Text>タイムリミット設定</Text>
+                <Text>{i18next.t("Time Limit Settings")}</Text>
               </CopilotTouchableOpacity>
             </CopilotStep>
             {tagGameStore.getTagGame().getIsGameStarted() === true ? (
               <Button
-                title={"ゲーム中止"}
+                title={i18next.t("Cancel Game")}
                 color={"error"}
                 onPress={() => {
                   gameCancel();
@@ -266,18 +267,18 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                 }}
               >
                 <IconSymbol size={28} name={"camera"} color={"white"} />
-                <Text>ゲームに参加</Text>
+                <Text>{i18next.t("Join Game")}</Text>
               </CopilotTouchableOpacity>
             </CopilotStep>
             <Button
-              title="ゲームから抜ける"
+              title={i18next.t("Leave Game")}
               color="red"
               disabled={!tagGameStore.getTagGame().getId()}
               onPress={async () => {
-                Alert.alert("確認", "本当にゲームから抜けますか？", [
-                  { text: "キャンセル", style: "cancel" },
+                Alert.alert(i18next.t("Confirm"), i18next.t("Really leave the game?"), [
+                  { text: i18next.t("Cancel"), style: "cancel" },
                   {
-                    text: "抜ける",
+                    text: i18next.t("Leave"),
                     style: "destructive",
                     onPress: async () => {
                       try {
@@ -288,8 +289,8 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                         router.replace("/");
                       } catch (e) {
                         Alert.alert(
-                          "エラー",
-                          "ゲームから抜ける処理に失敗しました",
+                          i18next.t("Error"),
+                          i18next.t("Failed to leave game"),
                         );
                       }
                     },
@@ -306,7 +307,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                 style={{ backgroundColor: "white", width: 330, padding: 20 }}
               >
                 <Text style={{ fontSize: 18 }}>
-                  {"QRを読み込ませてもらって\nゲームグループに参加しましょう!!"}
+                  {i18next.t("Let's scan QR and join the game group!!")}
                 </Text>
                 <CameraView
                   style={{
@@ -329,7 +330,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                     firstScan.current = true;
                   }}
                 >
-                  閉じる
+                  {i18next.t("Close")}
                 </Button>
               </View>
             </ReactNativeModal>

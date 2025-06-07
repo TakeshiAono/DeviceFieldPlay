@@ -4,6 +4,7 @@ import { Alert, Text, View } from "react-native";
 import { TimerPickerModal } from "react-native-timer-picker";
 import { Button } from "@rneui/themed";
 import dayjs from "dayjs";
+import i18next from "i18next";
 
 import TagGameStore from "@/stores/TagGameStore";
 import { router } from "expo-router";
@@ -22,7 +23,7 @@ function GameTimeScreen({ _tagGameStore }: Props) {
 
   useEffect(() => {
     if (tagGameStore.getShouldShowGameExplanation()) {
-      Alert.alert("終了時間設定方法", "ゲームの終了時間を設定しください");
+      Alert.alert(i18next.t("Game End Time Setting Method"), i18next.t("Please set the end time for the game"));
     }
   }, []);
 
@@ -54,7 +55,7 @@ function GameTimeScreen({ _tagGameStore }: Props) {
               setModalVisible(true);
             }}
           >
-            ゲーム時間設定
+            {i18next.t("Game Time Setting")}
           </Button>
         </View>
         <TimerPickerModal
@@ -83,13 +84,13 @@ function GameTimeScreen({ _tagGameStore }: Props) {
             );
             setModalVisible(false);
           }}
-          modalTitle="ゲーム終了時間"
+          modalTitle={i18next.t("Game End Time")}
           onCancel={() => {
             setModalVisible(false);
           }}
           closeOnOverlayPress
-          confirmButtonText="設定"
-          cancelButtonText="キャンセル"
+          confirmButtonText={i18next.t("Set")}
+          cancelButtonText={i18next.t("Cancel")}
         />
       </View>
     </View>
