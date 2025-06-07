@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import i18next from "i18next";
 
 import UserStore from "@/stores/UserStore";
 import { inject, observer } from "mobx-react";
@@ -23,8 +24,10 @@ function PrisonAreaScreen({ _userStore, _tagGameStore }: Props) {
   useEffect(() => {
     if (tagGameStore.getShouldShowGameExplanation()) {
       Alert.alert(
-        "監獄エリア選択",
-        "有効エリアと同じく地図上の好きな箇所を3点、タップすればエリアを設定できます。「エリア登録」を押して確定させてください",
+        i18next.t("Prison Area Selection"),
+        i18next.t(
+          "Like valid area, you can set the area by tapping 3 points on the map. Press 'Register Area' to confirm",
+        ),
       );
     }
   }, []);
@@ -64,7 +67,10 @@ function PrisonAreaScreen({ _userStore, _tagGameStore }: Props) {
               }
 
               if (tagGameStore.getTagGame().getPrisonArea().length < 3) {
-                Alert.alert("エラー", "監獄エリアは3点以上設定してください。");
+                Alert.alert(
+                  i18next.t("Error"),
+                  i18next.t("Please set 3 or more points for prison area."),
+                );
                 return;
               }
 
@@ -79,8 +85,8 @@ function PrisonAreaScreen({ _userStore, _tagGameStore }: Props) {
           >
             <IconSymbol size={28} name={"mappin.and.ellipse"} color={"white"} />
             {tagGameStore.getTagGame().getIsSetPrisonAreaDone()
-              ? "エリア更新"
-              : "エリア登録"}
+              ? i18next.t("Update Area")
+              : i18next.t("Register Area")}
           </Button>
         </View>
         <View style={{ flex: 1, margin: 5 }}>
@@ -99,7 +105,7 @@ function PrisonAreaScreen({ _userStore, _tagGameStore }: Props) {
               name={"arrow.counterclockwise"}
               color={"white"}
             />
-            エリア削除
+            {i18next.t("Delete Area")}
           </Button>
         </View>
       </View>

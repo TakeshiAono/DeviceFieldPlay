@@ -2,6 +2,7 @@ import { inject, observer } from "mobx-react";
 import { router, useLocalSearchParams } from "expo-router";
 import { StyleSheet, Text, View, Alert } from "react-native";
 import ReactNativeModal from "react-native-modal";
+import i18next from "i18next";
 
 import TagGameStore from "@/stores/TagGameStore";
 import UserStore from "@/stores/UserStore";
@@ -91,18 +92,24 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
     );
   };
 
-  const validGameAreaButtonExplanation =
-    "ゲーム内の有効エリアを編集する画面に移動します。ゲーム内から出た泥棒は強制的に逮捕扱いとなります。";
-  const prisonAreaButtonExplanation =
-    "泥棒を収容する監獄エリアを編集する画面に移動します。捕まえた泥棒を収容するエリアを設定します。";
-  const teamEditButtonExplanation =
-    "警察、泥棒の役割を編集する画面に移動します。";
-  const gameTimeButtonExplanation =
-    "ゲーム終了時間を編集する画面に移動します。";
-  const gameStartButtonExplanation =
-    "全ての設定が終了した後にボタンが押せるようになり、ゲームスタートできるようになります。";
-  const gameJoinCameraButtonExplanation =
-    "ゲームマスターのQRコードを読み取ることで、ゲームマスターが主催しているゲームに参加することができます。";
+  const validGameAreaButtonExplanation = i18next.t(
+    "Navigate to the screen to edit the valid area in the game. Thieves who leave the game area will be forcibly arrested.",
+  );
+  const prisonAreaButtonExplanation = i18next.t(
+    "Navigate to the screen to edit the prison area to house thieves. Set the area to house captured thieves.",
+  );
+  const teamEditButtonExplanation = i18next.t(
+    "Navigate to the screen to edit the roles of police and thieves.",
+  );
+  const gameTimeButtonExplanation = i18next.t(
+    "Navigate to the screen to edit the game end time.",
+  );
+  const gameStartButtonExplanation = i18next.t(
+    "After all settings are completed, the button will become pressable and you can start the game.",
+  );
+  const gameJoinCameraButtonExplanation = i18next.t(
+    "You can join the game hosted by the game master by reading the game master's QR code.",
+  );
 
   return (
     <View
@@ -142,7 +149,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                   router.push("/ValidAreaScreen");
                 }}
               >
-                <Text>ゲーム有効エリア設定</Text>
+                <Text>{i18next.t("Valid Game Area Setting")}</Text>
               </CopilotTouchableOpacity>
             </CopilotStep>
             <CopilotStep
@@ -165,7 +172,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                   router.push("/PrisonAreaScreen");
                 }}
               >
-                <Text>監獄エリア設定</Text>
+                <Text>{i18next.t("Prison Area Setting")}</Text>
               </CopilotTouchableOpacity>
             </CopilotStep>
             <CopilotStep
@@ -186,7 +193,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                   router.push("/TeamEditScreen");
                 }}
               >
-                <Text>チーム設定</Text>
+                <Text>{i18next.t("Team Settings")}</Text>
               </CopilotTouchableOpacity>
             </CopilotStep>
             <CopilotStep
@@ -209,12 +216,12 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                   router.push("/GameTimeScreen");
                 }}
               >
-                <Text>タイムリミット設定</Text>
+                <Text>{i18next.t("Time Limit Settings")}</Text>
               </CopilotTouchableOpacity>
             </CopilotStep>
             {tagGameStore.getTagGame().getIsGameStarted() === true ? (
               <Button
-                title={"ゲーム中止"}
+                title={i18next.t("Cancel Game")}
                 color={"error"}
                 onPress={() => {
                   gameCancel();
@@ -242,7 +249,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                     gameStart();
                   }}
                 >
-                  <Text>ゲームスタート</Text>
+                  <Text>{i18next.t("Game Start")}</Text>
                 </CopilotTouchableOpacity>
               </CopilotStep>
             )}
@@ -266,35 +273,39 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                 }}
               >
                 <IconSymbol size={28} name={"camera"} color={"white"} />
-                <Text>ゲームに参加</Text>
+                <Text>{i18next.t("Join Game")}</Text>
               </CopilotTouchableOpacity>
             </CopilotStep>
             <Button
-              title="ゲームから抜ける"
+              title={i18next.t("Leave Game")}
               color="red"
               disabled={!tagGameStore.getTagGame().getId()}
               onPress={async () => {
-                Alert.alert("確認", "本当にゲームから抜けますか？", [
-                  { text: "キャンセル", style: "cancel" },
-                  {
-                    text: "抜ける",
-                    style: "destructive",
-                    onPress: async () => {
-                      try {
-                        const gameId = tagGameStore.getTagGame().getId();
-                        const userId = userStore.getCurrentUser().getId();
-                        await removeUserFromGame(gameId, userId);
-                        tagGameStore.initialize();
-                        router.replace("/");
-                      } catch (e) {
-                        Alert.alert(
-                          "エラー",
-                          "ゲームから抜ける処理に失敗しました",
-                        );
-                      }
+                Alert.alert(
+                  i18next.t("Confirm"),
+                  i18next.t("Really leave the game?"),
+                  [
+                    { text: i18next.t("Cancel"), style: "cancel" },
+                    {
+                      text: i18next.t("Leave"),
+                      style: "destructive",
+                      onPress: async () => {
+                        try {
+                          const gameId = tagGameStore.getTagGame().getId();
+                          const userId = userStore.getCurrentUser().getId();
+                          await removeUserFromGame(gameId, userId);
+                          tagGameStore.initialize();
+                          router.replace("/");
+                        } catch (e) {
+                          Alert.alert(
+                            i18next.t("Error"),
+                            i18next.t("Failed to leave game"),
+                          );
+                        }
+                      },
                     },
-                  },
-                ]);
+                  ],
+                );
               }}
               style={{ marginTop: 10 }}
             />
@@ -306,7 +317,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                 style={{ backgroundColor: "white", width: 330, padding: 20 }}
               >
                 <Text style={{ fontSize: 18 }}>
-                  {"QRを読み込ませてもらって\nゲームグループに参加しましょう!!"}
+                  {i18next.t("Let's scan QR and join the game group!!")}
                 </Text>
                 <CameraView
                   style={{
@@ -329,7 +340,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                     firstScan.current = true;
                   }}
                 >
-                  閉じる
+                  {i18next.t("Close")}
                 </Button>
               </View>
             </ReactNativeModal>

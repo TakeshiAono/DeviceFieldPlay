@@ -9,6 +9,7 @@ import _ from "lodash";
 import ValidAreaEditMap from "@/components/ValidAreaEditMap";
 import { router } from "expo-router";
 import { useEffect } from "react";
+import i18next from "i18next";
 
 interface Props {
   _userStore?: UserStore;
@@ -22,8 +23,10 @@ function ValidAreaScreen({ _userStore, _tagGameStore }: Props) {
   useEffect(() => {
     if (tagGameStore.getShouldShowGameExplanation()) {
       Alert.alert(
-        "エリア設定方法",
-        "地図上の好きな箇所を3点、タップすればエリアを設定できます。「エリア登録」を押して確定させてください",
+        i18next.t("Area Setting Method"),
+        i18next.t(
+          "You can set the area by tapping 3 points on the map. Press 'Register Area' to confirm",
+        ),
       );
     }
   }, []);
@@ -63,7 +66,10 @@ function ValidAreaScreen({ _userStore, _tagGameStore }: Props) {
               }
 
               if (tagGameStore.getTagGame().getValidAreas().length < 3) {
-                Alert.alert("エラー", "有効エリアは3点以上設定してください。");
+                Alert.alert(
+                  i18next.t("Error"),
+                  i18next.t("Please set 3 or more points for valid area."),
+                );
                 return;
               }
 
@@ -79,8 +85,8 @@ function ValidAreaScreen({ _userStore, _tagGameStore }: Props) {
           >
             <IconSymbol size={28} name={"mappin.and.ellipse"} color={"white"} />
             {tagGameStore.getTagGame().getIsSetValidAreaDone()
-              ? "エリア更新"
-              : "エリア登録"}
+              ? i18next.t("Update Area")
+              : i18next.t("Register Area")}
           </Button>
         </View>
         <View style={{ flex: 1, margin: 5 }}>
@@ -99,7 +105,7 @@ function ValidAreaScreen({ _userStore, _tagGameStore }: Props) {
               name={"arrow.counterclockwise"}
               color={"white"}
             />
-            エリア削除
+            {i18next.t("Delete Area")}
           </Button>
         </View>
       </View>

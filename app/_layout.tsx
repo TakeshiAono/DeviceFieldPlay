@@ -16,6 +16,7 @@ import * as Notifications from "expo-notifications";
 import { CheckBox } from "@rneui/themed";
 import * as Crypto from "expo-crypto";
 import "@/i18n";
+import i18next from "i18next";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import UserStore from "@/stores/UserStore";
@@ -78,10 +79,10 @@ const RootLayout = observer(() => {
       // NOTE: 説明欄コンポーネントにステップ番号を出したくないためEmptyComponentを格納している
       stepNumberComponent={EmptyComponent}
       labels={{
-        skip: "スキップ",
-        previous: "前に戻る",
-        next: "次へ",
-        finish: "完了",
+        skip: i18next.t("Skip"),
+        previous: i18next.t("Previous"),
+        next: i18next.t("Next"),
+        finish: i18next.t("Finish"),
       }}
     >
       <Provider {...stores}>
@@ -93,7 +94,7 @@ const RootLayout = observer(() => {
               <Text
                 style={{ fontWeight: "bold", fontSize: 20, marginBottom: 20 }}
               >
-                名前登録
+                {i18next.t("Name Registration")}
               </Text>
               <CheckBox
                 checked={stores._tagGameStore.getShouldShowGameExplanation()}
@@ -104,9 +105,11 @@ const RootLayout = observer(() => {
                 }
                 checkedIcon="dot-circle-o"
                 uncheckedIcon="circle-o"
-                title={"アプリの使い方をみる"}
+                title={i18next.t("View app instructions")}
               />
-              <Text>ゲームで使用する名前を入力してください</Text>
+              <Text>
+                {i18next.t("Please enter the name to use in the game")}
+              </Text>
               <TextInput
                 style={{
                   height: 40,
@@ -114,29 +117,29 @@ const RootLayout = observer(() => {
                   borderRadius: 10,
                   marginVertical: 15,
                 }}
-                placeholder="お名前を記入してください"
+                placeholder={i18next.t("Please write your name")}
                 onChangeText={(value) => {
                   setUserName(value);
                 }}
                 value={userName}
               />
-              <Text>あなたのゲーム内での役職を選んでください</Text>
+              <Text>{i18next.t("Please select your role in the game")}</Text>
               <CheckBox
                 checked={isGameMaster === true}
                 onPress={() => setIsGameMaster(true)}
                 checkedIcon="dot-circle-o"
                 uncheckedIcon="circle-o"
-                title={"ゲームマスター"}
+                title={i18next.t("Game Master")}
               />
               <CheckBox
                 checked={isGameMaster === false}
                 onPress={() => setIsGameMaster(false)}
                 checkedIcon="dot-circle-o"
                 uncheckedIcon="circle-o"
-                title={"メンバー"}
+                title={i18next.t("Member")}
               />
               <Button
-                title="登録"
+                title={i18next.t("Register")}
                 disabled={userName === undefined}
                 onPress={async () => {
                   if (userName === undefined) return;
@@ -193,15 +196,21 @@ const RootLayout = observer(() => {
             <Text
               style={{ fontWeight: "bold", fontSize: 25, marginBottom: 20 }}
             >
-              ゲーム終了通知
+              {i18next.t("Game End Notification")}
             </Text>
             <View style={{ marginBottom: 20 }}>
-              <Text style={{ fontSize: 20 }}>おめでとうございます！🎉</Text>
+              <Text style={{ fontSize: 20 }}>
+                {i18next.t("Congratulations!")}
+              </Text>
               <Text style={{ fontSize: 20 }}>
                 {stores._tagGameStore.getWinnerMessage()}
               </Text>
             </View>
-            <Text>{"ゲームが終了しました。\n次のゲームを行いますか？"}</Text>
+            <Text>
+              {i18next.t(
+                "The game has ended.\nWould you like to play the next game?",
+              )}
+            </Text>
             <View
               style={{
                 flexDirection: "row",
@@ -210,7 +219,7 @@ const RootLayout = observer(() => {
               }}
             >
               <Button
-                title={"ゲームをやめる"}
+                title={i18next.t("Stop Game")}
                 color={"red"}
                 onPress={() => {
                   stores._userStore.initialize();
@@ -220,7 +229,7 @@ const RootLayout = observer(() => {
                 }}
               ></Button>
               <Button
-                title={"次ゲームへ設定を引き継ぐ"}
+                title={i18next.t("Inherit settings to next game")}
                 onPress={() => {
                   stores._tagGameStore.setIsGameTimeUp(false);
                   stores._tagGameStore.getTagGame().resetGameTimeLimit();
