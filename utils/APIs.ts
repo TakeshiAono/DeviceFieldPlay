@@ -290,3 +290,45 @@ export const removeUserFromGame = async <T extends DynamoTagGame>(
   });
   await docClient.send(updateCommand);
 };
+
+/**
+ * ゲーム終了スケジューラーを削除する
+ * @param gameId ゲームID
+ * @param gameTimeLimit ゲーム制限時間（スケジュール名生成に使用）
+ */
+export const deleteGameEndSchedule = async (
+  gameId: string,
+  gameTimeLimit: string,
+): Promise<void> => {
+  try {
+    // Lambda 関数のエンドポイントを環境変数から取得
+    const lambdaEndpoint =
+      Constants.expoConfig?.extra?.gameEndScheduleDeleterEndpoint;
+
+    if (!lambdaEndpoint) {
+      throw new Error("gameEndScheduleDeleterEndpoint is not configured");
+    }
+
+    const response = await fetch(lambdaEndpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        gameId,
+        gameTimeLimit,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`Failed to delete schedule: ${errorData.error}`);
+    }
+
+    const result = await response.json();
+    console.log("deleteGameEndSchedule:", result);
+  } catch (error) {
+    console.error("deleteGameEndSchedule:", error);
+    throw error;
+  }
+};

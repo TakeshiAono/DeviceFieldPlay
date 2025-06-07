@@ -19,7 +19,13 @@ import * as Crypto from "expo-crypto";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import UserStore from "@/stores/UserStore";
 import TagGameStore from "@/stores/TagGameStore";
-import { joinUser, putDevice, putTagGames, putUser } from "@/utils/APIs";
+import {
+  joinUser,
+  putDevice,
+  putTagGames,
+  putUser,
+  deleteGameEndSchedule,
+} from "@/utils/APIs";
 import { observer } from "mobx-react-lite";
 import { CopilotProvider } from "react-native-copilot";
 
@@ -71,6 +77,36 @@ const RootLayout = observer(() => {
 
     registerForPushNotificationsAsync();
   }, []);
+
+  // 泥棒側が勝利した時にスケジューラーを削除する
+  useEffect(() => {
+    const handleThiefWin = async () => {
+      if (stores._tagGameStore.thiefWinConditions()) {
+        const gameTimeLimit = stores._tagGameStore
+          .getTagGame()
+          .getGameTimeLimit();
+        const gameId = stores._tagGameStore.getTagGame().getId();
+
+        if (gameTimeLimit && gameId) {
+          try {
+            await deleteGameEndSchedule(gameId, gameTimeLimit.toISOString());
+            console.log("✅ 泥棒勝利時のスケジューラー削除が完了しました");
+          } catch (error) {
+            console.error(
+              "❌ 泥棒勝利時のスケジューラー削除に失敗しました:",
+              error,
+            );
+          }
+        }
+      }
+    };
+
+    handleThiefWin();
+  }, [
+    stores._tagGameStore.getIsGameTimeUp(),
+    stores._tagGameStore.getLiveUsers().length,
+    stores._tagGameStore.getTagGame().getIsGameStarted(),
+  ]);
 
   return (
     <CopilotProvider

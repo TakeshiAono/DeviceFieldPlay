@@ -3,6 +3,7 @@ import googleAuthLibrary from "google-auth-library";
 import {
   SchedulerClient,
   CreateScheduleCommand,
+  DeleteScheduleCommand,
 } from "@aws-sdk/client-scheduler";
 
 const AWS_REGION = process.env.REGION;
@@ -28,13 +29,10 @@ export const handler = async (event) => {
     const formattedGameTimeLimit = date.toISOString().split(".")[0];
 
     await createSchedule({
-      scheduleName:
-        event.Records[0].dynamodb.NewImage.id.S +
-        +date.getFullYear() +
-        date.getDate() +
-        date.getHours() +
-        date.getMinutes() +
-        date.getSeconds(),
+      scheduleName: generateScheduleName(
+        event.Records[0].dynamodb.NewImage.id.S,
+        gameTimeLimit,
+      ),
       targetLambdaArn: process.env.TARGET_LAMBDA_ARN,
       roleArn: process.env.ROLE_ARN,
       scheduleTimeUtc: formattedGameTimeLimit, // JST 15:30 相当
@@ -56,6 +54,18 @@ export const handler = async (event) => {
     };
   }
 };
+
+export function generateScheduleName(gameId, gameTimeLimit) {
+  const date = new Date(gameTimeLimit);
+  return (
+    gameId +
+    +date.getFullYear() +
+    date.getDate() +
+    date.getHours() +
+    date.getMinutes() +
+    date.getSeconds()
+  );
+}
 
 export async function createSchedule({
   scheduleName, // 例: "schedule-dynamo-abc123"
@@ -84,6 +94,23 @@ export async function createSchedule({
     console.log(`✅ スケジュール '${scheduleName}' を作成しました`);
   } catch (error) {
     console.error("❌ スケジュール作成失敗:", error);
+    throw error;
+  }
+}
+
+export async function deleteSchedule({
+  scheduleName, // 例: "schedule-dynamo-abc123"
+}) {
+  const command = new DeleteScheduleCommand({
+    Name: scheduleName,
+    GroupName: "default",
+  });
+
+  try {
+    await scheduleClient.send(command);
+    console.log(`✅ スケジュール '${scheduleName}' を削除しました`);
+  } catch (error) {
+    console.error("❌ スケジュール削除失敗:", error);
     throw error;
   }
 }
