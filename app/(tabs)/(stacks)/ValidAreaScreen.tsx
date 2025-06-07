@@ -24,7 +24,9 @@ function ValidAreaScreen({ _userStore, _tagGameStore }: Props) {
     if (tagGameStore.getShouldShowGameExplanation()) {
       Alert.alert(
         i18next.t("Area Setting Method"),
-        i18next.t("You can set the area by tapping 3 points on the map. Press 'Register Area' to confirm"),
+        i18next.t(
+          "You can set the area by tapping 3 points on the map. Press 'Register Area' to confirm",
+        ),
       );
     }
   }, []);
@@ -64,7 +66,10 @@ function ValidAreaScreen({ _userStore, _tagGameStore }: Props) {
               }
 
               if (tagGameStore.getTagGame().getValidAreas().length < 3) {
-                Alert.alert(i18next.t("Error"), i18next.t("Please set 3 or more points for valid area."));
+                Alert.alert(
+                  i18next.t("Error"),
+                  i18next.t("Please set 3 or more points for valid area."),
+                );
                 return;
               }
 

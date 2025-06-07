@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import i18next from "i18next";
 
 import UserStore from "@/stores/UserStore";
 import { inject, observer } from "mobx-react";
@@ -40,14 +41,18 @@ function ThiefListScreen({ _tagGameStore }: Props) {
       tagGameStore.setShouldShowGameExplanation(false);
 
       Alert.alert(
-        "泥棒リストの説明",
-        "この画面では各泥棒が逃亡中か逮捕中を確認することができます。",
+        i18next.t("Thief List Explanation"),
+        i18next.t(
+          "On this screen, you can check whether each thief is on the run or arrested.",
+        ),
         [
           {
             onPress: () => {
               Alert.alert(
-                "チュートリアル終了",
-                "これでチュートリアル終了です。\nそれでは設定画面に移動して「ゲーム有効エリア」〜「タイムリミット」の設定を行い、ゲームを始めましょう🎉",
+                i18next.t("Tutorial Complete"),
+                i18next.t(
+                  "This completes the tutorial.\nNow let's move to the settings screen and configure 'Valid Game Area' through 'Time Limit' settings to start the game🎉",
+                ),
               );
             },
           },
@@ -83,7 +88,9 @@ function ThiefListScreen({ _tagGameStore }: Props) {
       <View style={{ backgroundColor: "white", height: "100%" }}>
         <View style={{ flex: 1, margin: 10 }}>
           <Text style={{ textAlign: "center", fontSize: 20 }}>
-            泥棒(逮捕) {tagGameStore.getTagGame().getRejectUsers().length}人
+            {i18next.t("Thief (Arrested) {{count}} people", {
+              count: tagGameStore.getTagGame().getRejectUsers().length,
+            })}
           </Text>
           <View style={{ flex: 1, borderRadius: 5, borderWidth: 2 }}>
             <UserList userRecords={rejectUsersForList} />
@@ -91,7 +98,9 @@ function ThiefListScreen({ _tagGameStore }: Props) {
         </View>
         <View style={{ flex: 1, margin: 10 }}>
           <Text style={{ textAlign: "center", fontSize: 20 }}>
-            泥棒(生存) {tagGameStore.getTagGame().getLiveUsers().length}人
+            {i18next.t("Thief (Alive) {{count}} people", {
+              count: tagGameStore.getTagGame().getLiveUsers().length,
+            })}
           </Text>
           <View style={{ flex: 1, borderRadius: 5, borderWidth: 2 }}>
             <UserList userRecords={liveUsersForList} />

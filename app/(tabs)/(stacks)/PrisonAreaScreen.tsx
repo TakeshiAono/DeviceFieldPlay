@@ -25,7 +25,9 @@ function PrisonAreaScreen({ _userStore, _tagGameStore }: Props) {
     if (tagGameStore.getShouldShowGameExplanation()) {
       Alert.alert(
         i18next.t("Prison Area Selection"),
-        i18next.t("Like valid area, you can set the area by tapping 3 points on the map. Press 'Register Area' to confirm"),
+        i18next.t(
+          "Like valid area, you can set the area by tapping 3 points on the map. Press 'Register Area' to confirm",
+        ),
       );
     }
   }, []);
@@ -65,7 +67,10 @@ function PrisonAreaScreen({ _userStore, _tagGameStore }: Props) {
               }
 
               if (tagGameStore.getTagGame().getPrisonArea().length < 3) {
-                Alert.alert(i18next.t("Error"), i18next.t("Please set 3 or more points for prison area."));
+                Alert.alert(
+                  i18next.t("Error"),
+                  i18next.t("Please set 3 or more points for prison area."),
+                );
                 return;
               }
 

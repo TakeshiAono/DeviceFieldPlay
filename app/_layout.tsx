@@ -107,7 +107,9 @@ const RootLayout = observer(() => {
                 uncheckedIcon="circle-o"
                 title={i18next.t("View app instructions")}
               />
-              <Text>{i18next.t("Please enter the name to use in the game")}</Text>
+              <Text>
+                {i18next.t("Please enter the name to use in the game")}
+              </Text>
               <TextInput
                 style={{
                   height: 40,
@@ -194,15 +196,21 @@ const RootLayout = observer(() => {
             <Text
               style={{ fontWeight: "bold", fontSize: 25, marginBottom: 20 }}
             >
-              ゲーム終了通知
+              {i18next.t("Game End Notification")}
             </Text>
             <View style={{ marginBottom: 20 }}>
-              <Text style={{ fontSize: 20 }}>おめでとうございます！🎉</Text>
+              <Text style={{ fontSize: 20 }}>
+                {i18next.t("Congratulations!")}
+              </Text>
               <Text style={{ fontSize: 20 }}>
                 {stores._tagGameStore.getWinnerMessage()}
               </Text>
             </View>
-            <Text>{"ゲームが終了しました。\n次のゲームを行いますか？"}</Text>
+            <Text>
+              {i18next.t(
+                "The game has ended.\nWould you like to play the next game?",
+              )}
+            </Text>
             <View
               style={{
                 flexDirection: "row",
@@ -211,7 +219,7 @@ const RootLayout = observer(() => {
               }}
             >
               <Button
-                title={"ゲームをやめる"}
+                title={i18next.t("Stop Game")}
                 color={"red"}
                 onPress={() => {
                   stores._userStore.initialize();

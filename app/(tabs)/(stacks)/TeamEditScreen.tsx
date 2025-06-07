@@ -68,8 +68,10 @@ function TeamEditScreen({ _userStore, _tagGameStore }: Props) {
   useEffect(() => {
     if (tagGameStore.getShouldShowGameExplanation()) {
       Alert.alert(
-        "チーム設定方法",
-        "QRマークを押してみてください。\nQRが表示されるのでこれをメンバーのアプリ内のカメラで読み取ってもらえば、ゲームに参加してもらえます。",
+        i18next.t("Team Setting Method"),
+        i18next.t(
+          "Press the QR mark and a QR code will be displayed. Have members scan it with the camera in their app to join the game.",
+        ),
       );
     }
   }, []);
@@ -206,7 +208,9 @@ function TeamEditScreen({ _userStore, _tagGameStore }: Props) {
       </View>
       <View style={{ flexDirection: "row", flex: 1 }}>
         <View style={{ flex: 1, margin: 10 }}>
-          <Text style={{ textAlign: "center", fontSize: 20 }}>{i18next.t("Thief (Alive)")}</Text>
+          <Text style={{ textAlign: "center", fontSize: 20 }}>
+            {i18next.t("Thief (Alive)")}
+          </Text>
           <View style={{ flex: 1, borderRadius: 5, borderWidth: 2 }}>
             <UserCheckList
               userRecords={liveUsersForList}
@@ -236,7 +240,9 @@ function TeamEditScreen({ _userStore, _tagGameStore }: Props) {
           </View>
         </View>
         <View style={{ flex: 1, margin: 10 }}>
-          <Text style={{ textAlign: "center", fontSize: 20 }}>{i18next.t("Thief (Arrested)")}</Text>
+          <Text style={{ textAlign: "center", fontSize: 20 }}>
+            {i18next.t("Thief (Arrested)")}
+          </Text>
           <View style={{ flex: 1, borderRadius: 5, borderWidth: 2 }}>
             <UserCheckList
               userRecords={rejectUsersForList}
@@ -298,7 +304,7 @@ function TeamEditScreen({ _userStore, _tagGameStore }: Props) {
                 </View>
                 <View style={{ width: "33%", marginLeft: 10 }}>
                   <Button
-                    title="警察へ変更"
+                    title={i18next.t("Change to Police")}
                     onPress={() => {
                       tagGameStore.changeToPolice(
                         selectedUsers.map(
@@ -376,7 +382,9 @@ function TeamEditScreen({ _userStore, _tagGameStore }: Props) {
                       if (isInValidRoleCount()) {
                         Alert.alert(
                           i18next.t("Error"),
-                          i18next.t("At least one thief (alive) and one police officer are required."),
+                          i18next.t(
+                            "At least one thief (alive) and one police officer are required.",
+                          ),
                         );
                         return;
                       }
@@ -426,10 +434,10 @@ function TeamEditScreen({ _userStore, _tagGameStore }: Props) {
         <View style={{ backgroundColor: "white", width: 330, padding: 20 }}>
           {tagGameStore.getTagGame().getId() ? (
             <>
-              <Text style={{ fontSize: 30 }}>{i18next.t("Participation QR")}</Text>
-              <Text>
-                {i18next.t("Have friends scan to join the game")}
+              <Text style={{ fontSize: 30 }}>
+                {i18next.t("Participation QR")}
               </Text>
+              <Text>{i18next.t("Have friends scan to join the game")}</Text>
               <View style={{ alignItems: "center", marginVertical: 20 }}>
                 <QRCode size={150} value={tagGameStore.getTagGame().getId()} />
               </View>

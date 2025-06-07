@@ -92,18 +92,24 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
     );
   };
 
-  const validGameAreaButtonExplanation =
-    "ゲーム内の有効エリアを編集する画面に移動します。ゲーム内から出た泥棒は強制的に逮捕扱いとなります。";
-  const prisonAreaButtonExplanation =
-    "泥棒を収容する監獄エリアを編集する画面に移動します。捕まえた泥棒を収容するエリアを設定します。";
-  const teamEditButtonExplanation =
-    "警察、泥棒の役割を編集する画面に移動します。";
-  const gameTimeButtonExplanation =
-    "ゲーム終了時間を編集する画面に移動します。";
-  const gameStartButtonExplanation =
-    "全ての設定が終了した後にボタンが押せるようになり、ゲームスタートできるようになります。";
-  const gameJoinCameraButtonExplanation =
-    i18next.t("You can join the game hosted by the game master by reading the game master's QR code.");
+  const validGameAreaButtonExplanation = i18next.t(
+    "Navigate to the screen to edit the valid area in the game. Thieves who leave the game area will be forcibly arrested.",
+  );
+  const prisonAreaButtonExplanation = i18next.t(
+    "Navigate to the screen to edit the prison area to house thieves. Set the area to house captured thieves.",
+  );
+  const teamEditButtonExplanation = i18next.t(
+    "Navigate to the screen to edit the roles of police and thieves.",
+  );
+  const gameTimeButtonExplanation = i18next.t(
+    "Navigate to the screen to edit the game end time.",
+  );
+  const gameStartButtonExplanation = i18next.t(
+    "After all settings are completed, the button will become pressable and you can start the game.",
+  );
+  const gameJoinCameraButtonExplanation = i18next.t(
+    "You can join the game hosted by the game master by reading the game master's QR code.",
+  );
 
   return (
     <View
@@ -143,7 +149,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                   router.push("/ValidAreaScreen");
                 }}
               >
-                <Text>ゲーム有効エリア設定</Text>
+                <Text>{i18next.t("Valid Game Area Setting")}</Text>
               </CopilotTouchableOpacity>
             </CopilotStep>
             <CopilotStep
@@ -166,7 +172,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                   router.push("/PrisonAreaScreen");
                 }}
               >
-                <Text>監獄エリア設定</Text>
+                <Text>{i18next.t("Prison Area Setting")}</Text>
               </CopilotTouchableOpacity>
             </CopilotStep>
             <CopilotStep
@@ -243,7 +249,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                     gameStart();
                   }}
                 >
-                  <Text>ゲームスタート</Text>
+                  <Text>{i18next.t("Game Start")}</Text>
                 </CopilotTouchableOpacity>
               </CopilotStep>
             )}
@@ -275,27 +281,31 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
               color="red"
               disabled={!tagGameStore.getTagGame().getId()}
               onPress={async () => {
-                Alert.alert(i18next.t("Confirm"), i18next.t("Really leave the game?"), [
-                  { text: i18next.t("Cancel"), style: "cancel" },
-                  {
-                    text: i18next.t("Leave"),
-                    style: "destructive",
-                    onPress: async () => {
-                      try {
-                        const gameId = tagGameStore.getTagGame().getId();
-                        const userId = userStore.getCurrentUser().getId();
-                        await removeUserFromGame(gameId, userId);
-                        tagGameStore.initialize();
-                        router.replace("/");
-                      } catch (e) {
-                        Alert.alert(
-                          i18next.t("Error"),
-                          i18next.t("Failed to leave game"),
-                        );
-                      }
+                Alert.alert(
+                  i18next.t("Confirm"),
+                  i18next.t("Really leave the game?"),
+                  [
+                    { text: i18next.t("Cancel"), style: "cancel" },
+                    {
+                      text: i18next.t("Leave"),
+                      style: "destructive",
+                      onPress: async () => {
+                        try {
+                          const gameId = tagGameStore.getTagGame().getId();
+                          const userId = userStore.getCurrentUser().getId();
+                          await removeUserFromGame(gameId, userId);
+                          tagGameStore.initialize();
+                          router.replace("/");
+                        } catch (e) {
+                          Alert.alert(
+                            i18next.t("Error"),
+                            i18next.t("Failed to leave game"),
+                          );
+                        }
+                      },
                     },
-                  },
-                ]);
+                  ],
+                );
               }}
               style={{ marginTop: 10 }}
             />

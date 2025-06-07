@@ -23,7 +23,10 @@ function GameTimeScreen({ _tagGameStore }: Props) {
 
   useEffect(() => {
     if (tagGameStore.getShouldShowGameExplanation()) {
-      Alert.alert(i18next.t("Game End Time Setting Method"), i18next.t("Please set the end time for the game"));
+      Alert.alert(
+        i18next.t("Game End Time Setting Method"),
+        i18next.t("Please set the end time for the game"),
+      );
     }
   }, []);
 
@@ -48,7 +51,7 @@ function GameTimeScreen({ _tagGameStore }: Props) {
         <View>
           <Text style={{ color: "red" }}>
             {selectedDay?.isBefore(dayjs(), "minute") &&
-              "過去の時間になっています"}
+              i18next.t("This is a past time")}
           </Text>
           <Button
             onPress={() => {
