@@ -7,7 +7,7 @@ import _ from "lodash";
 // or even better, manage them separated from your code: https://react.i18next.com/guides/multiple-translation-files)
 
 type LocaleTypes = "en" | "ja";
-const localeCode: LocaleTypes = "en";
+const localeCode: LocaleTypes = "ja";
 // prettier-ignore
 const translationMap = {
   "Game Master": { ja: "ゲームマスター" },
@@ -105,8 +105,7 @@ const translate = (locale: string) => {
     });
   } else {
     _.forEach(translationMap, (value, key) => {
-      convertedTranslation[key] =
-        value[locale as Exclude<"en", LocaleTypes>];
+      convertedTranslation[key] = value[locale as Exclude<"en", LocaleTypes>];
     });
   }
   return convertedTranslation;
