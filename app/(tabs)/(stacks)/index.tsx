@@ -269,36 +269,35 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                 <Text>ゲームに参加</Text>
               </CopilotTouchableOpacity>
             </CopilotStep>
-            {tagGameStore.getTagGame().getId() ? (
-              <Button
-                title="ゲームから抜ける"
-                color="red"
-                onPress={async () => {
-                  Alert.alert("確認", "本当にゲームから抜けますか？", [
-                    { text: "キャンセル", style: "cancel" },
-                    {
-                      text: "抜ける",
-                      style: "destructive",
-                      onPress: async () => {
-                        try {
-                          const gameId = tagGameStore.getTagGame().getId();
-                          const userId = userStore.getCurrentUser().getId();
-                          await removeUserFromGame(gameId, userId);
-                          tagGameStore.initialize();
-                          router.replace("/");
-                        } catch (e) {
-                          Alert.alert(
-                            "エラー",
-                            "ゲームから抜ける処理に失敗しました",
-                          );
-                        }
-                      },
+            <Button
+              title="ゲームから抜ける"
+              color="red"
+              disabled={!tagGameStore.getTagGame().getId()}
+              onPress={async () => {
+                Alert.alert("確認", "本当にゲームから抜けますか？", [
+                  { text: "キャンセル", style: "cancel" },
+                  {
+                    text: "抜ける",
+                    style: "destructive",
+                    onPress: async () => {
+                      try {
+                        const gameId = tagGameStore.getTagGame().getId();
+                        const userId = userStore.getCurrentUser().getId();
+                        await removeUserFromGame(gameId, userId);
+                        tagGameStore.initialize();
+                        router.replace("/");
+                      } catch (e) {
+                        Alert.alert(
+                          "エラー",
+                          "ゲームから抜ける処理に失敗しました",
+                        );
+                      }
                     },
-                  ]);
-                }}
-                style={{ marginTop: 10 }}
-              />
-            ) : }
+                  },
+                ]);
+              }}
+              style={{ marginTop: 10 }}
+            />
             <ReactNativeModal
               style={{ margin: "auto" }}
               isVisible={cameraVisible}
