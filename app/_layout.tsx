@@ -15,6 +15,7 @@ import Toast from "react-native-toast-message";
 import * as Notifications from "expo-notifications";
 import { CheckBox } from "@rneui/themed";
 import * as Crypto from "expo-crypto";
+import "@/i18n";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import UserStore from "@/stores/UserStore";
