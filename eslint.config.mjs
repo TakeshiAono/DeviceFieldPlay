@@ -1,6 +1,7 @@
 import js from "@eslint/js";
 import parser from "@typescript-eslint/parser";
 import plugin from "@typescript-eslint/eslint-plugin";
+import globals from "globals";
 
 export default [
   js.configs.recommended,
@@ -12,9 +13,9 @@ export default [
         ecmaVersion: "latest",
         sourceType: "module",
       },
-    },
-    env: {
-      node: true,
+      globals: {
+        ...globals.node,
+      },
     },
     plugins: {
       "@typescript-eslint": plugin,
