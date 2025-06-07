@@ -5,6 +5,7 @@ import { inject, observer } from "mobx-react";
 import { Alert, Text, View } from "react-native";
 import TagGameStore from "@/stores/TagGameStore";
 import _ from "lodash";
+import { router } from "expo-router";
 
 import UserList, { UserListItem } from "@/components/UserList";
 import { SafeAreaView } from "react-native-safe-area-context";
