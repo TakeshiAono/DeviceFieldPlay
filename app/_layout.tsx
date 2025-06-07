@@ -140,10 +140,9 @@ const RootLayout = observer(() => {
                 onPress={async () => {
                   if (userName === undefined) return;
 
-                  const gameId = Crypto.randomUUID();
-                  stores._tagGameStore.getTagGame().setId(gameId);
                   setModalView(false);
                   stores._userStore.setCurrentUserName(userName);
+                  const gameId = Crypto.randomUUID();
                   await putUser(gameId, stores._userStore.getCurrentUser());
 
                   const currentUser = stores._userStore.getCurrentUser();
@@ -153,6 +152,7 @@ const RootLayout = observer(() => {
                   );
 
                   if (isGameMaster) {
+                    stores._tagGameStore.getTagGame().setId(gameId);
                     stores._tagGameStore
                       .getTagGame()
                       .setGameMasterId(

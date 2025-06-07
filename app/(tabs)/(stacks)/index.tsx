@@ -272,6 +272,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
             <Button
               title="ゲームから抜ける"
               color="red"
+              disabled={!tagGameStore.getTagGame().getId()}
               onPress={async () => {
                 Alert.alert("確認", "本当にゲームから抜けますか？", [
                   { text: "キャンセル", style: "cancel" },
