@@ -4,6 +4,7 @@ import {
   SchedulerClient,
   CreateScheduleCommand,
 } from "@aws-sdk/client-scheduler";
+import { t } from "../../constants/translations.js";
 
 const AWS_REGION = process.env.REGION;
 
@@ -47,12 +48,12 @@ export const handler = async (event) => {
     };
   } catch (error) {
     console.error(
-      "FCM API Error:",
+      t("FCM API Error:"),
       error.response ? error.response.data : error.message,
     );
     return {
       statusCode: 200,
-      body: JSON.stringify({ error: "Failed to send FCM message" }),
+      body: JSON.stringify({ error: t("Failed to send FCM message") }),
     };
   }
 };

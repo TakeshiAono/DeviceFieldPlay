@@ -8,6 +8,7 @@ import {
   BatchGetCommand,
 } from "@aws-sdk/lib-dynamodb";
 import dayjs from "dayjs";
+import { t } from "../../constants/translations.js";
 
 const AWS_ACCESS_KEY_ID = process.env.ACCESS_KEY;
 const AWS_SECRET_ACCESS_KEY = process.env.SECRET_KEY;
@@ -82,7 +83,7 @@ export const handler = async (event) => {
             title: "ゲーム終了",
             body: "ゲーム終了です。",
           },
-          data: { notification_type: "gameEnd" },
+          data: { notification_type: t("gameEnd") },
           android: {
             priority: "high",
             notification: {
@@ -110,10 +111,10 @@ export const handler = async (event) => {
       body: JSON.stringify({ success: true }),
     };
   } catch (error) {
-    console.error("FCM API Error:", error);
+    console.error(t("FCM API Error:"), error);
     return {
       statusCode: 200,
-      body: JSON.stringify({ error: "Failed to send FCM message" }),
+      body: JSON.stringify({ error: t("Failed to send FCM message") }),
     };
   }
 };
@@ -143,10 +144,10 @@ const fetchTagGames = async (gameId) => {
       },
     });
     const response = await docClient.send(command);
-    console.log("fetchTagGames:", response);
+    console.log(t("fetchTagGames:"), response);
     return response.Item;
   } catch (error) {
-    console.error("fetchTagGames:", error);
+    console.error(t("fetchTagGames:"), error);
     throw error;
   }
 };

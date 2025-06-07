@@ -3,6 +3,7 @@ import { readFileSync } from "fs";
 import googleAuthLibrary from "google-auth-library";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, BatchGetCommand } from "@aws-sdk/lib-dynamodb";
+import { t } from "../../constants/translations.js";
 
 const AWS_ACCESS_KEY_ID = process.env.ACCESS_KEY;
 const AWS_SECRET_ACCESS_KEY = process.env.SECRET_KEY;
@@ -88,7 +89,7 @@ export const handler = async (event) => {
             title: "監獄エリア変更通知",
             body: "監獄エリアが変更されました",
           },
-          data: { notification_type: "changePrisonArea" },
+          data: { notification_type: t("changePrisonArea") },
           android: {
             // ✅ ここで `priority: "high"` を設定
             priority: "high", // 🚀 高優先度にする
@@ -118,12 +119,12 @@ export const handler = async (event) => {
     };
   } catch (error) {
     console.error(
-      "FCM API Error:",
+      t("FCM API Error:"),
       error.response ? error.response.data : error.message,
     );
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Failed to send FCM message" }),
+      body: JSON.stringify({ error: t("Failed to send FCM message") }),
     };
   }
 };

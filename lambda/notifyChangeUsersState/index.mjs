@@ -3,6 +3,7 @@ import { readFileSync } from "fs";
 import googleAuthLibrary from "google-auth-library";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, BatchGetCommand } from "@aws-sdk/lib-dynamodb";
+import { t } from "../../constants/translations.js";
 
 const AWS_ACCESS_KEY_ID = process.env.ACCESS_KEY;
 const AWS_SECRET_ACCESS_KEY = process.env.SECRET_KEY;
@@ -96,7 +97,7 @@ export const handler = async (event) => {
               title: "ユーザー変更通知",
               body: "ユーザーが復活しました",
             },
-            data: { notification_type: "reviveUser" },
+            data: { notification_type: t("reviveUser") },
             android: {
               priority: "high",
               notification: {
@@ -116,7 +117,7 @@ export const handler = async (event) => {
               title: "ユーザー変更通知",
               body: "ユーザーが逮捕されました",
             },
-            data: { notification_type: "rejectUser" },
+            data: { notification_type: t("rejectUser") },
             android: {
               priority: "high",
               notification: {
@@ -136,7 +137,7 @@ export const handler = async (event) => {
               title: "ユーザー変更通知",
               body: "ユーザーが警察になりました",
             },
-            data: { notification_type: "policeUser" },
+            data: { notification_type: t("policeUser") },
             android: {
               priority: "high",
               notification: {
@@ -166,12 +167,12 @@ export const handler = async (event) => {
     };
   } catch (error) {
     console.error(
-      "FCM API Error:",
+      t("FCM API Error:"),
       error.response ? error.response.data : error.message,
     );
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Failed to send FCM message" }),
+      body: JSON.stringify({ error: t("Failed to send FCM message") }),
     };
   }
 };
