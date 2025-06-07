@@ -76,16 +76,19 @@ const RootLayout = observer(() => {
   useEffect(() => {
     const gameStarted = stores._tagGameStore.getTagGame().getIsGameStarted();
     const policeWon = stores._tagGameStore.policeWinConditions();
+    const thiefWon = stores._tagGameStore.thiefWinConditions();
     const gameTimeLimit = stores._tagGameStore.getTagGame().getGameTimeLimit();
     
-    // Delete scheduler when police win (game ends early)
-    if (gameStarted && policeWon && gameTimeLimit) {
+    // Delete scheduler when game ends (either police or thief win)
+    if (gameStarted && (policeWon || thiefWon) && gameTimeLimit) {
       const gameId = stores._tagGameStore.getTagGame().getId();
+      console.log(`Game ended: police won: ${policeWon}, thief won: ${thiefWon}`);
       deleteGameEndSchedule(gameId, gameTimeLimit)
         .catch(error => console.error("Failed to delete schedule:", error));
     }
   }, [
     stores._tagGameStore.policeWinConditions(),
+    stores._tagGameStore.thiefWinConditions(),
     stores._tagGameStore.getTagGame().getIsGameStarted()
   ]);
 
