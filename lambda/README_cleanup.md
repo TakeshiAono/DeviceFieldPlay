@@ -22,7 +22,7 @@ The function uses batch delete operations to efficiently remove all items while 
 ### 2. dailyTableCleanupScheduler
 **File**: `lambda/dailyTableCleanupScheduler/index.mjs`
 
-This function creates a daily schedule that triggers the cleanup function at midnight (0:00 UTC).
+This function creates a daily schedule that triggers the cleanup function at midnight JST (0:00 JST / 15:00 UTC).
 
 **Environment Variables**:
 - `REGION`: AWS Region
@@ -42,7 +42,7 @@ Follow the same deployment process as other Lambda functions in this project:
 1. Deploy the `dailyTableCleanup` function first
 2. Deploy the `dailyTableCleanupScheduler` function
 3. Trigger the scheduler function to set up the daily cleanup schedule
-4. The cleanup will run automatically every day at 0:00 UTC
+4. The cleanup will run automatically every day at 0:00 JST (midnight Japan time)
 
 ## Security Considerations
 

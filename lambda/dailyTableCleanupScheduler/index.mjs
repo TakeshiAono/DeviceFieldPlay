@@ -51,7 +51,7 @@ export async function createDailyCleanupSchedule({
 }) {
   const command = new CreateScheduleCommand({
     Name: scheduleName,
-    ScheduleExpression: "cron(0 0 * * ? *)", // 毎日0:00 UTC
+    ScheduleExpression: "cron(0 15 * * ? *)", // 毎日0:00 JST (15:00 UTC前日)
     GroupName: "default",
     FlexibleTimeWindow: { Mode: "OFF" }, // 固定時刻実行
     Target: {
@@ -63,13 +63,13 @@ export async function createDailyCleanupSchedule({
       }),
     },
     State: "ENABLED",
-    Description: "Daily cleanup of all DynamoDB tables at midnight (0:00 UTC)"
+    Description: "Daily cleanup of all DynamoDB tables at midnight JST (0:00 JST / 15:00 UTC)"
   });
 
   try {
     await scheduleClient.send(command);
     console.log(`✅ Daily cleanup schedule '${scheduleName}' created successfully`);
-    console.log(`Schedule will run daily at 0:00 UTC`);
+    console.log(`Schedule will run daily at 0:00 JST (15:00 UTC)`);
   } catch (error) {
     console.error("❌ Schedule creation failed:", error);
     throw error;

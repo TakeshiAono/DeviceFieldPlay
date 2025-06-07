@@ -36,7 +36,8 @@ export const handler = async (event) => {
       body: JSON.stringify({ 
         success: true,
         message: "All tables cleaned up successfully",
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        tablesProcessed: ["tagGames", "users", "devices"]
       }),
     };
   } catch (error) {
@@ -63,8 +64,12 @@ async function cleanupTable(tableName, keyAttributes) {
   try {
     let lastEvaluatedKey;
     let totalDeleted = 0;
+    let batchCount = 0;
     
     do {
+      batchCount++;
+      console.log(`Processing batch ${batchCount} for table ${tableName}`);
+      
       // テーブルの全アイテムをスキャン
       const scanCommand = new ScanCommand({
         TableName: tableName,
@@ -80,6 +85,10 @@ async function cleanupTable(tableName, keyAttributes) {
         const deleteRequests = scanResult.Items.map(item => {
           const key = {};
           keyAttributes.forEach(attr => {
+            if (item[attr] === undefined) {
+              console.warn(`Missing key attribute ${attr} in item:`, item);
+              return null;
+            }
             key[attr] = item[attr];
           });
           return {
@@ -87,25 +96,34 @@ async function cleanupTable(tableName, keyAttributes) {
               Key: key
             }
           };
-        });
+        }).filter(request => request !== null); // Remove any null requests
         
-        // バッチ削除を実行
-        const batchWriteCommand = new BatchWriteCommand({
-          RequestItems: {
-            [tableName]: deleteRequests
-          }
-        });
-        
-        await docClient.send(batchWriteCommand);
-        totalDeleted += deleteRequests.length;
-        
-        console.log(`Deleted ${deleteRequests.length} items from ${tableName}`);
+        if (deleteRequests.length > 0) {
+          // バッチ削除を実行
+          const batchWriteCommand = new BatchWriteCommand({
+            RequestItems: {
+              [tableName]: deleteRequests
+            }
+          });
+          
+          await docClient.send(batchWriteCommand);
+          totalDeleted += deleteRequests.length;
+          
+          console.log(`Deleted ${deleteRequests.length} items from ${tableName} (batch ${batchCount})`);
+        }
+      } else {
+        console.log(`No items found in batch ${batchCount} for table ${tableName}`);
       }
       
       lastEvaluatedKey = scanResult.LastEvaluatedKey;
+      
+      // Add a small delay between batches to avoid throttling
+      if (lastEvaluatedKey) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
     } while (lastEvaluatedKey);
     
-    console.log(`✅ ${tableName}: ${totalDeleted} items deleted`);
+    console.log(`✅ ${tableName}: ${totalDeleted} items deleted in ${batchCount} batches`);
   } catch (error) {
     console.error(`❌ Failed to cleanup table ${tableName}:`, error);
     throw error;
