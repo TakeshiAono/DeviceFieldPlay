@@ -5,6 +5,15 @@ import {
   CreateScheduleCommand,
 } from "@aws-sdk/client-scheduler";
 
+// 日本語メッセージ辞書
+const MESSAGES = {
+  FCM_API_ERROR: "FCM API エラー:",
+  FAILED_TO_SEND_FCM_MESSAGE: "FCMメッセージの送信に失敗しました",
+  SUCCESS_TRUE: "処理が正常に完了しました"
+};
+
+const getMessage = (key) => MESSAGES[key] || key;
+
 const AWS_REGION = process.env.REGION;
 
 const { JWT } = googleAuthLibrary;
@@ -43,16 +52,16 @@ export const handler = async (event) => {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ success: true }),
+      body: JSON.stringify({ success: getMessage("SUCCESS_TRUE") }),
     };
   } catch (error) {
     console.error(
-      "FCM API Error:",
+      getMessage("FCM_API_ERROR"),
       error.response ? error.response.data : error.message,
     );
     return {
       statusCode: 200,
-      body: JSON.stringify({ error: "Failed to send FCM message" }),
+      body: JSON.stringify({ error: getMessage("FAILED_TO_SEND_FCM_MESSAGE") }),
     };
   }
 };
