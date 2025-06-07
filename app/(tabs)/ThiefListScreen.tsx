@@ -5,6 +5,7 @@ import { inject, observer } from "mobx-react";
 import { Alert, Text, View } from "react-native";
 import TagGameStore from "@/stores/TagGameStore";
 import _ from "lodash";
+import { router } from "expo-router";
 
 import UserList, { UserListItem } from "@/components/UserList";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -47,6 +48,15 @@ function ThiefListScreen({ _tagGameStore }: Props) {
               Alert.alert(
                 "チュートリアル終了",
                 "これでチュートリアル終了です。\nそれでは設定画面に移動して「ゲーム有効エリア」〜「タイムリミット」の設定を行い、ゲームを始めましょう🎉",
+                [
+                  {
+                    text: "OK",
+                    onPress: () => {
+                      // 設定画面に遷移
+                      router.replace("/SettingScreen");
+                    },
+                  },
+                ],
               );
             },
           },
