@@ -83,7 +83,7 @@ function ThiefListScreen({ _tagGameStore }: Props) {
       <View style={{ backgroundColor: "white", height: "100%" }}>
         <View style={{ flex: 1, margin: 10 }}>
           <Text style={{ textAlign: "center", fontSize: 20 }}>
-            生存(逮捕) {tagGameStore.getTagGame().getRejectUsers().length}人
+            泥棒(逮捕) {tagGameStore.getTagGame().getRejectUsers().length}人
           </Text>
           <View style={{ flex: 1, borderRadius: 5, borderWidth: 2 }}>
             <UserList userRecords={rejectUsersForList} />
