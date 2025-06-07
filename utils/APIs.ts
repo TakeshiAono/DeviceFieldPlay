@@ -11,6 +11,7 @@ import Constants from "expo-constants";
 import { Platform } from "react-native";
 import UserModel from "@/models/UserModel";
 import { DynamoDevice, DynamoTagGame, DynamoUser } from "@/interfaces/api";
+import { t } from "@/constants/translations";
 
 const AWS_ACCESS_KEY_ID = Constants.expoConfig?.extra?.awsAccessKeyId;
 const AWS_SECRET_ACCESS_KEY = Constants.expoConfig?.extra?.awsSecretAccessKey;
@@ -37,10 +38,10 @@ export const fetchTagGames = async <T extends DynamoTagGame>(
       },
     });
     const response = await docClient.send(command);
-    console.log("fetchTagGames:", response);
+    console.log(t("fetchTagGames:"), response);
     return response.Item as DynamoTagGame;
   } catch (error) {
-    console.error("fetchTagGames:", error);
+    console.error(t("fetchTagGames:"), error);
     throw error;
   }
 };
@@ -55,10 +56,10 @@ export const putTagGames = async <T extends DynamoTagGame>(
     });
 
     const response = await docClient.send(command);
-    console.log("putTagGames:", response);
+    console.log(t("putTagGames:"), response);
     return item;
   } catch (error) {
-    console.error("putTagGames:", error);
+    console.error(t("putTagGames:"), error);
     throw error;
   }
 };
@@ -95,7 +96,7 @@ export const joinUser = async <T extends DynamoTagGame>(
     const response = await docClient.send(updateCommand);
     return response.Attributes as Pick<T, "liveUsers">;
   } catch (error) {
-    console.error("joinUser:", error);
+    console.error(t("joinUser:"), error);
     throw error;
   }
 };
@@ -113,12 +114,12 @@ export const fetchCurrentGameUsersInfo = async <T extends DynamoUser>(
     });
 
     const response = await docClient.send(command);
-    console.log("fetchCurrentGameUsersInfo:", response);
+    console.log(t("fetchCurrentGameUsersInfo:"), response);
 
     const items = response.Items?.map((item) => unmarshall(item) as T) ?? [];
     return items;
   } catch (error) {
-    console.error("fetchCurrentGameUsersInfo:", error);
+    console.error(t("fetchCurrentGameUsersInfo:"), error);
     throw error;
   }
 };
@@ -139,10 +140,10 @@ export const putUser = async <T extends DynamoUser>(
     });
 
     const response = await docClient.send(command);
-    console.log("putUser:", response);
+    console.log(t("putUser:"), response);
     return response.Attributes as T | undefined;
   } catch (error) {
-    console.error("putUser:", error);
+    console.error(t("putUser:"), error);
     throw error;
   }
 };
@@ -180,10 +181,10 @@ export const rejectUser = async <T extends DynamoTagGame>(
     });
 
     const response = await docClient.send(command);
-    console.log("rejectUsers:", response);
+    console.log(t("rejectUsers:"), response);
     return response.Attributes as Pick<T, "rejectUsers">;
   } catch (error) {
-    console.error("rejectUsers:", error);
+    console.error(t("rejectUsers:"), error);
     throw error;
   }
 };
@@ -220,10 +221,10 @@ export const reviveUser = async <T extends DynamoTagGame>(
     });
 
     const response = await docClient.send(command);
-    console.log("reviveUser:", response);
+    console.log(t("reviveUser:"), response);
     return response.Attributes as Pick<T, "liveUsers">;
   } catch (error) {
-    console.error("reviveUser:", error);
+    console.error(t("reviveUser:"), error);
     throw error;
   }
 };
@@ -243,10 +244,10 @@ export const putDevice = async <T extends DynamoDevice>(
     });
 
     const response = await docClient.send(command);
-    console.log("putDevice:", response);
+    console.log(t("putDevice:"), response);
     return userId;
   } catch (error) {
-    console.error("putDevice:", error);
+    console.error(t("putDevice:"), error);
     throw error;
   }
 };

@@ -33,6 +33,6 @@ export const translations = {
 };
 
 // Translation function
-export function t(key) {
-  return translations[key] || key;
+export function t(key: string): string {
+  return translations[key as keyof typeof translations] || key;
 }

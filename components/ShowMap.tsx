@@ -30,6 +30,7 @@ import { Text } from "react-native";
 import { Colors, getPlayerRoleColor } from "@/constants/Colors";
 import useCopilotHook from "@/hooks/useCopilotHook";
 import { router } from "expo-router";
+import { t } from "@/constants/translations";
 
 export type Props = {
   mapVisible?: boolean;
@@ -204,7 +205,7 @@ function ShowMap({
         userStore.getCurrentUser().getId(),
       );
       Alert.alert("逮捕通知", "エリア外に出たため逮捕となりました。", [
-        { text: "OK" },
+        { text: t("OK") },
       ]);
     }
   };
@@ -263,9 +264,9 @@ function ShowMap({
                   }
                   onPress={() => {
                     Alert.alert("復活", "復活してもよいですか？", [
-                      { text: "Cancel", onPress: undefined },
+                      { text: t("Cancel"), onPress: undefined },
                       {
-                        text: "OK",
+                        text: t("OK"),
                         onPress: async () => {
                           if (!userStore.getCurrentUser().getId()) return;
 
@@ -327,9 +328,9 @@ function ShowMap({
                   }
                   onPress={() => {
                     Alert.alert("逮捕", "逮捕されてもよいですか？", [
-                      { text: "Cancel", onPress: undefined },
+                      { text: t("Cancel"), onPress: undefined },
                       {
-                        text: "OK",
+                        text: t("OK"),
                         onPress: async () => {
                           if (!userStore.getCurrentUser().getId()) return;
 
