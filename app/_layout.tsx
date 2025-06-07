@@ -19,7 +19,7 @@ import * as Crypto from "expo-crypto";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import UserStore from "@/stores/UserStore";
 import TagGameStore from "@/stores/TagGameStore";
-import { joinUser, putDevice, putTagGames, putUser } from "@/utils/APIs";
+import { joinUser, putDevice, putTagGames, putUser, deleteGameEndSchedule } from "@/utils/APIs";
 import { observer } from "mobx-react-lite";
 import { CopilotProvider } from "react-native-copilot";
 
@@ -71,6 +71,23 @@ const RootLayout = observer(() => {
 
     registerForPushNotificationsAsync();
   }, []);
+
+  // Delete scheduler when game ends early
+  useEffect(() => {
+    const gameStarted = stores._tagGameStore.getTagGame().getIsGameStarted();
+    const policeWon = stores._tagGameStore.policeWinConditions();
+    const gameTimeLimit = stores._tagGameStore.getTagGame().getGameTimeLimit();
+    
+    // Delete scheduler when police win (game ends early)
+    if (gameStarted && policeWon && gameTimeLimit) {
+      const gameId = stores._tagGameStore.getTagGame().getId();
+      deleteGameEndSchedule(gameId, gameTimeLimit)
+        .catch(error => console.error("Failed to delete schedule:", error));
+    }
+  }, [
+    stores._tagGameStore.policeWinConditions(),
+    stores._tagGameStore.getTagGame().getIsGameStarted()
+  ]);
 
   return (
     <CopilotProvider

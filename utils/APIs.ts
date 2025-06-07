@@ -6,6 +6,10 @@ import {
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
+import {
+  SchedulerClient,
+  DeleteScheduleCommand,
+} from "@aws-sdk/client-scheduler";
 
 import Constants from "expo-constants";
 import { Platform } from "react-native";
@@ -25,6 +29,14 @@ const client = new DynamoDBClient({
 });
 
 const docClient = DynamoDBDocumentClient.from(client);
+
+const scheduleClient = new SchedulerClient({ 
+  credentials: {
+    accessKeyId: AWS_ACCESS_KEY_ID,
+    secretAccessKey: AWS_SECRET_ACCESS_KEY,
+  },
+  region: AWS_REGION 
+});
 
 export const fetchTagGames = async <T extends DynamoTagGame>(
   id: T["id"],
@@ -289,4 +301,36 @@ export const removeUserFromGame = async <T extends DynamoTagGame>(
     },
   });
   await docClient.send(updateCommand);
+};
+
+/**
+ * Delete a scheduler when game ends early
+ * @param gameId Game ID
+ * @param gameTimeLimit Game time limit to reconstruct scheduler name
+ */
+export const deleteGameEndSchedule = async (
+  gameId: string,
+  gameTimeLimit: string,
+): Promise<void> => {
+  try {
+    const date = new Date(gameTimeLimit);
+    const scheduleName = 
+      gameId +
+      date.getFullYear() +
+      date.getDate() +
+      date.getHours() +
+      date.getMinutes() +
+      date.getSeconds();
+
+    const command = new DeleteScheduleCommand({
+      Name: scheduleName,
+      GroupName: "default",
+    });
+
+    await scheduleClient.send(command);
+    console.log(`✅ スケジュール '${scheduleName}' を削除しました`);
+  } catch (error) {
+    console.error("❌ スケジュール削除失敗:", error);
+    // Don't throw error as this is not critical - the schedule will auto-delete anyway
+  }
 };
