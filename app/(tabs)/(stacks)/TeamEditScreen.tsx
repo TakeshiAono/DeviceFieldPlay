@@ -21,6 +21,7 @@ import ReactNativeModal from "react-native-modal";
 import QRCode from "react-native-qrcode-svg";
 import UserModel from "@/models/UserModel";
 import { router } from "expo-router";
+import { t } from "@/constants/translations";
 
 interface Props {
   _userStore?: UserStore;
@@ -392,7 +393,7 @@ function TeamEditScreen({ _userStore, _tagGameStore }: Props) {
                         await putTagGames(tagGameStore.getTagGame().toObject());
                         tagGameStore.setIsEditTeams(true);
                       } catch (error) {
-                        console.log("Error: ", error);
+                        console.log(t("Error: "), error);
                         throw error;
                       }
                     }}

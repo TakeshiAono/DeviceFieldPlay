@@ -11,6 +11,7 @@ export const translations = {
   "rejectUsers:": "ユーザー逮捕:",
   "reviveUser:": "ユーザー復活:",
   "putDevice:": "デバイス更新:",
+  "Error: ": "エラー: ",
   
   // Alert buttons
   "Cancel": "キャンセル",
