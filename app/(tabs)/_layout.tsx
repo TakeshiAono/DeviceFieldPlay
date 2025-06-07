@@ -1,6 +1,7 @@
 import { Tabs } from "expo-router";
 import React from "react";
 import { Platform } from "react-native";
+import i18next from "i18next";
 
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
@@ -27,7 +28,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "MAP",
+          title: i18next.t("MAP"),
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="map.fill" color={color} />
           ),
@@ -36,7 +37,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="ThiefListScreen"
         options={{
-          title: "ThiefListScreen",
+          title: i18next.t("Thief Status"),
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="person.2.fill" color={color} />
           ),
@@ -45,7 +46,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="(stacks)"
         options={{
-          title: "Setting",
+          title: i18next.t("Setting"),
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="hammer" color={color} />
           ),
