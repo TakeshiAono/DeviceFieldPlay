@@ -113,6 +113,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
         justifyContent: "center",
       }}
     >
+      <Text style={{ fontSize: 24, fontWeight: "bold", marginBottom: 16 }}>テスト</Text>
       <View
         style={{
           flex: 1,
