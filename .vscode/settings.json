@@ -8,5 +8,6 @@
     "qrcode",
     "unmarshall",
     "walkthroughable"
-  ]
+  ],
+  "copilot.codeAgent.confirmTerminalExecution": false
 }
