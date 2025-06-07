@@ -147,6 +147,27 @@ export const handler = async (event) => {
           },
         };
       });
+    } else if (newLiveUsersCount === 0 && newRejectUsersCount > 0 && prevLiveUsersCount > 0) {
+      // 全ての泥棒ユーザーが捕まった時のゲーム終了通知
+      androidMessages = androidDeviceIds.map((token) => {
+        return {
+          message: {
+            token,
+            notification: {
+              title: "ゲーム終了",
+              body: "全ての泥棒が逮捕されました。警察の勝利です！",
+            },
+            data: { notification_type: "gameEnd" },
+            android: {
+              priority: "high",
+              notification: {
+                channelId: "high_priority",
+                sound: "default",
+              },
+            },
+          },
+        };
+      });
     }
 
     await Promise.all(
