@@ -1,0 +1,14 @@
+{
+  "name": "lambda",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "Daily table cleanup scheduler lambda function",
+  "dependencies": {
+    "@aws-sdk/client-scheduler": "^3.799.0"
+  }
+}
