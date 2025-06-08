@@ -1,8 +1,17 @@
 import "dotenv/config";
 
+let appName = "(default)ケイドロ";
+if (process.env.EAS_BUILD_PROFILE === "development") {
+  appName = "(開発)ケイドロ";
+} else if (process.env.EAS_BUILD_PROFILE === "preview") {
+  appName = "(検証)ケイドロ";
+} else if (process.env.EAS_BUILD_PROFILE === "production") {
+  appName = "ケイドロ";
+}
+
 export default {
   expo: {
-    name: "DeviceFieldPlay",
+    name: appName,
     slug: "DeviceFieldPlay",
     version: "1.0.0",
     orientation: "portrait",
