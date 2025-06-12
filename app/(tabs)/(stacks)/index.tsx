@@ -62,6 +62,13 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
     putTagGames(tagGame);
   };
 
+  const isValidGameId = (gameId: string) => {
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    console.log("test", uuidRegex.test(gameId));
+    return uuidRegex.test(gameId);
+  };
+
   // ゲームマスター以外の人(子)がゲーム情報をstoreにセットするための処理
   const setDataSettings = async ({ data: gameId }: { data: string }) => {
     if (!tagGameStore.belongingGameGroup(gameId)) firstScan.current = true;
@@ -73,6 +80,15 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
     firstScan.current = false;
     console.log("ScanData: ", gameId);
     setCameraVisible(false);
+
+    if (!isValidGameId(gameId)) {
+      Alert.alert(
+        "QR読み取りエラー",
+        "ゲームマスターが発行したQRを読み取ってください。アプリ管理外のQRを読み込んでいます。",
+      );
+      return;
+    }
+
     tagGameStore.getTagGame().setId(gameId);
     await putUser(gameId, userStore.getCurrentUser());
 

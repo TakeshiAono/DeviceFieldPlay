@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 import React, { useState } from "react";
-import MapView, { LatLng, Polygon, Region } from "react-native-maps";
+import MapView, { LatLng, Marker, Polygon, Region } from "react-native-maps";
 import "react-native-get-random-values";
 import { inject, observer } from "mobx-react";
 
@@ -97,10 +97,21 @@ function EditMap({
           }}
         >
           {points.length > 0 && (
-            <Polygon
-              fillColor={drawColor}
-              coordinates={points} // 東京
-            />
+            <>
+              {points.map((point, index) => (
+                <Marker
+                  key={index}
+                  coordinate={{
+                    latitude: point.latitude,
+                    longitude: point.longitude,
+                  }}
+                />
+              ))}
+              <Polygon
+                fillColor={drawColor}
+                coordinates={points} // 東京
+              />
+            </>
           )}
         </MapView>
       )}

@@ -437,8 +437,10 @@ function TeamEditScreen({ _userStore, _tagGameStore }: Props) {
               <Text style={{ fontSize: 30 }}>
                 {i18next.t("Participation QR")}
               </Text>
-              <Text>{i18next.t("Have friends scan to join the game")}</Text>
-              <View style={{ alignItems: "center", marginVertical: 20 }}>
+              <Text style={{ marginBottom: 30 }}>
+                {i18next.t("Have friends scan to join the game")}
+              </Text>
+              <View style={{ alignItems: "center", marginBottom: 20 }}>
                 <QRCode size={150} value={tagGameStore.getTagGame().getId()} />
               </View>
             </>
