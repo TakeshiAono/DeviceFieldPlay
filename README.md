@@ -26,6 +26,16 @@ AWS access portalで`DeviceFieldPlayDev`にログインする
 1. `eas whoami`コマンドでデプロイ先のexpoアカウントかを確認する。※間違っていると別のアカウントprojectにデプロイしてしまうので注意
 2. `eas build --profile development --platform android`コマンドにて開発アプリをデプロイ
 
+### エミュレーターでアプリを動かす方法
+
+1. Android Studioにて該当の仮想デバイスをインストールして立ち上げる。
+
+   - 参考: https://developer.android.com/studio/run/managing-avds?hl=ja
+
+2. expoクラウドにあるdevelopmentビルドをローカルPCに.apkファイルをダウンロードする。
+
+3. 立ち上げた仮想デバイスに.apkファイルをドラッグアンドドロップ
+
 ## 本番環境のデプロイ方法
 
 ### Androidデプロイ

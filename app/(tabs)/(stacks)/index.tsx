@@ -332,7 +332,9 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
               <View
                 style={{ backgroundColor: "white", width: 330, padding: 20 }}
               >
-                <Text style={{ fontSize: 18 }}>
+                {/* NOTE: 一部の端末でのみ2行になると2行目の文字が見切れる(参考: https://honmushi.com/2019/12/09/expo-j-lineheight/)
+                そのため、lineHeightを設定している */}
+                <Text style={{ fontSize: 18, lineHeight: 30 }}>
                   {i18next.t("Let's scan QR and join the game group!!")}
                 </Text>
                 <CameraView
