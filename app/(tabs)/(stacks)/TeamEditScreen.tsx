@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import * as Location from "expo-location";
 import { useCameraPermissions } from "expo-camera";
-import * as Notifications from "expo-notifications";
 import i18next from "i18next";
 
 import UserStore from "@/stores/UserStore";
@@ -11,6 +9,7 @@ import { Button as EButton } from "@rneui/themed";
 import UserCheckList, { UserTypeForList } from "@/components/UserCheckList";
 import TagGameStore from "@/stores/TagGameStore";
 import _ from "lodash";
+import { getDevicePushTokenAsync } from "expo-notifications";
 
 import {
   fetchCurrentGameUsersInfo,
@@ -22,6 +21,10 @@ import ReactNativeModal from "react-native-modal";
 import QRCode from "react-native-qrcode-svg";
 import UserModel from "@/models/UserModel";
 import { router } from "expo-router";
+import {
+  getCurrentPositionAsync,
+  requestForegroundPermissionsAsync,
+} from "expo-location";
 
 interface Props {
   _userStore?: UserStore;
@@ -59,7 +62,7 @@ function TeamEditScreen({ _userStore, _tagGameStore }: Props) {
 
   const deviceId = useRef("");
 
-  Notifications.getDevicePushTokenAsync().then(({ data }) => {
+  getDevicePushTokenAsync().then(({ data }) => {
     console.log("deviceId:", data);
     deviceId.current = data;
     userStore.getCurrentUser().setDeviceId(data);
@@ -78,7 +81,7 @@ function TeamEditScreen({ _userStore, _tagGameStore }: Props) {
 
   useEffect(() => {
     async function getCurrentLocation() {
-      const { status } = await Location.requestForegroundPermissionsAsync();
+      const { status } = await requestForegroundPermissionsAsync();
       return status;
     }
 
@@ -98,7 +101,7 @@ function TeamEditScreen({ _userStore, _tagGameStore }: Props) {
 
   useEffect(() => {
     if (locationPermissionStatus === "granted") {
-      Location.getCurrentPositionAsync({});
+      getCurrentPositionAsync({});
     }
   }, [locationPermissionStatus]);
 

@@ -1,7 +1,10 @@
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState, useEffect } from "react";
-import * as Location from "expo-location";
 import { useCameraPermissions } from "expo-camera";
+import {
+  getCurrentPositionAsync,
+  requestForegroundPermissionsAsync,
+} from "expo-location";
 
 import UserStore from "@/stores/UserStore";
 import { inject, observer } from "mobx-react";
@@ -22,7 +25,7 @@ function MapScreen({ _tagGameStore }: Props) {
 
   useEffect(() => {
     async function getCurrentLocation() {
-      const { status } = await Location.requestForegroundPermissionsAsync();
+      const { status } = await requestForegroundPermissionsAsync();
       return status;
     }
 
@@ -33,7 +36,7 @@ function MapScreen({ _tagGameStore }: Props) {
 
   useEffect(() => {
     if (locationPermissionStatus === "granted") {
-      Location.getCurrentPositionAsync({});
+      getCurrentPositionAsync({});
     }
   }, [locationPermissionStatus]);
 
