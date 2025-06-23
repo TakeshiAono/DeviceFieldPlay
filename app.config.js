@@ -1,9 +1,7 @@
 import "dotenv/config";
 
-let appName = "(default)ケイドロ";
-if (process.env.EAS_BUILD_PROFILE === "development") {
-  appName = "(開発)ケイドロ";
-} else if (process.env.EAS_BUILD_PROFILE === "preview") {
+let appName = "(開発)ケイドロ";
+if (process.env.EAS_BUILD_PROFILE === "preview") {
   appName = "(検証)ケイドロ";
 } else if (process.env.EAS_BUILD_PROFILE === "production") {
   appName = "ケイドロ";
@@ -28,6 +26,7 @@ export default {
       },
     },
     ios: {
+      scheme: appName,
       supportsTablet: true,
       bundleIdentifier: "com.aonot.devicefield",
     },
