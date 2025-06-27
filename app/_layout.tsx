@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import "react-native-reanimated";
 import { Provider } from "mobx-react";
 import ReactNativeModal from "react-native-modal";
-import { Button, Text, TextInput, View } from "react-native";
+import { Button, Platform, Text, TextInput, View } from "react-native";
 import Toast from "react-native-toast-message";
 import * as Notifications from "expo-notifications";
 import { CheckBox } from "@rneui/themed";
@@ -49,10 +49,18 @@ const RootLayout = observer(() => {
     const id = Crypto.randomUUID();
     stores._userStore.getCurrentUser().setId(id);
 
-    Notifications.getDevicePushTokenAsync().then(({ data }) => {
-      console.log("deviceId:", data);
-      stores._userStore.getCurrentUser().setDeviceId(data);
-    });
+    if (Platform.OS === "android") {
+      // TODO: iosと同じようにgetExpoPushTokenAsyncでpush通知を送るように変更したい
+      Notifications.getDevicePushTokenAsync().then(({ data }) => {
+        console.log("deviceId:", data);
+        stores._userStore.getCurrentUser().setDeviceId(data);
+      });
+    } else if (Platform.OS === "ios") {
+      Notifications.getExpoPushTokenAsync().then(({ data }) => {
+        console.log("deviceId:", data);
+        stores._userStore.getCurrentUser().setDeviceId(data);
+      });
+    }
     // TODO: storesはいらないので削除したい
   }, [stores, modalView]);
 
