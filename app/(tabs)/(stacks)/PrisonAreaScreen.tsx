@@ -6,7 +6,7 @@ import { inject, observer } from "mobx-react";
 import { Alert, View } from "react-native";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { Button } from "@rneui/themed";
-import { putTagGames } from "@/utils/APIs";
+import { putTagGames } from "@/utils/dynamoUtils";
 import TagGameStore from "@/stores/TagGameStore";
 import _ from "lodash";
 import { PrisonAreaEditMap } from "@/components/PrisonAreaEditMap";

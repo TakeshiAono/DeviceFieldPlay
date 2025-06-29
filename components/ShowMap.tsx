@@ -8,7 +8,7 @@ import { inject, observer } from "mobx-react";
 import { CopilotStep } from "react-native-copilot";
 import * as Location from "expo-location";
 
-import { rejectUser, reviveUser } from "@/utils/APIs";
+import { rejectUser, reviveUser } from "@/utils/dynamoUtils";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import UserStore from "@/stores/UserStore";
 import TagGameStore from "@/stores/TagGameStore";

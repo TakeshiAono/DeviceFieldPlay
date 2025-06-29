@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import { Alert } from "react-native";
 import { Notification } from "expo-notifications";
 
-import { fetchCurrentGameUsersInfo, fetchTagGames } from "./APIs";
+import { fetchCurrentGameUsersInfo, fetchTagGames } from "./dynamoUtils";
 import { DynamoTagGame, DynamoUser } from "@/interfaces/api";
 
 export const prisonAreaNotificationHandler = async (
