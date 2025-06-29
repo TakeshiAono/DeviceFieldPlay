@@ -4,10 +4,30 @@ import TagGameStore from "@/stores/TagGameStore";
 describe("UserStoreユニットテスト", () => {
   const userStore = new UserStore();
   const userName = "testユーザー";
+  userStore.getCurrentUser().setId("testId");
+  userStore.setCurrentUserName(userName);
 
   it("setCurrentUserName", () => {
-    userStore.setCurrentUserName(userName);
     expect(userStore.getCurrentUser().getName()).toBe(userName);
+  });
+
+  it("getCurrentUser", () => {
+    const userModel = userStore.getCurrentUser();
+    expect(userModel.getName()).toBe(userName);
+  });
+
+  describe("isCurrentUserGameMaster", () => {
+    const userModel = userStore.getCurrentUser();
+    const tagGameStore = new TagGameStore();
+    const tagGameModel = tagGameStore.getTagGame();
+    it("ゲームマスターではない時", () => {
+      expect(userStore.isCurrentUserGameMaster(tagGameModel)).toBeFalsy();
+    });
+
+    it("ゲームマスターの時", () => {
+      tagGameModel.setGameMasterId(userModel.getId());
+      expect(userStore.isCurrentUserGameMaster(tagGameModel)).toBeTruthy();
+    });
   });
 
   it("getPlayerRoleName", () => {
@@ -30,5 +50,12 @@ describe("UserStoreユニットテスト", () => {
     expect(() => {
       userStore.getPlayerRoleName(tagGameStore);
     }).toThrow();
+  });
+
+  it("initialize", () => {
+    userStore.initialize();
+    expect(userStore.getCurrentUser().getId()).toBe("");
+    expect(userStore.getCurrentUser().getName()).toBe("");
+    expect(userStore.getCurrentUser().getDeviceId()).toBe("");
   });
 });
