@@ -26,7 +26,7 @@ export default {
       },
     },
     ios: {
-      scheme: appName,
+      scheme: "keidoro",
       supportsTablet: true,
       bundleIdentifier: "com.aonot.devicefield",
     },
