@@ -44,3 +44,9 @@ AWS access portalで`DeviceFieldPlayDev`にログインする
 --profile developmentだと.apkファイルがビルドされるが
 上記のコマンドはproductionでビルドされその場合は.aabファイルがビルドされる。
 それを`google play console`に.aabファイルを手動アップロードしてデプロイandリリースする(初回だけ？)
+
+### iosデプロイ
+
+`eas build --profile production --platform ios`コマンドでeas上で本番環境ビルドを行う。
+ビルド完了後.ipaファイルがダウンロードできるようになる。
+macPCにて`Transporter`というアプリをインストールして、そこで.ipaがデプロイできるようになる。
