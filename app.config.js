@@ -14,7 +14,7 @@ export default {
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
-    scheme: "myapp",
+    scheme: "keidoro",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     extra: {
@@ -26,7 +26,6 @@ export default {
       },
     },
     ios: {
-      scheme: "keidoro",
       supportsTablet: true,
       bundleIdentifier: "com.aonot.devicefield",
     },
