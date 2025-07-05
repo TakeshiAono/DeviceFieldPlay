@@ -28,6 +28,12 @@ export default {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.aonot.devicefield",
+      infoPlist: {
+        NSCameraUsageDescription:
+          "ゲーム内で他プレイヤーのQRコードを読み取るためにカメラを使用します。",
+        NSLocationWhenInUseUsageDescription:
+          "現在地を取得してプレイヤー同士の位置関係を表示するために位置情報を使用します。",
+      },
     },
     android: {
       config: {
@@ -41,12 +47,6 @@ export default {
       },
       package: "com.aonot.devicefield",
       googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
-    },
-    infoPlist: {
-      NSCameraUsageDescription:
-        "ゲーム内で他プレイヤーのQRコードを読み取るためにカメラを使用します。",
-      NSLocationWhenInUseUsageDescription:
-        "現在地を取得してプレイヤー同士の位置関係を表示するために位置情報を使用します。",
     },
     web: {
       bundler: "metro",
