@@ -10,7 +10,8 @@
     "web": "expo start --web",
     "test": "jest --watchAll",
     "lint": "expo lint",
-    "fmt": "prettier --write '{app,components,utils,models,stores}/**/*.{tsx,ts}'"
+    "fmt": "prettier --write '{app,components,utils,models,stores}/**/*.{tsx,ts}'",
+    "jest": "npx jest --coverage"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.744.0",

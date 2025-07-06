@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">45.65% </span>
+                <span class="strong">50% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>21/46</span>
+                <span class='fraction'>23/46</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">20% </span>
+                <span class="strong">40% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>1/5</span>
+                <span class='fraction'>2/5</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">26.47% </span>
+                <span class="strong">32.35% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>9/34</span>
+                <span class='fraction'>11/34</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">45.65% </span>
+                <span class="strong">50% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>21/46</span>
+                <span class='fraction'>23/46</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line medium'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -249,7 +249,9 @@
 <a name='L184'></a><a href='#L184'>184</a>
 <a name='L185'></a><a href='#L185'>185</a>
 <a name='L186'></a><a href='#L186'>186</a>
-<a name='L187'></a><a href='#L187'>187</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L187'></a><a href='#L187'>187</a>
+<a name='L188'></a><a href='#L188'>188</a>
+<a name='L189'></a><a href='#L189'>189</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -282,20 +284,22 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -327,11 +331,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -436,7 +440,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { makeAutoObservable, toJS } from "mobx";
-import { DynamoTagGame } from "@/interfaces/api";
+import { DynamoTagGame, UserLists } from "@/interfaces/api";
 import dayjs, { Dayjs } from "dayjs";
 import UserModel from "./UserModel";
 &nbsp;
@@ -445,6 +449,8 @@ export type LocalTagGameModelTypes = {
   isSetValidAreaDone: boolean;
   isSetPrisonAreaDone: boolean;
 };
+&nbsp;
+export type InitialParamsType = Omit&lt;DynamoTagGame, keyof UserLists&gt;;
 &nbsp;
 export default class TagGameModel {
   private id: DynamoTagGame["id"];
@@ -467,7 +473,7 @@ export default class TagGameModel {
     gameMasterId,
     gameTimeLimit,
     isGameStarted,
-  }: DynamoTagGame) {
+  }: InitialParamsType) {
     this.id = id;
     this.liveUsers = [];
     this.rejectUsers = [];
@@ -475,7 +481,7 @@ export default class TagGameModel {
     this.validAreas = validAreas;
     this.prisonArea = prisonArea;
     this.gameMasterId = gameMasterId;
-    this.gameTimeLimit = gameTimeLimit ? <span class="branch-0 cbranch-no" title="branch not covered" >dayjs(gameTimeLimit) </span>: null;
+    this.gameTimeLimit = gameTimeLimit ? dayjs(gameTimeLimit) : null;
     this.isGameStarted = isGameStarted;
 &nbsp;
     this.isSetValidAreaDone = false;
@@ -512,12 +518,12 @@ export default class TagGameModel {
   }
 &nbsp;
   // validAreas
-<span class="fstat-no" title="function not covered" >  ge</span>tValidAreas(): DynamoTagGame["validAreas"] {
-<span class="cstat-no" title="statement not covered" >    return toJS(this.validAreas);</span>
+  getValidAreas(): DynamoTagGame["validAreas"] {
+    return toJS(this.validAreas);
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  se</span>tValidAreas(validAreas: DynamoTagGame["validAreas"]): void {
-<span class="cstat-no" title="statement not covered" >    this.validAreas = validAreas;</span>
+  setValidAreas(validAreas: DynamoTagGame["validAreas"]): void {
+    this.validAreas = validAreas;
   }
 &nbsp;
   // prisonArea
@@ -628,7 +634,7 @@ export default class TagGameModel {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-06-29T04:33:13.703Z
+                at 2025-07-06T05:54:05.888Z
             </div>
         <script src="../prettify.js"></script>
         <script>
