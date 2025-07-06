@@ -1,5 +1,5 @@
 import { makeAutoObservable, toJS } from "mobx";
-import { DynamoTagGame } from "@/interfaces/api";
+import { DynamoTagGame, UserLists } from "@/interfaces/api";
 import dayjs, { Dayjs } from "dayjs";
 import UserModel from "./UserModel";
 
@@ -8,6 +8,8 @@ export type LocalTagGameModelTypes = {
   isSetValidAreaDone: boolean;
   isSetPrisonAreaDone: boolean;
 };
+
+export type InitialParamsType = Omit<DynamoTagGame, keyof UserLists>;
 
 export default class TagGameModel {
   private id: DynamoTagGame["id"];
@@ -30,7 +32,7 @@ export default class TagGameModel {
     gameMasterId,
     gameTimeLimit,
     isGameStarted,
-  }: DynamoTagGame) {
+  }: InitialParamsType) {
     this.id = id;
     this.liveUsers = [];
     this.rejectUsers = [];
