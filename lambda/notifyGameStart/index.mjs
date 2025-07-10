@@ -66,35 +66,36 @@ export const handler = async (event) => {
 
     const response = await docClient.send(command);
     const devices = response.Responses?.devices;
+    const iosExpoPushTokens = devices.map((deviceRecord) => {
+      if (deviceRecord.deviceType === "ios") {
+        return deviceRecord.deviceId;
+      }
+    });
     const androidDeviceIds = devices.map((deviceRecord) => {
       if (deviceRecord.deviceType === "android") {
         return deviceRecord.deviceId;
       }
     });
 
-    // TODO: iOSの通知が実装できていないので、実装する
-    // const iOSDeviceIds = devices.map(deviceRecord => {
-    //   if(deviceRecord.deviceType === "iOS") {
-    //     return deviceRecord.deviceId
-    //   }
-    // })
-    // console.log("iOSDeviceIds", iOSDeviceIds)
-
     const accessToken = await getAccessToken();
     const fcmUrl = `https://fcm.googleapis.com/v1/projects/${firebaseConfig.project_id}/messages:send`;
 
     let androidMessages = [];
+    let iosMessages = [];
     const isGameStarted = event.Records[0].dynamodb.NewImage.isGameStarted.BOOL;
     androidMessages = androidDeviceIds.map((token) => {
       if (isGameStarted) {
+        const pushMessageTitle = "ゲームスタート！";
+        const pushMessageBody = "ゲームが開始しました！";
+        const notificationType = "gameStart";
         return {
           message: {
             token,
             notification: {
-              title: "ゲームスタート！",
-              body: "ゲームが開始しました！",
+              title: pushMessageTitle,
+              body: pushMessageBody,
             },
-            data: { notification_type: "gameStart" },
+            data: { notification_type: notificationType },
             android: {
               priority: "high",
               notification: {
@@ -105,14 +106,17 @@ export const handler = async (event) => {
           },
         };
       } else {
+        const pushMessageTitle = "ゲーム終了！";
+        const pushMessageBody = "ゲームが終了しました！";
+        const notificationType = "gameEnd";
         return {
           message: {
             token,
             notification: {
-              title: "ゲーム終了！",
-              body: "ゲームが終了しました！",
+              title: pushMessageTitle,
+              body: pushMessageBody,
             },
-            data: { notification_type: "gameEnd" },
+            data: { notification_type: notificationType },
             android: {
               priority: "high",
               notification: {
@@ -125,8 +129,39 @@ export const handler = async (event) => {
       }
     });
 
-    await Promise.all(
-      androidMessages.map((message) =>
+    const getIosMessage = (
+      token,
+      pushMessageTitle,
+      pushMessageBody,
+      notification_type,
+    ) => ({
+      to: token,
+      sound: "default",
+      title: pushMessageTitle,
+      body: pushMessageBody,
+      data: { notification_type: notification_type },
+    });
+
+    iosMessages = iosExpoPushTokens.map((token) => {
+      if (isGameStarted) {
+        return getIosMessage(
+          token,
+          "ゲームスタート！",
+          "ゲームが開始しました！",
+          "gameStart",
+        );
+      } else {
+        return getIosMessage(
+          token,
+          "ゲーム終了！",
+          "ゲームが終了しました！",
+          "gameEnd",
+        );
+      }
+    });
+
+    await Promise.all([
+      ...androidMessages.map((message) =>
         axios.post(fcmUrl, message, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -134,7 +169,17 @@ export const handler = async (event) => {
           },
         }),
       ),
-    );
+      ...iosMessages.map((message) => {
+        return fetch("https://exp.host/--/api/v2/push/send", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(message),
+        });
+      }),
+    ]);
 
     return {
       statusCode: 200,

@@ -74,34 +74,49 @@ export const handler = async (event) => {
 
     const response = await docClient.send(command);
     const devices = response.Responses?.devices;
+    const iosExpoPushTokens = devices.map((deviceRecord) => {
+      if (deviceRecord.deviceType === "ios") {
+        return deviceRecord.deviceId;
+      }
+    });
     const androidDeviceIds = devices.map((deviceRecord) => {
       if (deviceRecord.deviceType === "android") {
         return deviceRecord.deviceId;
       }
     });
 
-    // TODO: iOSの通知が実装できていないので、実装する
-    // const iOSDeviceIds = devices.map(deviceRecord => {
-    //   if(deviceRecord.deviceType === "iOS") {
-    //     return deviceRecord.deviceId
-    //   }
-    // })
-    // console.log("iOSDeviceIds", iOSDeviceIds)
-
     const accessToken = await getAccessToken();
     const fcmUrl = `https://fcm.googleapis.com/v1/projects/${firebaseConfig.project_id}/messages:send`;
 
     let androidMessages = [];
+    let iosMessages = [];
+
+    const getIosMessage = (
+      token,
+      pushMessageTitle,
+      pushMessageBody,
+      notification_type,
+    ) => ({
+      to: token,
+      sound: "default",
+      title: pushMessageTitle,
+      body: pushMessageBody,
+      data: { notification_type: notification_type },
+    });
+
     if (oldUsersLength < newUsersLength) {
+      const pushMessageTitle = "新規ユーザー参加通知";
+      const pushMessageBody = "新しいユーザーがゲームに参加しました";
+      const notificationType = "joinUser";
       androidMessages = androidDeviceIds.map((token) => {
         return {
           message: {
             token,
             notification: {
-              title: "新規ユーザー参加通知",
-              body: "新しいユーザーがゲームに参加しました",
+              title: pushMessageTitle,
+              body: pushMessageBody,
             },
-            data: { notification_type: "joinUser" },
+            data: { notification_type: notificationType },
             android: {
               priority: "high",
               notification: {
@@ -112,16 +127,28 @@ export const handler = async (event) => {
           },
         };
       });
+      iosMessages = iosExpoPushTokens.map((token) =>
+        getIosMessage(
+          token,
+          pushMessageTitle,
+          pushMessageBody,
+          notificationType,
+        ),
+      );
     } else if (oldUsersLength > newUsersLength) {
+      const pushMessageTitle = "ユーザー追放通知";
+      const pushMessageBody = "ユーザーがゲームから追放されました";
+      const notificationType = "kickOutUsers";
+
       androidMessages = androidDeviceIds.map((token) => {
         return {
           message: {
             token,
             notification: {
-              title: "ユーザー追放通知",
-              body: "ユーザーがゲームから追放されました",
+              title: pushMessageTitle,
+              body: pushMessageBody,
             },
-            data: { notification_type: "kickOutUsers" },
+            data: { notification_type: notificationType },
             android: {
               priority: "high",
               notification: {
@@ -132,10 +159,18 @@ export const handler = async (event) => {
           },
         };
       });
+      iosMessages = iosExpoPushTokens.map((token) =>
+        getIosMessage(
+          token,
+          pushMessageTitle,
+          pushMessageBody,
+          notificationType,
+        ),
+      );
     }
 
-    await Promise.all(
-      androidMessages.map((message) =>
+    await Promise.all([
+      ...androidMessages.map((message) =>
         axios.post(fcmUrl, message, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -143,7 +178,17 @@ export const handler = async (event) => {
           },
         }),
       ),
-    );
+      ...iosMessages.map((message) => {
+        return fetch("https://exp.host/--/api/v2/push/send", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(message),
+        });
+      }),
+    ]);
 
     return {
       statusCode: 200,

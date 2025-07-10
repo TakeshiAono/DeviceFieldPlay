@@ -56,24 +56,22 @@ export const handler = async (event) => {
 
     const response = await docClient.send(command);
     const devices = response.Responses?.devices;
+    const iosExpoPushTokens = devices.map((deviceRecord) => {
+      if (deviceRecord.deviceType === "ios") {
+        return deviceRecord.deviceId;
+      }
+    });
     const androidDeviceIds = devices.map((deviceRecord) => {
       if (deviceRecord.deviceType === "android") {
         return deviceRecord.deviceId;
       }
     });
 
-    // TODO: iOSの通知が実装できていないので、実装する
-    // const iOSDeviceIds = devices.map(deviceRecord => {
-    //   if(deviceRecord.deviceType === "iOS") {
-    //     return deviceRecord.deviceId
-    //   }
-    // })
-    // console.log("iOSDeviceIds", iOSDeviceIds)
-
     const accessToken = await getAccessToken();
     const fcmUrl = `https://fcm.googleapis.com/v1/projects/${firebaseConfig.project_id}/messages:send`;
 
     let androidMessages = [];
+    let iosMessages = [];
     const prevLiveUsersCount =
       event.Records[0].dynamodb.OldImage?.liveUsers?.L.length;
     const newLiveUsersCount =
@@ -86,17 +84,33 @@ export const handler = async (event) => {
       event.Records[0].dynamodb.OldImage?.policeUsers?.L.length;
     const newPoliceUsersCount =
       event.Records[0].dynamodb.NewImage?.policeUsers?.L.length;
-    // liveUserの増減をみて復活通知、逮捕通知をするか判断してFCMへ送信している。
+
+    const getIosMessage = (
+      token,
+      pushMessageTitle,
+      pushMessageBody,
+      notification_type,
+    ) => ({
+      to: token,
+      sound: "default",
+      title: pushMessageTitle,
+      body: pushMessageBody,
+      data: { notification_type: notification_type },
+    });
+
     if (prevLiveUsersCount < newLiveUsersCount) {
+      const pushMessageTitle = "ユーザー変更通知";
+      const pushMessageBody = "ユーザーが復活しました";
+      const notificationType = "reviveUser";
       androidMessages = androidDeviceIds.map((token) => {
         return {
           message: {
             token,
             notification: {
-              title: "ユーザー変更通知",
-              body: "ユーザーが復活しました",
+              title: pushMessageTitle,
+              body: pushMessageBody,
             },
-            data: { notification_type: "reviveUser" },
+            data: { notification_type: notificationType },
             android: {
               priority: "high",
               notification: {
@@ -107,16 +121,28 @@ export const handler = async (event) => {
           },
         };
       });
+      iosMessages = iosExpoPushTokens.map((token) =>
+        getIosMessage(
+          token,
+          pushMessageTitle,
+          pushMessageBody,
+          notificationType,
+        ),
+      );
     } else if (prevRejectUsersCount < newRejectUsersCount) {
+      const pushMessageTitle = "ユーザー変更通知";
+      const pushMessageBody = "ユーザーが逮捕されました";
+      const notificationType = "rejectUser";
+
       androidMessages = androidDeviceIds.map((token) => {
         return {
           message: {
             token,
             notification: {
-              title: "ユーザー変更通知",
-              body: "ユーザーが逮捕されました",
+              title: pushMessageTitle,
+              body: pushMessageBody,
             },
-            data: { notification_type: "rejectUser" },
+            data: { notification_type: notificationType },
             android: {
               priority: "high",
               notification: {
@@ -127,16 +153,28 @@ export const handler = async (event) => {
           },
         };
       });
+      iosMessages = iosExpoPushTokens.map((token) =>
+        getIosMessage(
+          token,
+          pushMessageTitle,
+          pushMessageBody,
+          notificationType,
+        ),
+      );
     } else if (prevPoliceUsersCount < newPoliceUsersCount) {
+      const pushMessageTitle = "ユーザー変更通知";
+      const pushMessageBody = "ユーザーが警察になりました";
+      const notificationType = "policeUser";
+
       androidMessages = androidDeviceIds.map((token) => {
         return {
           message: {
             token,
             notification: {
-              title: "ユーザー変更通知",
-              body: "ユーザーが警察になりました",
+              title: pushMessageTitle,
+              body: pushMessageBody,
             },
-            data: { notification_type: "policeUser" },
+            data: { notification_type: notificationType },
             android: {
               priority: "high",
               notification: {
@@ -147,10 +185,18 @@ export const handler = async (event) => {
           },
         };
       });
+      iosMessages = iosExpoPushTokens.map((token) =>
+        getIosMessage(
+          token,
+          pushMessageTitle,
+          pushMessageBody,
+          notificationType,
+        ),
+      );
     }
 
-    await Promise.all(
-      androidMessages.map((message) =>
+    await Promise.all([
+      ...androidMessages.map((message) =>
         axios.post(fcmUrl, message, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -158,7 +204,17 @@ export const handler = async (event) => {
           },
         }),
       ),
-    );
+      ...iosMessages.map((message) => {
+        return fetch("https://exp.host/--/api/v2/push/send", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(message),
+        });
+      }),
+    ]);
 
     return {
       statusCode: 200,

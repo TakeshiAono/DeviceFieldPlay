@@ -64,19 +64,19 @@ export const handler = async (event) => {
 
     const response = await docClient.send(command);
     const devices = response.Responses?.devices;
+    const iosExpoPushTokens = devices.map((deviceRecord) => {
+      if (deviceRecord.deviceType === "ios") {
+        return deviceRecord.deviceId;
+      }
+    });
     const androidDeviceIds = devices.map((deviceRecord) => {
       if (deviceRecord.deviceType === "android") {
         return deviceRecord.deviceId;
       }
     });
 
-    // TODO: iOSの通知が実装できていないので、実装する
-    // const iOSDeviceIds = devices.map(deviceRecord => {
-    //   if(deviceRecord.deviceType === "iOS") {
-    //     return deviceRecord.deviceId
-    //   }
-    // })
-    // console.log("iOSDeviceIds", iOSDeviceIds)
+    const pushMessageTitle = "監獄エリア変更通知";
+    const pushMessageBody = "監獄エリアが変更されました";
 
     const accessToken = await getAccessToken();
     const fcmUrl = `https://fcm.googleapis.com/v1/projects/${firebaseConfig.project_id}/messages:send`;
@@ -85,8 +85,8 @@ export const handler = async (event) => {
         message: {
           token,
           notification: {
-            title: "監獄エリア変更通知",
-            body: "監獄エリアが変更されました",
+            title: pushMessageTitle,
+            body: pushMessageBody,
           },
           data: { notification_type: "changePrisonArea" },
           android: {
@@ -101,8 +101,16 @@ export const handler = async (event) => {
       };
     });
 
-    await Promise.all(
-      androidMessages.map((message) => {
+    const getIosMessage = (token) => ({
+      to: token,
+      sound: "default",
+      title: pushMessageTitle,
+      body: pushMessageBody,
+      data: { notification_type: "changeValidArea" },
+    });
+
+    await Promise.all([
+      ...androidMessages.map((message) => {
         return axios.post(fcmUrl, message, {
           headers: {
             Authorization: `Bearer ${accessToken}`, // ✅ OAuth 2.0 アクセストークンを使用
@@ -110,7 +118,17 @@ export const handler = async (event) => {
           },
         });
       }),
-    );
+      ...iosExpoPushTokens.map((token) => {
+        return fetch("https://exp.host/--/api/v2/push/send", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(getIosMessage(token)),
+        });
+      }),
+    ]);
 
     return {
       statusCode: 200,

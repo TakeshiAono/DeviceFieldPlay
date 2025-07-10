@@ -56,31 +56,31 @@ export const handler = async (event) => {
 
     const response = await docClient.send(command);
     const devices = response.Responses?.devices;
+    const iosExpoPushTokens = devices.map((deviceRecord) => {
+      if (deviceRecord.deviceType === "ios") {
+        return deviceRecord.deviceId;
+      }
+    });
     const androidDeviceIds = devices.map((deviceRecord) => {
       if (deviceRecord.deviceType === "android") {
         return deviceRecord.deviceId;
       }
     });
 
-    // TODO: iOSの通知が実装できていないので、実装する
-    // const iOSDeviceIds = devices.map(deviceRecord => {
-    //   if(deviceRecord.deviceType === "iOS") {
-    //     return deviceRecord.deviceId
-    //   }
-    // })
-    // console.log("iOSDeviceIds", iOSDeviceIds)
-
     const accessToken = await getAccessToken();
     const fcmUrl = `https://fcm.googleapis.com/v1/projects/${firebaseConfig.project_id}/messages:send`;
 
+    const pushMessageTitle = "ゲーム終了";
+    const pushMessageBody = "ゲーム終了です。";
     let androidMessages = [];
+    let iosMessages = [];
     androidMessages = androidDeviceIds.map((token) => {
       return {
         message: {
           token,
           notification: {
-            title: "ゲーム終了",
-            body: "ゲーム終了です。",
+            title: pushMessageTitle,
+            body: pushMessageBody,
           },
           data: { notification_type: "gameEnd" },
           android: {
@@ -94,8 +94,24 @@ export const handler = async (event) => {
       };
     });
 
-    await Promise.all(
-      androidMessages.map((message) =>
+    const getIosMessage = (
+      token,
+      pushMessageTitle,
+      pushMessageBody,
+      notification_type,
+    ) => ({
+      to: token,
+      sound: "default",
+      title: pushMessageTitle,
+      body: pushMessageBody,
+      data: { notification_type: notification_type },
+    });
+    iosMessages = iosExpoPushTokens.map((token) =>
+      getIosMessage(token, pushMessageTitle, pushMessageBody, "gameEnd"),
+    );
+
+    await Promise.all([
+      ...androidMessages.map((message) =>
         axios.post(fcmUrl, message, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -103,7 +119,17 @@ export const handler = async (event) => {
           },
         }),
       ),
-    );
+      ...iosMessages.map((message) => {
+        return fetch("https://exp.host/--/api/v2/push/send", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(message),
+        });
+      }),
+    ]);
 
     return {
       statusCode: 200,
