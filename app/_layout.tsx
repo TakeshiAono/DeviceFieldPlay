@@ -12,11 +12,17 @@ import { Provider } from "mobx-react";
 import ReactNativeModal from "react-native-modal";
 import { Button, Platform, Text, TextInput, View } from "react-native";
 import Toast from "react-native-toast-message";
-import * as Notifications from "expo-notifications";
 import { CheckBox } from "@rneui/themed";
 import * as Crypto from "expo-crypto";
 import "@/i18n";
 import i18next from "i18next";
+import {
+  AndroidImportance,
+  getDevicePushTokenAsync,
+  getExpoPushTokenAsync,
+  requestPermissionsAsync,
+  setNotificationChannelAsync,
+} from "expo-notifications";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import UserStore from "@/stores/UserStore";
@@ -51,12 +57,12 @@ const RootLayout = observer(() => {
 
     if (Platform.OS === "android") {
       // TODO: iosと同じようにgetExpoPushTokenAsyncでpush通知を送るように変更したい
-      Notifications.getDevicePushTokenAsync().then(({ data }) => {
+      getDevicePushTokenAsync().then(({ data }) => {
         console.log("deviceId:", data);
         stores._userStore.getCurrentUser().setDeviceId(data);
       });
     } else if (Platform.OS === "ios") {
-      Notifications.getExpoPushTokenAsync().then(({ data }) => {
+      getExpoPushTokenAsync().then(({ data }) => {
         console.log("deviceId:", data);
         stores._userStore.getCurrentUser().setDeviceId(data);
       });
@@ -66,14 +72,14 @@ const RootLayout = observer(() => {
 
   useEffect(() => {
     async function registerForPushNotificationsAsync() {
-      const { status } = await Notifications.requestPermissionsAsync();
+      const { status } = await requestPermissionsAsync();
       if (status !== "granted") {
         return;
       }
 
-      await Notifications.setNotificationChannelAsync("default", {
+      await setNotificationChannelAsync("default", {
         name: "default",
-        importance: Notifications.AndroidImportance.MAX,
+        importance: AndroidImportance.MAX,
         vibrationPattern: [0, 250, 250, 250],
         lightColor: "#FF231F7C",
       });

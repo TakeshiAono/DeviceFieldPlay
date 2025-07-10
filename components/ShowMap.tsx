@@ -5,7 +5,6 @@ import { booleanPointInPolygon, point, polygon } from "@turf/turf";
 import "react-native-get-random-values";
 import _ from "lodash";
 import { inject, observer } from "mobx-react";
-import * as Notifications from "expo-notifications";
 import { CopilotStep } from "react-native-copilot";
 import * as Location from "expo-location";
 
@@ -45,6 +44,10 @@ import { Text } from "react-native";
 import { Colors, getPlayerRoleColor } from "@/constants/Colors";
 import useCopilotHook from "@/hooks/useCopilotHook";
 import { router } from "expo-router";
+import {
+  addNotificationReceivedListener,
+  setNotificationHandler,
+} from "expo-notifications";
 
 export type Props = {
   mapVisible?: boolean;
@@ -95,7 +98,7 @@ function ShowMap({
     if (_.isEmpty(gameId)) return;
 
     if (Platform.OS === "ios") {
-      Notifications.setNotificationHandler({
+      setNotificationHandler({
         handleNotification: async (response) => {
           switch (response.request.content.data.notification_type) {
             case "changePrisonArea":
@@ -144,8 +147,8 @@ function ShowMap({
 
       return;
     } else {
-      const joinUserNotificationListener =
-        Notifications.addNotificationReceivedListener((event) => {
+      const joinUserNotificationListener = addNotificationReceivedListener(
+        (event) => {
           if (
             tagGameStore.getShouldShowGameExplanation() &&
             firstNotification.current
@@ -164,59 +167,67 @@ function ShowMap({
             );
           }
           joinUserNotificationHandler(event, gameId, tagGameStore);
-        });
+        },
+      );
 
-      const kickOutUsersNotificationListener =
-        Notifications.addNotificationReceivedListener((event) => {
+      const kickOutUsersNotificationListener = addNotificationReceivedListener(
+        (event) => {
           kickOutUsersNotificationHandler(
             event,
             gameId,
             tagGameStore,
             userStore.getCurrentUser().getId(),
           );
-        });
+        },
+      );
 
       // ゲーム有効エリア変更時の通知を受け取って自分の持っているエリア情報を更新する
       const changeValidAreaNotificationListener =
-        Notifications.addNotificationReceivedListener((event) => {
+        addNotificationReceivedListener((event) => {
           validAreaNotificationHandler(event, gameId, tagGameStore);
         });
 
       // 監獄エリア変更時の通知を受け取って自分の持っているエリア情報を更新する
       const changePrisonAreaNotificationListener =
-        Notifications.addNotificationReceivedListener((event) => {
+        addNotificationReceivedListener((event) => {
           prisonAreaNotificationHandler(event, gameId, tagGameStore);
         });
 
-      const rejectUserNotificationListener =
-        Notifications.addNotificationReceivedListener((event) => {
+      const rejectUserNotificationListener = addNotificationReceivedListener(
+        (event) => {
           rejectUserNotificationHandler(event, gameId, tagGameStore);
-        });
+        },
+      );
 
-      const reviveUserNotificationListener =
-        Notifications.addNotificationReceivedListener((event) => {
+      const reviveUserNotificationListener = addNotificationReceivedListener(
+        (event) => {
           liveUserNotificationHandler(event, gameId, tagGameStore);
-        });
+        },
+      );
 
-      const policeUserNotificationListener =
-        Notifications.addNotificationReceivedListener((event) => {
+      const policeUserNotificationListener = addNotificationReceivedListener(
+        (event) => {
           policeUserNotificationHandler(event, gameId, tagGameStore);
-        });
+        },
+      );
 
-      const gameStartNotificationListener =
-        Notifications.addNotificationReceivedListener((event) => {
+      const gameStartNotificationListener = addNotificationReceivedListener(
+        (event) => {
           gameStartNotificationHandler(event, gameId, tagGameStore);
-        });
+        },
+      );
 
-      const gameTimeUpNotificationListener =
-        Notifications.addNotificationReceivedListener((event) => {
+      const gameTimeUpNotificationListener = addNotificationReceivedListener(
+        (event) => {
           gameTimeUpNotificationHandler(event, tagGameStore);
-        });
+        },
+      );
 
-      const gameStopNotificationListener =
-        Notifications.addNotificationReceivedListener((event) => {
+      const gameStopNotificationListener = addNotificationReceivedListener(
+        (event) => {
           gameStopNotificationHandler(event, gameId, tagGameStore);
-        });
+        },
+      );
 
       // gameIdが変わるたびに別のゲームのエリアで更新されてしまわないよう、イベントリスナーを削除し新規のイベントリスナーを生成する。
       return () => {

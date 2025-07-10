@@ -1,14 +1,14 @@
 import TagGameStore from "@/stores/TagGameStore";
-import * as Notifications from "expo-notifications";
 import Toast from "react-native-toast-message";
 import dayjs from "dayjs";
-import { Alert, Platform } from "react-native";
+import { Alert } from "react-native";
+import { Notification } from "expo-notifications";
 
 import { fetchCurrentGameUsersInfo, fetchTagGames } from "./APIs";
 import { DynamoTagGame, DynamoUser } from "@/interfaces/api";
 
 export const prisonAreaNotificationHandler = async (
-  notification: Notifications.Notification,
+  notification: Notification,
   gameId: string,
   tagGameStore: TagGameStore,
 ) => {
@@ -40,7 +40,7 @@ export const updateStoreOnChangePrisonArea = async (
 };
 
 export const validAreaNotificationHandler = async (
-  notification: Notifications.Notification,
+  notification: Notification,
   gameId: string,
   tagGameStore: TagGameStore,
 ) => {
@@ -70,7 +70,7 @@ export const updateStoreOnChangeValidArea = async (
 };
 
 export const joinUserNotificationHandler = async (
-  notification: Notifications.Notification,
+  notification: Notification,
   gameId: string,
   tagGameStore: TagGameStore,
 ) => {
@@ -101,7 +101,7 @@ export const updateStoreOnJoinUser = async (
 };
 
 export const kickOutUsersNotificationHandler = async (
-  notification: Notifications.Notification,
+  notification: Notification,
   gameId: string,
   tagGameStore: TagGameStore,
   currentUserId: string,
@@ -155,7 +155,7 @@ export const updateStoreOnKickOutUsers = async (
 };
 
 export const gameStartNotificationHandler = async (
-  notification: Notifications.Notification,
+  notification: Notification,
   gameId: string,
   tagGameStore: TagGameStore,
 ) => {
@@ -186,7 +186,7 @@ export const updateStoreOnGameStart = async (
 };
 
 export const gameTimeUpNotificationHandler = async (
-  notification: Notifications.Notification,
+  notification: Notification,
   tagGameStore: TagGameStore,
 ) => {
   if (notification.request.content.data.notification_type !== "gameEnd") return;
@@ -210,7 +210,7 @@ export const updateStoreOnGameEnd = async (tagGameStore: TagGameStore) => {
 };
 
 export const gameStopNotificationHandler = async (
-  notification: Notifications.Notification,
+  notification: Notification,
   gameId: string,
   tagGameStore: TagGameStore,
 ) => {
@@ -240,7 +240,7 @@ export const updateStoreOnGameStop = async (
 };
 
 export const rejectUserNotificationHandler = async (
-  notification: Notifications.Notification,
+  notification: Notification,
   gameId: string,
   tagGameStore: TagGameStore,
 ) => {
@@ -271,7 +271,7 @@ export const updateStoreOnRejectUser = async (
 };
 
 export const liveUserNotificationHandler = async (
-  notification: Notifications.Notification,
+  notification: Notification,
   gameId: string,
   tagGameStore: TagGameStore,
 ) => {
@@ -302,7 +302,7 @@ export const updateStoreOnReviveUser = async (
 };
 
 export const policeUserNotificationHandler = async (
-  notification: Notifications.Notification,
+  notification: Notification,
   gameId: string,
   tagGameStore: TagGameStore,
 ) => {

@@ -16,15 +16,19 @@ const AWS_ACCESS_KEY_ID = Constants.expoConfig?.extra?.awsAccessKeyId;
 const AWS_SECRET_ACCESS_KEY = Constants.expoConfig?.extra?.awsSecretAccessKey;
 const AWS_REGION = Constants.expoConfig?.extra?.awsRegion;
 
-const client = new DynamoDBClient({
-  credentials: {
-    accessKeyId: AWS_ACCESS_KEY_ID,
-    secretAccessKey: AWS_SECRET_ACCESS_KEY,
-  },
-  region: AWS_REGION,
-});
+export const generateClient = () => {
+  return new DynamoDBClient({
+    credentials: {
+      accessKeyId: AWS_ACCESS_KEY_ID,
+      secretAccessKey: AWS_SECRET_ACCESS_KEY,
+    },
+    region: AWS_REGION,
+  });
+};
 
-const docClient = DynamoDBDocumentClient.from(client);
+export const generateDocClient = () => {
+  return DynamoDBDocumentClient.from(generateClient());
+};
 
 export const fetchTagGames = async <T extends DynamoTagGame>(
   id: T["id"],
@@ -36,7 +40,7 @@ export const fetchTagGames = async <T extends DynamoTagGame>(
         id: id,
       },
     });
-    const response = await docClient.send(command);
+    const response = await generateDocClient().send(command);
     console.log("fetchTagGames:", response);
     return response.Item as DynamoTagGame;
   } catch (error) {
@@ -54,7 +58,7 @@ export const putTagGames = async <T extends DynamoTagGame>(
       Item: item,
     });
 
-    const response = await docClient.send(command);
+    const response = await generateDocClient().send(command);
     console.log("putTagGames:", response);
     return item;
   } catch (error) {
@@ -73,7 +77,7 @@ export const joinUser = async <T extends DynamoTagGame>(
       Key: { id: gameId },
       ProjectionExpression: "liveUsers",
     });
-    const result = await docClient.send(getCommand);
+    const result = await generateDocClient().send(getCommand);
     const currentUsers = result.Item?.liveUsers ?? [];
 
     if (currentUsers.includes(userId)) {
@@ -92,7 +96,7 @@ export const joinUser = async <T extends DynamoTagGame>(
       ReturnValues: "UPDATED_NEW",
     });
 
-    const response = await docClient.send(updateCommand);
+    const response = await generateDocClient().send(updateCommand);
     return response.Attributes as Pick<T, "liveUsers">;
   } catch (error) {
     console.error("joinUser:", error);
@@ -112,7 +116,7 @@ export const fetchCurrentGameUsersInfo = async <T extends DynamoUser>(
       },
     });
 
-    const response = await docClient.send(command);
+    const response = await generateDocClient().send(command);
     console.log("fetchCurrentGameUsersInfo:", response);
 
     const items = response.Items?.map((item) => unmarshall(item) as T) ?? [];
@@ -138,7 +142,7 @@ export const putUser = async <T extends DynamoUser>(
       ReturnValues: "ALL_OLD",
     });
 
-    const response = await docClient.send(command);
+    const response = await generateDocClient().send(command);
     console.log("putUser:", response);
     return response.Attributes as T | undefined;
   } catch (error) {
@@ -159,7 +163,7 @@ export const rejectUser = async <T extends DynamoTagGame>(
       Key: { id: gameId },
       ProjectionExpression: "liveUsers",
     });
-    const currentData = await docClient.send(getCommand);
+    const currentData = await generateDocClient().send(getCommand);
     const liveUserList = currentData.Item?.liveUsers || [];
 
     const userIdIndex = liveUserList.indexOf(userId);
@@ -179,7 +183,7 @@ export const rejectUser = async <T extends DynamoTagGame>(
       ReturnValues: "UPDATED_NEW",
     });
 
-    const response = await docClient.send(command);
+    const response = await generateDocClient().send(command);
     console.log("rejectUsers:", response);
     return response.Attributes as Pick<T, "rejectUsers">;
   } catch (error) {
@@ -200,7 +204,7 @@ export const reviveUser = async <T extends DynamoTagGame>(
       Key: { id: gameId },
       ProjectionExpression: "rejectUsers",
     });
-    const currentData = await docClient.send(getCommand);
+    const currentData = await generateDocClient().send(getCommand);
     const rejectUserList = currentData.Item?.rejectUsers || [];
 
     const userIdIndex = rejectUserList.indexOf(userId);
@@ -219,7 +223,7 @@ export const reviveUser = async <T extends DynamoTagGame>(
       ReturnValues: "UPDATED_NEW",
     });
 
-    const response = await docClient.send(command);
+    const response = await generateDocClient().send(command);
     console.log("reviveUser:", response);
     return response.Attributes as Pick<T, "liveUsers">;
   } catch (error) {
@@ -242,7 +246,7 @@ export const putDevice = async <T extends DynamoDevice>(
       },
     });
 
-    const response = await docClient.send(command);
+    const response = await generateDocClient().send(command);
     console.log("putDevice:", response);
     return userId;
   } catch (error) {
@@ -266,7 +270,7 @@ export const removeUserFromGame = async <T extends DynamoTagGame>(
     Key: { id: gameId },
     ProjectionExpression: "liveUsers, rejectUsers, policeUsers",
   });
-  const result = await docClient.send(getCommand);
+  const result = await generateDocClient().send(getCommand);
   const liveUsers: string[] = result.Item?.liveUsers ?? [];
   const rejectUsers: string[] = result.Item?.rejectUsers ?? [];
   const policeUsers: string[] = result.Item?.policeUsers ?? [];
@@ -288,5 +292,5 @@ export const removeUserFromGame = async <T extends DynamoTagGame>(
       ":police": newPoliceUsers,
     },
   });
-  await docClient.send(updateCommand);
+  await generateDocClient().send(updateCommand);
 };
