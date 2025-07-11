@@ -6,7 +6,12 @@ import i18next from "i18next";
 
 import TagGameStore from "@/stores/TagGameStore";
 import UserStore from "@/stores/UserStore";
-import { fetchTagGames, joinUser, putTagGames, putUser } from "@/utils/APIs";
+import {
+  fetchTagGames,
+  joinUser,
+  putTagGames,
+  putUser,
+} from "@/utils/dynamoUtils";
 import { Button } from "@rneui/themed";
 import { useEffect, useRef, useState } from "react";
 import { CameraView } from "expo-camera";
@@ -15,7 +20,7 @@ import { CopilotStep } from "react-native-copilot";
 import { Colors } from "@/constants/Colors";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import useCopilotHook from "@/hooks/useCopilotHook";
-import { removeUserFromGame } from "@/utils/APIs";
+import { removeUserFromGame } from "@/utils/dynamoUtils";
 
 interface Props {
   _userStore?: UserStore;
