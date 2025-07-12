@@ -8,7 +8,7 @@ import {
   AbilityList,
   GetAbilityList,
   UpdateAbilityUsedParams,
-} from "@/interfaces/abilites";
+} from "@/interfaces/abilities";
 
 type interfaces = UpdateAbilityUsedParams & GetAbilityList;
 
