@@ -426,7 +426,10 @@ export default class TagGameStore implements interfaces {
   }
 
   @action
-  public updateAbilityUsedParams(targetAbilityName: string): void {
+  public updateAbilityUsedParams(
+    targetAbilityName: string,
+    changeTo: "toValid" | "toInvalid",
+  ): void {
     console.log("ダミーのため未実装");
     return;
   }

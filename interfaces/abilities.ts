@@ -1,9 +1,9 @@
 export interface AbilityMethod {
-  (args: unknown[]): void;
+  (args?: unknown[]): Promise<void> | void;
 }
 
 export interface ChangeToCanUsedRuleMethod {
-  (args: unknown[]): void;
+  (args?: unknown[]): Promise<void> | void;
 }
 
 export type AbilityObject = {
@@ -24,8 +24,13 @@ export type AbilityList = AbilityObject[];
  * AbilityScreen画面にてアビリティを実行した際の使用を想定
  */
 export interface UpdateAbilityUsedParams {
-  updateAbilityUsedParams(targetAbilityName: string): void;
+  updateAbilityUsedParams(
+    targetAbilityName: string,
+    changeTo: ChangeToType,
+  ): void;
 }
+
+export type ChangeToType = "toValid" | "toInvalid";
 
 /**
  * tagGameStoreでの定義
@@ -38,16 +43,6 @@ export interface GetAbilityList {
 }
 
 // TODO: これ以下は詳細設計で必要なインタフェースなので各ファイルに定義してもよさそう
-// /**
-//  * tagGameStoreでの定義
-//  * SettingScreenでの使用を想定
-//  *
-//  * 設定画面にてゲームマスターがゲーム中に使用できるアビリティを選択する際に使用する想定
-//  */
-// export interface UpdateAbilityIsSettingParams {
-//   (abilityObject: AbilityObject): void;
-// }
-
 // /**
 //  * SettingScreenでの定義と使用を想定
 //  *
