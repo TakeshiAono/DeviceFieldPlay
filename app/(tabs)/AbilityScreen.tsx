@@ -27,8 +27,7 @@ const AbilityScreen: React.FC<Props> = ({ _userStore, _tagGameStore }) => {
   const abilityList: AbilityList = tagGameStore.getAbilityList();
   const [policeAbilities, thiefAbilities] = _.partition(
     abilityList,
-    (abilityObject) =>
-      abilityObject.targetRole === RoleDisplayString.policeUser,
+    (abilityObject) => abilityObject.targetRole === "police",
   );
 
   const changeAbilityCanUsed: UpdateAbilityIsSettingParams = (
@@ -40,7 +39,7 @@ const AbilityScreen: React.FC<Props> = ({ _userStore, _tagGameStore }) => {
 
   const renderButtons = () => {
     const selectedAbilitiesByRole =
-      userStore.getPlayerRoleName(tagGameStore) === RoleDisplayString.policeUser
+      userStore.getPlayerRoleName(tagGameStore) === "police"
         ? policeAbilities
         : thiefAbilities;
     const settingAbilities = selectedAbilitiesByRole.filter(
