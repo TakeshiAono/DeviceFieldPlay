@@ -55,9 +55,6 @@ export default class TagGameStore implements interfaces {
   public initialize() {
     this.currentTagGame = new TagGameModel({
       id: "",
-      liveUsers: [],
-      rejectUsers: [],
-      policeUsers: [],
       validAreas: [],
       prisonArea: [],
       gameMasterId: "",
