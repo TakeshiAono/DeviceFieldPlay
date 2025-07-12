@@ -12,6 +12,7 @@ export type AbilityObject = {
   isSetting: boolean;
   canUsed: boolean; // trueの場合だけabilityが使用でき、falseの際は使用できない想定
   changeToCanUsedRuleMethod: ChangeToCanUsedRuleMethod;
+  targetRole: "thief" | "police";
 };
 
 export type AbilityList = AbilityObject[];
