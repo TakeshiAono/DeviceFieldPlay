@@ -13,6 +13,7 @@ const translationMap = {
   "Game Master": { ja: "ゲームマスター" },
   "MAP": { ja: "地図" },
   "Thief Status": { ja: "泥棒ステータス" },
+  "Ability": { ja: "アビリティ" },
   "Setting": { ja: "設定" },
   "Game Start": { ja: "ゲームスタート" },
   // TeamEditScreen translations
