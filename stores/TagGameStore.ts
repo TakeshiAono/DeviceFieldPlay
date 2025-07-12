@@ -4,8 +4,15 @@ import { booleanPointInPolygon, polygon } from "@turf/turf";
 import TagGameModel, { LocalTagGameModelTypes } from "@/models/TagGameModel";
 import UserModel from "@/models/UserModel";
 import { DynamoTagGame, DynamoUser } from "@/interfaces/api";
+import {
+  AbilityList,
+  GetAbilityList,
+  UpdateAbilityUsedParams,
+} from "@/interfaces/abilities";
 
-export default class TagGameStore {
+type interfaces = UpdateAbilityUsedParams & GetAbilityList;
+
+export default class TagGameStore implements interfaces {
   @observable.deep
   private currentTagGame!: TagGameModel;
 
@@ -36,6 +43,9 @@ export default class TagGameStore {
   @observable
   private explainedTeamEditScreen!: boolean;
 
+  @observable
+  private abilityList!: AbilityList;
+
   constructor() {
     makeObservable(this);
     this.initialize();
@@ -45,9 +55,6 @@ export default class TagGameStore {
   public initialize() {
     this.currentTagGame = new TagGameModel({
       id: "",
-      liveUsers: [],
-      rejectUsers: [],
-      policeUsers: [],
       validAreas: [],
       prisonArea: [],
       gameMasterId: "",
@@ -416,6 +423,21 @@ export default class TagGameStore {
   @action
   public setExplainedTeamEditScreen(value: boolean) {
     this.explainedTeamEditScreen = value;
+  }
+
+  @action
+  public updateAbilityUsedParams(
+    targetAbilityName: string,
+    changeTo: "toValid" | "toInvalid",
+  ): void {
+    console.log("ダミーのため未実装");
+    return;
+  }
+
+  @action
+  public getAbilityList(): AbilityList {
+    console.log("ダミーのため未実装");
+    return [];
   }
 
   public isUserInPrisonArea(userLocation: {
