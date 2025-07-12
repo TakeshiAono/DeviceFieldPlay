@@ -24,7 +24,7 @@ export type AbilityList = AbilityObject[];
  * AbilityScreen画面にてアビリティを実行した際の使用を想定
  */
 export interface UpdateAbilityUsedParams {
-  (abilityObject: AbilityObject): void;
+  updateAbilityUsedParams(targetAbilityName: string): void;
 }
 
 /**
@@ -34,7 +34,7 @@ export interface UpdateAbilityUsedParams {
  * AbilityScreen画面にてゲームユーザーがアビリティを実行する際の使用を想定
  */
 export interface GetAbilityList {
-  (): AbilityList;
+  getAbilityList(): AbilityList;
 }
 
 // TODO: これ以下は詳細設計で必要なインタフェースなので各ファイルに定義してもよさそう
