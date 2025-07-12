@@ -246,12 +246,20 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
               name="abilitySetting"
             >
               <CopilotTouchableOpacity
-                style={styles.button}
+                style={[
+                  styles.button,
+                  {
+                    backgroundColor: tagGameStore
+                      .getTagGame()
+                      .getGameTimeLimit()
+                      ? Colors.primary
+                      : Colors.warning,
+                  },
+                ]}
                 onPress={() => {
                   router.push("/AbilitySettingScreen");
                 }}
               >
-                <IconSymbol size={28} name="bolt.fill" color={"#333"} />
                 <Text>アビリティ設定</Text>
               </CopilotTouchableOpacity>
             </CopilotStep>

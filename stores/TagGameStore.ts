@@ -7,10 +7,13 @@ import { DynamoTagGame, DynamoUser } from "@/interfaces/api";
 import {
   AbilityList,
   GetAbilityList,
+  UpdateAbilityIsSettingParams,
   UpdateAbilityUsedParams,
 } from "@/interfaces/abilities";
 
-type interfaces = UpdateAbilityUsedParams & GetAbilityList;
+type interfaces = UpdateAbilityUsedParams &
+  GetAbilityList &
+  UpdateAbilityIsSettingParams;
 
 export default class TagGameStore implements interfaces {
   @observable.deep
@@ -435,8 +438,17 @@ export default class TagGameStore implements interfaces {
   }
 
   @action
+  public updateAbilityIsSettingParams(
+    targetAbilityName: string[],
+    changeTo: "toValid" | "toInvalid",
+  ): void {
+    console.log("updateAbilityIsSettingParams: ダミーのため未実装");
+    return;
+  }
+
+  @action
   public getAbilityList(): AbilityList {
-    console.log("ダミーのため未実装");
+    console.log("getAbilityList: ダミーのため未実装");
     return [];
   }
 
