@@ -448,7 +448,7 @@ export default class TagGameStore implements interfaces {
 
   @action
   public getAbilityList(): AbilityList {
-    console.log("ダミーのため未実装");
+    console.log("getAbilityList: ダミーのため未実装");
     return [];
   }
 
