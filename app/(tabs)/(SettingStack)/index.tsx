@@ -240,6 +240,21 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                 <Text>{i18next.t("Time Limit Settings")}</Text>
               </CopilotTouchableOpacity>
             </CopilotStep>
+            <CopilotStep
+              text={"アビリティ設定画面に遷移します。"}
+              order={10}
+              name="abilitySetting"
+            >
+              <CopilotTouchableOpacity
+                style={styles.button}
+                onPress={() => {
+                  router.push("/AbilitySettingScreen");
+                }}
+              >
+                <IconSymbol size={28} name="bolt.fill" color={"#333"} />
+                <Text>アビリティ設定</Text>
+              </CopilotTouchableOpacity>
+            </CopilotStep>
             {tagGameStore.getTagGame().getIsGameStarted() === true ? (
               <Button
                 title={i18next.t("Cancel Game")}

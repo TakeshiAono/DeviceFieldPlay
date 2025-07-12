@@ -44,7 +44,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="(stacks)"
+        name="(SettingStack)"
         options={{
           title: i18next.t("Setting"),
           tabBarIcon: ({ color }) => (
