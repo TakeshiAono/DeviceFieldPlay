@@ -170,9 +170,14 @@ const AbilitySettingScreen: React.FC<Props> = ({ _tagGameStore }) => {
           style={{
             height: 50,
             width: 150,
-            backgroundColor: Colors.primary,
+            backgroundColor: tagGameStore.getIsSetAbilityDone()
+              ? Colors.success
+              : Colors.error,
           }}
-          onPress={updateAbilityList}
+          onPress={() => {
+            updateAbilityList();
+            tagGameStore.setIsSetAbilityDone(true);
+          }}
         >
           <Text
             style={{

@@ -192,6 +192,17 @@ export default class TagGameStore implements interfaces {
   }
 
   @action
+  public setIsSetAbilityDone(
+    isSetAbilityDone: LocalTagGameModelTypes["isSetAbilityDone"],
+  ) {
+    this.currentTagGame.setIsSetAbilityDone(isSetAbilityDone);
+  }
+
+  public getIsSetAbilityDone() {
+    return this.currentTagGame.getIsSetAbilityDone();
+  }
+
+  @action
   public putPoliceUsers(policeUsers: UserModel[]) {
     this.currentTagGame.setPoliceUsers(policeUsers);
   }
