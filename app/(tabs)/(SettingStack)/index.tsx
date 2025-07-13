@@ -282,9 +282,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                   style={[
                     styles.button,
                     {
-                      backgroundColor: tagGameStore
-                        .getTagGame()
-                        .getGameTimeLimit()
+                      backgroundColor: canGameStart()
                         ? Colors.success
                         : Colors.inactive,
                     },
