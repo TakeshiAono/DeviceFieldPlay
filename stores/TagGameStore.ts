@@ -1,5 +1,6 @@
 import { action, computed, makeObservable, observable } from "mobx";
 import { booleanPointInPolygon, polygon } from "@turf/turf";
+import _ from "lodash";
 
 import TagGameModel, { LocalTagGameModelTypes } from "@/models/TagGameModel";
 import UserModel from "@/models/UserModel";
@@ -18,6 +19,9 @@ type interfaces = UpdateAbilityUsedParams &
 export default class TagGameStore implements interfaces {
   @observable.deep
   private currentTagGame!: TagGameModel;
+
+  @observable.deep
+  private abilityList!: AbilityList;
 
   @observable
   private isEditTeams!: boolean;
@@ -45,9 +49,6 @@ export default class TagGameStore implements interfaces {
 
   @observable
   private explainedTeamEditScreen!: boolean;
-
-  @observable
-  private abilityList!: AbilityList;
 
   constructor() {
     makeObservable(this);
@@ -201,6 +202,10 @@ export default class TagGameStore implements interfaces {
 
   public getPoliceUsers() {
     return this.currentTagGame.getPoliceUsers();
+  }
+
+  public getRejectUsers() {
+    return this.currentTagGame.getRejectUsers();
   }
 
   @action
@@ -430,26 +435,65 @@ export default class TagGameStore implements interfaces {
 
   @action
   public updateAbilityUsedParams(
-    targetAbilityName: string,
+    targetAbilityNames: string,
     changeTo: "toValid" | "toInvalid",
   ): void {
-    console.log("ダミーのため未実装");
+    const [targetAbilities, otherAbilities] = _.partition(
+      this.abilityList,
+      (ability) => targetAbilityNames.includes(ability.abilityName),
+    );
+    const updatedAbilities =
+      changeTo === "toValid"
+        ? targetAbilities.map((targetAbility) => ({
+            ...targetAbility,
+            canUsed: true,
+          }))
+        : targetAbilities.map((targetAbility) => ({
+            ...targetAbility,
+            canUsed: false,
+          }));
+
+    const joinedAbilities = [...otherAbilities, ...updatedAbilities];
+
+    this.abilityList = _.sortBy(
+      joinedAbilities,
+      (ability) => ability.abilityName,
+    );
     return;
   }
 
   @action
   public updateAbilityIsSettingParams(
-    targetAbilityName: string[],
+    targetAbilityNames: string[],
     changeTo: "toValid" | "toInvalid",
   ): void {
-    console.log("updateAbilityIsSettingParams: ダミーのため未実装");
+    const [targetAbilities, otherAbilities] = _.partition(
+      this.abilityList,
+      (ability) => targetAbilityNames.includes(ability.abilityName),
+    );
+    const updatedAbilities =
+      changeTo === "toValid"
+        ? targetAbilities.map((targetAbility) => ({
+            ...targetAbility,
+            isSetting: true,
+          }))
+        : targetAbilities.map((targetAbility) => ({
+            ...targetAbility,
+            isSetting: false,
+          }));
+
+    const joinedAbilities = [...otherAbilities, ...updatedAbilities];
+
+    this.abilityList = _.sortBy(
+      joinedAbilities,
+      (ability) => ability.abilityName,
+    );
     return;
   }
 
-  @action
-  public getAbilityList(): AbilityList {
-    console.log("getAbilityList: ダミーのため未実装");
-    return [];
+  @computed
+  public get getAbilityList() {
+    return this.abilityList;
   }
 
   public isUserInPrisonArea(userLocation: {

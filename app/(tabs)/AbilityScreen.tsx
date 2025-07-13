@@ -1,10 +1,5 @@
 import { Colors } from "@/constants/Colors";
-import {
-  AbilityList,
-  AbilityObject,
-  ChangeToType,
-  UpdateAbilityUsedParams,
-} from "@/interfaces/abilities";
+import { AbilityList, ChangeToType } from "@/interfaces/abilities";
 import TagGameStore from "@/stores/TagGameStore";
 import UserStore, { RoleDisplayString } from "@/stores/UserStore";
 import _ from "lodash";
@@ -24,7 +19,7 @@ export interface UpdateAbilityIsSettingParams {
 const AbilityScreen: React.FC<Props> = ({ _userStore, _tagGameStore }) => {
   const userStore = _userStore!;
   const tagGameStore = _tagGameStore!;
-  const abilityList: AbilityList = tagGameStore.getAbilityList();
+  const abilityList: AbilityList = tagGameStore.getAbilityList;
   const [policeAbilities, thiefAbilities] = _.partition(
     abilityList,
     (abilityObject) => abilityObject.targetRole === "police",
@@ -39,7 +34,7 @@ const AbilityScreen: React.FC<Props> = ({ _userStore, _tagGameStore }) => {
 
   const renderButtons = () => {
     const selectedAbilitiesByRole =
-      userStore.getPlayerRoleName(tagGameStore) === "police"
+      userStore.getPlayerRoleName(tagGameStore) === RoleDisplayString.policeUser
         ? policeAbilities
         : thiefAbilities;
     const settingAbilities = selectedAbilitiesByRole.filter(
@@ -55,6 +50,7 @@ const AbilityScreen: React.FC<Props> = ({ _userStore, _tagGameStore }) => {
           }
           disabled={!abilityObject.canUsed}
           onPress={async () => {
+            // ability()は戻り値がPromiseの場合とPromiseではない場合両方の可能性がある
             await abilityObject.ability();
             changeAbilityCanUsed(abilityObject.abilityName, "toInvalid");
           }}
