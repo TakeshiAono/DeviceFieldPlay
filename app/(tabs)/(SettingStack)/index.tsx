@@ -109,7 +109,8 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
       tagGameStore.getTagGame().getIsSetValidAreaDone() &&
       tagGameStore.getTagGame().getIsSetPrisonAreaDone() &&
       tagGameStore.getIsEditTeams() &&
-      !!tagGameStore.getTagGame().getGameTimeLimit()
+      !!tagGameStore.getTagGame().getGameTimeLimit() &&
+      tagGameStore.getTagGame().getIsSetAbilityDone()
     );
   };
 
@@ -251,7 +252,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                   {
                     backgroundColor: tagGameStore
                       .getTagGame()
-                      .getGameTimeLimit()
+                      .getIsSetAbilityDone()
                       ? Colors.primary
                       : Colors.warning,
                   },
@@ -281,9 +282,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                   style={[
                     styles.button,
                     {
-                      backgroundColor: tagGameStore
-                        .getTagGame()
-                        .getGameTimeLimit()
+                      backgroundColor: canGameStart()
                         ? Colors.success
                         : Colors.inactive,
                     },

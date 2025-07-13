@@ -46,7 +46,7 @@ export interface UpdateAbilityIsSettingParams {
  * AbilityScreen画面にてゲームユーザーがアビリティを実行する際の使用を想定
  */
 export interface GetAbilityList {
-  getAbilityList(): AbilityList;
+  getAbilityList: AbilityList;
 }
 
 // TODO: これ以下は詳細設計で必要なインタフェースなので各ファイルに定義してもよさそう

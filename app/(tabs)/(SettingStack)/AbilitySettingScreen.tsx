@@ -24,7 +24,7 @@ const AbilitySettingScreen: React.FC<Props> = ({ _tagGameStore }) => {
   >([]);
 
   useEffect(() => {
-    const abilityList = tagGameStore.getAbilityList();
+    const abilityList = tagGameStore.getAbilityList;
     const [policeAbilities, thiefAbilities] = _.partition(
       abilityList,
       (abilityObject) => abilityObject.targetRole === "police",
@@ -38,7 +38,7 @@ const AbilitySettingScreen: React.FC<Props> = ({ _tagGameStore }) => {
   ): AbilityTypeForList[] => {
     return abilities.map((ability) => ({
       abilityName: ability.abilityName,
-      checked: false,
+      checked: ability.isSetting,
     }));
   };
 
@@ -170,9 +170,14 @@ const AbilitySettingScreen: React.FC<Props> = ({ _tagGameStore }) => {
           style={{
             height: 50,
             width: 150,
-            backgroundColor: Colors.primary,
+            backgroundColor: tagGameStore.getIsSetAbilityDone()
+              ? Colors.success
+              : Colors.error,
           }}
-          onPress={updateAbilityList}
+          onPress={() => {
+            updateAbilityList();
+            tagGameStore.setIsSetAbilityDone(true);
+          }}
         >
           <Text
             style={{

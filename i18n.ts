@@ -32,6 +32,7 @@ const translationMap = {
   // SettingScreen translations
   "Team Settings": { ja: "チーム設定" },
   "Time Limit Settings": { ja: "タイムリミット設定" },
+  "Ability Setting": { ja: "アビリティ設定" },
   "Cancel Game": { ja: "ゲーム中止" },
   "Leave Game": { ja: "ゲームから抜ける" },
   "Error": { ja: "エラー" },

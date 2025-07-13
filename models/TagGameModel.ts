@@ -7,6 +7,7 @@ import UserModel from "./UserModel";
 export type LocalTagGameModelTypes = {
   isSetValidAreaDone: boolean;
   isSetPrisonAreaDone: boolean;
+  isSetAbilityDone: boolean;
 };
 
 export type InitialParamsType = Omit<DynamoTagGame, keyof UserLists>;
@@ -24,6 +25,7 @@ export default class TagGameModel {
 
   private isSetValidAreaDone: LocalTagGameModelTypes["isSetValidAreaDone"];
   private isSetPrisonAreaDone: LocalTagGameModelTypes["isSetPrisonAreaDone"];
+  private isSetAbilityDone: LocalTagGameModelTypes["isSetAbilityDone"];
 
   constructor({
     id = "",
@@ -45,6 +47,7 @@ export default class TagGameModel {
 
     this.isSetValidAreaDone = false;
     this.isSetPrisonAreaDone = false;
+    this.isSetAbilityDone = false;
 
     makeAutoObservable(this);
   }
@@ -137,6 +140,17 @@ export default class TagGameModel {
     isSetPrisonAreaDone: LocalTagGameModelTypes["isSetPrisonAreaDone"],
   ): void {
     this.isSetPrisonAreaDone = isSetPrisonAreaDone;
+  }
+
+  // isSetAbilityDone
+  getIsSetAbilityDone(): LocalTagGameModelTypes["isSetAbilityDone"] {
+    return this.isSetAbilityDone;
+  }
+
+  setIsSetAbilityDone(
+    isSetAbilityDone: LocalTagGameModelTypes["isSetAbilityDone"],
+  ): void {
+    this.isSetAbilityDone = isSetAbilityDone;
   }
 
   // policeUsers
