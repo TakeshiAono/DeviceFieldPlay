@@ -32,6 +32,10 @@ export default function Layout() {
         name="GameTimeScreen"
         options={{ title: i18next.t("Time Limit Settings") }}
       />
+      <Stack.Screen
+        name="AbilitySettingScreen"
+        options={{ title: i18next.t("Ability Setting") }}
+      />
     </Stack>
   );
 }
