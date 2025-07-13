@@ -43,6 +43,7 @@ export default class UserStore {
       return RoleDisplayString.liveUser;
     if (tagGameStore.isCurrentUserReject(this.getCurrentUser()))
       return RoleDisplayString.rejectUser;
-    throw new Error("Error: Empty role name error");
+    return "";
+    // throw new Error("Error: Empty role name error");
   }
 }
