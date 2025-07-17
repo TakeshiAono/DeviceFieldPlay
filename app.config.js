@@ -26,13 +26,14 @@ export default {
       },
     },
     ios: {
-      supportsTablet: true,
+      supportsTablet: false,
       bundleIdentifier: "com.aonot.devicefield",
       infoPlist: {
         NSCameraUsageDescription:
           "ゲーム内で他プレイヤーのQRコードを読み取るためにカメラを使用します。",
         NSLocationWhenInUseUsageDescription:
           "現在地を取得してプレイヤー同士の位置関係を表示するために位置情報を使用します。",
+        UIDeviceFamily: [1],
       },
     },
     android: {
