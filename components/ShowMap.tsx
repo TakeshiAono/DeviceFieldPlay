@@ -74,7 +74,7 @@ function ShowMap({
   const [setIsStart, CopilotTouchableOpacity, CopilotView] = useCopilotHook(
     "roleDisplay",
     ["plusButton", "roleDisplay", "minusButton"],
-    "/(tabs)/(stacks)",
+    "/(tabs)/(SettingStack)",
   );
 
   const firstNotification = useRef(true);
