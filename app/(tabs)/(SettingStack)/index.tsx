@@ -6,7 +6,12 @@ import i18next from "i18next";
 
 import TagGameStore from "@/stores/TagGameStore";
 import UserStore from "@/stores/UserStore";
-import { fetchTagGames, joinUser, putTagGames, putUser } from "@/utils/APIs";
+import {
+  fetchTagGames,
+  joinUser,
+  putTagGames,
+  putUser,
+} from "@/utils/dynamoUtils";
 import { Button } from "@rneui/themed";
 import { useEffect, useRef, useState } from "react";
 import { CameraView } from "expo-camera";
@@ -15,7 +20,7 @@ import { CopilotStep } from "react-native-copilot";
 import { Colors } from "@/constants/Colors";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import useCopilotHook from "@/hooks/useCopilotHook";
-import { removeUserFromGame } from "@/utils/APIs";
+import { removeUserFromGame } from "@/utils/dynamoUtils";
 
 interface Props {
   _userStore?: UserStore;
@@ -104,7 +109,8 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
       tagGameStore.getTagGame().getIsSetValidAreaDone() &&
       tagGameStore.getTagGame().getIsSetPrisonAreaDone() &&
       tagGameStore.getIsEditTeams() &&
-      !!tagGameStore.getTagGame().getGameTimeLimit()
+      !!tagGameStore.getTagGame().getGameTimeLimit() &&
+      tagGameStore.getTagGame().getIsSetAbilityDone()
     );
   };
 
@@ -235,6 +241,29 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                 <Text>{i18next.t("Time Limit Settings")}</Text>
               </CopilotTouchableOpacity>
             </CopilotStep>
+            <CopilotStep
+              text={"アビリティ設定画面に遷移します。"}
+              order={10}
+              name="abilitySetting"
+            >
+              <CopilotTouchableOpacity
+                style={[
+                  styles.button,
+                  {
+                    backgroundColor: tagGameStore
+                      .getTagGame()
+                      .getIsSetAbilityDone()
+                      ? Colors.primary
+                      : Colors.warning,
+                  },
+                ]}
+                onPress={() => {
+                  router.push("/AbilitySettingScreen");
+                }}
+              >
+                <Text>アビリティ設定</Text>
+              </CopilotTouchableOpacity>
+            </CopilotStep>
             {tagGameStore.getTagGame().getIsGameStarted() === true ? (
               <Button
                 title={i18next.t("Cancel Game")}
@@ -253,9 +282,7 @@ function SettingScreen({ _userStore, _tagGameStore }: Props) {
                   style={[
                     styles.button,
                     {
-                      backgroundColor: tagGameStore
-                        .getTagGame()
-                        .getGameTimeLimit()
+                      backgroundColor: canGameStart()
                         ? Colors.success
                         : Colors.inactive,
                     },

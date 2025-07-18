@@ -10,7 +10,8 @@
     "web": "expo start --web",
     "test": "jest --watchAll",
     "lint": "expo lint",
-    "fmt": "prettier --write '{app,components,utils,models,stores}/**/*.{tsx,ts}'"
+    "fmt": "prettier --write '{app,components,utils,models,stores}/**/*.{tsx,ts}'",
+    "jest": "npx jest --coverage"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.744.0",
@@ -28,6 +29,7 @@
     "dotenv": "^16.5.0",
     "expo": "~52.0.32",
     "expo-blur": "~14.0.3",
+    "expo-build-properties": "~0.13.3",
     "expo-camera": "~16.0.17",
     "expo-constants": "~17.0.5",
     "expo-crypto": "~14.0.2",

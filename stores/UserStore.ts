@@ -3,7 +3,7 @@ import UserModel from "@/models/UserModel";
 import { action, makeObservable, observable } from "mobx";
 import TagGameStore from "./TagGameStore";
 
-const RoleDisplayString = {
+export const RoleDisplayString = {
   policeUser: "警察",
   liveUser: "泥(生)",
   rejectUser: "泥(捕)",

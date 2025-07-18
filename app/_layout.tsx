@@ -27,7 +27,7 @@ import {
 import { useColorScheme } from "@/hooks/useColorScheme";
 import UserStore from "@/stores/UserStore";
 import TagGameStore from "@/stores/TagGameStore";
-import { joinUser, putDevice, putTagGames, putUser } from "@/utils/APIs";
+import { joinUser, putDevice, putTagGames, putUser } from "@/utils/dynamoUtils";
 import { observer } from "mobx-react-lite";
 import { CopilotProvider } from "react-native-copilot";
 

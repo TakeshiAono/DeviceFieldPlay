@@ -1,32 +1,31 @@
-import { useEffect, useRef } from "react";
-import i18next from "i18next";
-
 import UserStore from "@/stores/UserStore";
 import { inject, observer } from "mobx-react";
 import { Alert, View } from "react-native";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { Button } from "@rneui/themed";
-import { putTagGames } from "@/utils/APIs";
+import { putTagGames } from "@/utils/dynamoUtils";
 import TagGameStore from "@/stores/TagGameStore";
 import _ from "lodash";
-import { PrisonAreaEditMap } from "@/components/PrisonAreaEditMap";
+import ValidAreaEditMap from "@/components/ValidAreaEditMap";
 import { router } from "expo-router";
+import { useEffect } from "react";
+import i18next from "i18next";
 
 interface Props {
   _userStore?: UserStore;
   _tagGameStore?: TagGameStore;
 }
 
-function PrisonAreaScreen({ _userStore, _tagGameStore }: Props) {
+function ValidAreaScreen({ _userStore, _tagGameStore }: Props) {
   const userStore = _userStore!;
   const tagGameStore = _tagGameStore!;
 
   useEffect(() => {
     if (tagGameStore.getShouldShowGameExplanation()) {
       Alert.alert(
-        i18next.t("Prison Area Selection"),
+        i18next.t("Area Setting Method"),
         i18next.t(
-          "Like valid area, you can set the area by tapping 3 points on the map. Press 'Register Area' to confirm",
+          "You can set the area by tapping 3 points on the map. Press 'Register Area' to confirm",
         ),
       );
     }
@@ -36,16 +35,16 @@ function PrisonAreaScreen({ _userStore, _tagGameStore }: Props) {
     return userStore.isCurrentUserGameMaster(tagGameStore.getTagGame());
   };
 
-  const resetPrisonArea = () => {
-    tagGameStore.putPrisonArea([]);
+  const resetValidArea = () => {
+    tagGameStore.putValidArea([]);
   };
 
   return (
     <View style={{ flex: 1, width: "100%" }}>
-      <PrisonAreaEditMap
-        points={tagGameStore.getTagGame().getPrisonArea()}
+      <ValidAreaEditMap
+        points={tagGameStore.getTagGame().getValidAreas()}
         setPoints={(points) => {
-          tagGameStore.putPrisonArea(points);
+          tagGameStore.putValidArea(points);
         }}
       />
       <View style={{ flexDirection: "row", width: "100%" }}>
@@ -53,7 +52,7 @@ function PrisonAreaScreen({ _userStore, _tagGameStore }: Props) {
           <Button
             type="solid"
             color={
-              tagGameStore.getTagGame().getIsSetPrisonAreaDone()
+              tagGameStore.getTagGame().getIsSetValidAreaDone()
                 ? "success"
                 : "primary"
             }
@@ -62,14 +61,14 @@ function PrisonAreaScreen({ _userStore, _tagGameStore }: Props) {
             }
             onPress={async () => {
               if (tagGameStore.getShouldShowGameExplanation()) {
-                router.replace("/TeamEditScreen");
+                router.replace("/PrisonAreaScreen");
                 return;
               }
 
-              if (tagGameStore.getTagGame().getPrisonArea().length < 3) {
+              if (tagGameStore.getTagGame().getValidAreas().length < 3) {
                 Alert.alert(
                   i18next.t("Error"),
-                  i18next.t("Please set 3 or more points for prison area."),
+                  i18next.t("Please set 3 or more points for valid area."),
                 );
                 return;
               }
@@ -80,11 +79,12 @@ function PrisonAreaScreen({ _userStore, _tagGameStore }: Props) {
               }
 
               await putTagGames(tagGame.toObject());
-              tagGameStore.setIsSetPrisonAreaDone(true);
+              // setIsSetDoneArea(true);
+              tagGameStore.setIsSetValidAreaDone(true);
             }}
           >
             <IconSymbol size={28} name={"mappin.and.ellipse"} color={"white"} />
-            {tagGameStore.getTagGame().getIsSetPrisonAreaDone()
+            {tagGameStore.getTagGame().getIsSetValidAreaDone()
               ? i18next.t("Update Area")
               : i18next.t("Register Area")}
           </Button>
@@ -93,8 +93,8 @@ function PrisonAreaScreen({ _userStore, _tagGameStore }: Props) {
           <Button
             type="solid"
             onPress={() => {
-              resetPrisonArea();
-              tagGameStore.setIsSetPrisonAreaDone(false);
+              resetValidArea();
+              tagGameStore.setIsSetValidAreaDone(false);
             }}
             disabled={
               !(isGameMaster() || !tagGameStore.getTagGame().isSetGame())
@@ -113,7 +113,4 @@ function PrisonAreaScreen({ _userStore, _tagGameStore }: Props) {
   );
 }
 
-export default inject(
-  "_userStore",
-  "_tagGameStore",
-)(observer(PrisonAreaScreen));
+export default inject("_userStore", "_tagGameStore")(observer(ValidAreaScreen));

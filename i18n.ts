@@ -13,6 +13,7 @@ const translationMap = {
   "Game Master": { ja: "ゲームマスター" },
   "MAP": { ja: "地図" },
   "Thief Status": { ja: "泥棒ステータス" },
+  "Ability": { ja: "アビリティ" },
   "Setting": { ja: "設定" },
   "Game Start": { ja: "ゲームスタート" },
   // TeamEditScreen translations
@@ -31,6 +32,7 @@ const translationMap = {
   // SettingScreen translations
   "Team Settings": { ja: "チーム設定" },
   "Time Limit Settings": { ja: "タイムリミット設定" },
+  "Ability Setting": { ja: "アビリティ設定" },
   "Cancel Game": { ja: "ゲーム中止" },
   "Leave Game": { ja: "ゲームから抜ける" },
   "Error": { ja: "エラー" },

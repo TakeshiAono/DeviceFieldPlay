@@ -1,13 +1,27 @@
 import { action, computed, makeObservable, observable } from "mobx";
 import { booleanPointInPolygon, polygon } from "@turf/turf";
+import _ from "lodash";
 
 import TagGameModel, { LocalTagGameModelTypes } from "@/models/TagGameModel";
 import UserModel from "@/models/UserModel";
 import { DynamoTagGame, DynamoUser } from "@/interfaces/api";
+import {
+  AbilityList,
+  GetAbilityList,
+  UpdateAbilityIsSettingParams,
+  UpdateAbilityUsedParams,
+} from "@/interfaces/abilities";
 
-export default class TagGameStore {
+type interfaces = UpdateAbilityUsedParams &
+  GetAbilityList &
+  UpdateAbilityIsSettingParams;
+
+export default class TagGameStore implements interfaces {
   @observable.deep
   private currentTagGame!: TagGameModel;
+
+  @observable.deep
+  private abilityList!: AbilityList;
 
   @observable
   private isEditTeams!: boolean;
@@ -45,9 +59,6 @@ export default class TagGameStore {
   public initialize() {
     this.currentTagGame = new TagGameModel({
       id: "",
-      liveUsers: [],
-      rejectUsers: [],
-      policeUsers: [],
       validAreas: [],
       prisonArea: [],
       gameMasterId: "",
@@ -181,6 +192,17 @@ export default class TagGameStore {
   }
 
   @action
+  public setIsSetAbilityDone(
+    isSetAbilityDone: LocalTagGameModelTypes["isSetAbilityDone"],
+  ) {
+    this.currentTagGame.setIsSetAbilityDone(isSetAbilityDone);
+  }
+
+  public getIsSetAbilityDone() {
+    return this.currentTagGame.getIsSetAbilityDone();
+  }
+
+  @action
   public putPoliceUsers(policeUsers: UserModel[]) {
     this.currentTagGame.setPoliceUsers(policeUsers);
   }
@@ -191,6 +213,10 @@ export default class TagGameStore {
 
   public getPoliceUsers() {
     return this.currentTagGame.getPoliceUsers();
+  }
+
+  public getRejectUsers() {
+    return this.currentTagGame.getRejectUsers();
   }
 
   @action
@@ -416,6 +442,69 @@ export default class TagGameStore {
   @action
   public setExplainedTeamEditScreen(value: boolean) {
     this.explainedTeamEditScreen = value;
+  }
+
+  @action
+  public updateAbilityUsedParams(
+    targetAbilityNames: string,
+    changeTo: "toValid" | "toInvalid",
+  ): void {
+    const [targetAbilities, otherAbilities] = _.partition(
+      this.abilityList,
+      (ability) => targetAbilityNames.includes(ability.abilityName),
+    );
+    const updatedAbilities =
+      changeTo === "toValid"
+        ? targetAbilities.map((targetAbility) => ({
+            ...targetAbility,
+            canUsed: true,
+          }))
+        : targetAbilities.map((targetAbility) => ({
+            ...targetAbility,
+            canUsed: false,
+          }));
+
+    const joinedAbilities = [...otherAbilities, ...updatedAbilities];
+
+    this.abilityList = _.sortBy(
+      joinedAbilities,
+      (ability) => ability.abilityName,
+    );
+    return;
+  }
+
+  @action
+  public updateAbilityIsSettingParams(
+    targetAbilityNames: string[],
+    changeTo: "toValid" | "toInvalid",
+  ): void {
+    const [targetAbilities, otherAbilities] = _.partition(
+      this.abilityList,
+      (ability) => targetAbilityNames.includes(ability.abilityName),
+    );
+    const updatedAbilities =
+      changeTo === "toValid"
+        ? targetAbilities.map((targetAbility) => ({
+            ...targetAbility,
+            isSetting: true,
+          }))
+        : targetAbilities.map((targetAbility) => ({
+            ...targetAbility,
+            isSetting: false,
+          }));
+
+    const joinedAbilities = [...otherAbilities, ...updatedAbilities];
+
+    this.abilityList = _.sortBy(
+      joinedAbilities,
+      (ability) => ability.abilityName,
+    );
+    return;
+  }
+
+  @computed
+  public get getAbilityList() {
+    return this.abilityList;
   }
 
   public isUserInPrisonArea(userLocation: {

@@ -7,6 +7,25 @@ if (process.env.EAS_BUILD_PROFILE === "preview") {
   appName = "ケイドロ";
 }
 
+// 開発のためのデバイスがAndroid15以上にアップデートできないため、本番環境以外は特に下限バージョンを指定しない
+const buildPropertiesPlugin =
+  process.env.EAS_BUILD_PROFILE === "production"
+    ? [
+        "expo-build-properties",
+        {
+          android: {
+            // Android 16 (API Level 36) までの機能を使用できるようにビルドする設定（上限）
+            compileSdkVersion: 36,
+            // Android 16 (API Level 36) を対象として最適化する設定（ターゲット）
+            // 最適ではないAndroidバージョンだと若干パフォーマンスの低下や新機能を使用できない場合がある
+            targetSdkVersion: 36,
+            // Android 15 (API Level 35) 以降の端末で動作可能にする設定（下限）
+            minSdkVersion: 35,
+          },
+        },
+      ]
+    : null;
+
 export default {
   expo: {
     name: appName,
@@ -87,6 +106,7 @@ export default {
           enableBackgroundRemoteNotifications: true,
         },
       ],
+      ...(buildPropertiesPlugin ? [buildPropertiesPlugin] : []),
     ],
     experiments: {
       typedRoutes: true,

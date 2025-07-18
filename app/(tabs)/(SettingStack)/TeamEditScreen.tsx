@@ -15,7 +15,7 @@ import {
   fetchCurrentGameUsersInfo,
   fetchTagGames,
   putTagGames,
-} from "@/utils/APIs";
+} from "@/utils/dynamoUtils";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import ReactNativeModal from "react-native-modal";
 import QRCode from "react-native-qrcode-svg";
