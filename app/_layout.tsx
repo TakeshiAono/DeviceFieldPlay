@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import "react-native-reanimated";
 import { Provider } from "mobx-react";
 import ReactNativeModal from "react-native-modal";
-import { Button, Text, TextInput, View } from "react-native";
+import { Button, Platform, Text, TextInput, View } from "react-native";
 import Toast from "react-native-toast-message";
 import { CheckBox } from "@rneui/themed";
 import * as Crypto from "expo-crypto";
@@ -19,6 +19,7 @@ import i18next from "i18next";
 import {
   AndroidImportance,
   getDevicePushTokenAsync,
+  getExpoPushTokenAsync,
   requestPermissionsAsync,
   setNotificationChannelAsync,
 } from "expo-notifications";
@@ -54,10 +55,18 @@ const RootLayout = observer(() => {
     const id = Crypto.randomUUID();
     stores._userStore.getCurrentUser().setId(id);
 
-    getDevicePushTokenAsync().then(({ data }) => {
-      console.log("deviceId:", data);
-      stores._userStore.getCurrentUser().setDeviceId(data);
-    });
+    if (Platform.OS === "android") {
+      // TODO: iosと同じようにgetExpoPushTokenAsyncでpush通知を送るように変更したい
+      getDevicePushTokenAsync().then(({ data }) => {
+        console.log("deviceId:", data);
+        stores._userStore.getCurrentUser().setDeviceId(data);
+      });
+    } else if (Platform.OS === "ios") {
+      getExpoPushTokenAsync().then(({ data }) => {
+        console.log("deviceId:", data);
+        stores._userStore.getCurrentUser().setDeviceId(data);
+      });
+    }
     // TODO: storesはいらないので削除したい
   }, [stores, modalView]);
 

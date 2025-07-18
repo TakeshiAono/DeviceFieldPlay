@@ -24,6 +24,13 @@ export const prisonAreaNotificationHandler = async (
     text2: notification.request.content.body as string,
   });
 
+  await updateStoreOnChangePrisonArea(gameId, tagGameStore);
+};
+
+export const updateStoreOnChangePrisonArea = async (
+  gameId: string,
+  tagGameStore: TagGameStore,
+) => {
   try {
     const tagGame = await fetchTagGames(gameId);
     tagGameStore.putPrisonArea(tagGame.prisonArea);
@@ -47,6 +54,13 @@ export const validAreaNotificationHandler = async (
     text2: notification.request.content.body as string,
   });
 
+  await updateStoreOnChangeValidArea(gameId, tagGameStore);
+};
+
+export const updateStoreOnChangeValidArea = async (
+  gameId: string,
+  tagGameStore: TagGameStore,
+) => {
   try {
     const tagGame = await fetchTagGames(gameId);
     tagGameStore.putValidArea(tagGame.validAreas);
@@ -70,6 +84,13 @@ export const joinUserNotificationHandler = async (
     text2: notification.request.content.body as string,
   });
 
+  await updateStoreOnJoinUser(gameId, tagGameStore);
+};
+
+export const updateStoreOnJoinUser = async (
+  gameId: string,
+  tagGameStore: TagGameStore,
+) => {
   try {
     const tagGame = await fetchTagGames(gameId);
     const gameUsers = await fetchCurrentGameUsersInfo(gameId);
@@ -95,6 +116,14 @@ export const kickOutUsersNotificationHandler = async (
     text2: notification.request.content.body as string,
   });
 
+  await updateStoreOnKickOutUsers(gameId, tagGameStore, currentUserId);
+};
+
+export const updateStoreOnKickOutUsers = async (
+  gameId: string,
+  tagGameStore: TagGameStore,
+  currentUserId: string,
+) => {
   try {
     const tagGame = await fetchTagGames(gameId);
     if (!hasGameCurrentUser(tagGame, currentUserId)) {
@@ -140,6 +169,13 @@ export const gameStartNotificationHandler = async (
     text2: notification.request.content.body as string,
   });
 
+  await updateStoreOnGameStart(gameId, tagGameStore);
+};
+
+export const updateStoreOnGameStart = async (
+  gameId: string,
+  tagGameStore: TagGameStore,
+) => {
   try {
     const tagGame = await fetchTagGames(gameId);
     const gameUsers = await fetchCurrentGameUsersInfo(gameId);
@@ -162,6 +198,10 @@ export const gameTimeUpNotificationHandler = async (
     text2: notification.request.content.body as string,
   });
 
+  await updateStoreOnGameEnd(tagGameStore);
+};
+
+export const updateStoreOnGameEnd = async (tagGameStore: TagGameStore) => {
   try {
     tagGameStore.setIsGameTimeUp(true);
   } catch (error) {
@@ -183,6 +223,13 @@ export const gameStopNotificationHandler = async (
     text2: notification.request.content.body as string,
   });
 
+  await updateStoreOnGameStop(gameId, tagGameStore);
+};
+
+export const updateStoreOnGameStop = async (
+  gameId: string,
+  tagGameStore: TagGameStore,
+) => {
   try {
     const tagGame = await fetchTagGames(gameId);
     const gameUsers = await fetchCurrentGameUsersInfo(gameId);
@@ -207,6 +254,13 @@ export const rejectUserNotificationHandler = async (
     text2: notification.request.content.body as string,
   });
 
+  await updateStoreOnRejectUser(gameId, tagGameStore);
+};
+
+export const updateStoreOnRejectUser = async (
+  gameId: string,
+  tagGameStore: TagGameStore,
+) => {
   try {
     const tagGame = await fetchTagGames(gameId);
     const gameUsers = await fetchCurrentGameUsersInfo(gameId);
@@ -231,6 +285,13 @@ export const liveUserNotificationHandler = async (
     text2: notification.request.content.body as string,
   });
 
+  await updateStoreOnReviveUser(gameId, tagGameStore);
+};
+
+export const updateStoreOnReviveUser = async (
+  gameId: string,
+  tagGameStore: TagGameStore,
+) => {
   try {
     const tagGame = await fetchTagGames(gameId);
     const gameUsers = await fetchCurrentGameUsersInfo(gameId);
@@ -255,6 +316,13 @@ export const policeUserNotificationHandler = async (
     text2: notification.request.content.body as string,
   });
 
+  await updateStoreOnPoliceUser(gameId, tagGameStore);
+};
+
+export const updateStoreOnPoliceUser = async (
+  gameId: string,
+  tagGameStore: TagGameStore,
+) => {
   try {
     const tagGame = await fetchTagGames(gameId);
     const gameUsers = await fetchCurrentGameUsersInfo(gameId);

@@ -1,9 +1,7 @@
 import "dotenv/config";
 
-let appName = "(default)ケイドロ";
-if (process.env.EAS_BUILD_PROFILE === "development") {
-  appName = "(開発)ケイドロ";
-} else if (process.env.EAS_BUILD_PROFILE === "preview") {
+let appName = "(開発)ケイドロ";
+if (process.env.EAS_BUILD_PROFILE === "preview") {
   appName = "(検証)ケイドロ";
 } else if (process.env.EAS_BUILD_PROFILE === "production") {
   appName = "ケイドロ";
@@ -35,7 +33,7 @@ export default {
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
-    scheme: "myapp",
+    scheme: "keidoro",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     extra: {
@@ -47,8 +45,15 @@ export default {
       },
     },
     ios: {
-      supportsTablet: true,
+      supportsTablet: false,
       bundleIdentifier: "com.aonot.devicefield",
+      infoPlist: {
+        NSCameraUsageDescription:
+          "ゲーム内で他プレイヤーのQRコードを読み取るためにカメラを使用します。",
+        NSLocationWhenInUseUsageDescription:
+          "現在地を取得してプレイヤー同士の位置関係を表示するために位置情報を使用します。",
+        UIDeviceFamily: [1],
+      },
     },
     android: {
       config: {
@@ -82,14 +87,15 @@ export default {
       [
         "expo-camera",
         {
-          cameraPermission: "カメラの権限を許可してください",
+          cameraPermission:
+            "ゲーム内でQRコードを読み取るためにカメラを使用します。",
         },
       ],
       [
         "expo-location",
         {
           locationAlwaysAndWhenInUsePermission:
-            "位置情報の取得を許可してください",
+            "現在地を取得してプレイヤー同士の位置関係を表示するために位置情報を使用します。",
         },
       ],
       [

@@ -74,7 +74,7 @@ function GameTimeScreen({ _tagGameStore }: Props) {
             if (tagGameStore.getShouldShowGameExplanation()) {
               // NOTE: /(tabs)/ThiefListScreenに遷移だけでは設定タブに移動した際にタイムリミット画面のままで設定画面に戻るボタンが存在しないため
               // stackの設定画面に一瞬移動させている。
-              router.replace("/(tabs)/(stacks)");
+              router.replace("/(tabs)/(SettingStack)");
 
               router.replace("/(tabs)/ThiefListScreen");
             }
