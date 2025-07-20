@@ -2,6 +2,7 @@ import { makeAutoObservable, toJS } from "mobx";
 import { DynamoTagGame, UserLists } from "@/interfaces/api";
 import dayjs, { Dayjs } from "dayjs";
 import UserModel from "./UserModel";
+import { AbilityList } from "@/interfaces/abilities";
 
 // DynamoDBでは保存せずクライアント側でのみ保持している値
 export type LocalTagGameModelTypes = {
@@ -22,6 +23,7 @@ export default class TagGameModel {
   private gameTimeLimit: Dayjs | null;
   private gameMasterId: DynamoTagGame["gameMasterId"];
   private isGameStarted: DynamoTagGame["isGameStarted"];
+  private abilityList: DynamoTagGame["abilityList"];
 
   private isSetValidAreaDone: LocalTagGameModelTypes["isSetValidAreaDone"];
   private isSetPrisonAreaDone: LocalTagGameModelTypes["isSetPrisonAreaDone"];
@@ -34,6 +36,7 @@ export default class TagGameModel {
     gameMasterId,
     gameTimeLimit,
     isGameStarted,
+    abilityList,
   }: InitialParamsType) {
     this.id = id;
     this.liveUsers = [];
@@ -44,6 +47,7 @@ export default class TagGameModel {
     this.gameMasterId = gameMasterId;
     this.gameTimeLimit = gameTimeLimit ? dayjs(gameTimeLimit) : null;
     this.isGameStarted = isGameStarted;
+    this.abilityList = abilityList;
 
     this.isSetValidAreaDone = false;
     this.isSetPrisonAreaDone = false;
@@ -170,6 +174,14 @@ export default class TagGameModel {
     this.isGameStarted = isGameStarted;
   }
 
+  getAbilityList(): AbilityList {
+    return this.abilityList;
+  }
+
+  setAbilityList(abilityList: AbilityList): void {
+    this.abilityList = abilityList;
+  }
+
   isSetGame() {
     return this.id != "";
   }
@@ -197,6 +209,7 @@ export default class TagGameModel {
       policeUsers: this.policeUsers.map((user) => user.getId()),
       gameTimeLimit: this.gameTimeLimit ? this.gameTimeLimit.toISOString() : "",
       isGameStarted: this.isGameStarted,
+      abilityList: this.abilityList,
     };
   }
 }

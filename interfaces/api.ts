@@ -1,4 +1,5 @@
 import { PutCommandInput, PutCommandOutput } from "@aws-sdk/lib-dynamodb";
+import { AbilityList } from "./abilities";
 
 type GameId = string;
 
@@ -21,6 +22,7 @@ export type DynamoTagGame = {
   gameMasterId: string;
   gameTimeLimit: string | null;
   isGameStarted: boolean | null; // NOTE: ゲームが始まっていない状態はnullとなる
+  abilityList: AbilityList;
 } & UserLists;
 
 export type DynamoUser = {
