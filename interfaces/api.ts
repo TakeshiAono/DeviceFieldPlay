@@ -1,3 +1,5 @@
+import { PutCommandInput, PutCommandOutput } from "@aws-sdk/lib-dynamodb";
+
 type GameId = string;
 
 export type Marker = {
@@ -32,3 +34,7 @@ export type DynamoDevice = {
   deviceId: string;
   deviceType: "ios" | "android";
 };
+
+export type PutDynamoTagGame = (
+  item: DynamoTagGame,
+) => Promise<PutCommandOutput>;
