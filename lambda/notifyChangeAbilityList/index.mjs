@@ -53,7 +53,7 @@ export const handler = async (event) => {
     event.Records[0].dynamodb?.NewImage?.abilityList?.L?.map(
       (ability) => ability.M,
     );
-  if (oldAbilityList == newAbilityList) {
+  if (JSON.stringify(oldAbilityList) == JSON.stringify(newAbilityList)) {
     return {
       statusCode: 200,
       body: "",
