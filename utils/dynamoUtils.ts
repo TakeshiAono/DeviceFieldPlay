@@ -4,13 +4,19 @@ import {
   DynamoDBDocumentClient,
   GetCommand,
   UpdateCommand,
+  PutCommandInput,
 } from "@aws-sdk/lib-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 
 import Constants from "expo-constants";
 import { Platform } from "react-native";
 import UserModel from "@/models/UserModel";
-import { DynamoDevice, DynamoTagGame, DynamoUser } from "@/interfaces/api";
+import {
+  DynamoDevice,
+  DynamoTagGame,
+  DynamoUser,
+  PutDynamoTagGame,
+} from "@/interfaces/api";
 
 const AWS_ACCESS_KEY_ID = Constants.expoConfig?.extra?.awsAccessKeyId;
 const AWS_SECRET_ACCESS_KEY = Constants.expoConfig?.extra?.awsSecretAccessKey;
@@ -49,9 +55,7 @@ export const fetchTagGames = async <T extends DynamoTagGame>(
   }
 };
 
-export const putTagGames = async <T extends DynamoTagGame>(
-  item: T,
-): Promise<T> => {
+export const putTagGames: PutDynamoTagGame = async (item: DynamoTagGame) => {
   try {
     const command = new PutCommand({
       TableName: "tagGames",
@@ -60,7 +64,7 @@ export const putTagGames = async <T extends DynamoTagGame>(
 
     const response = await generateDocClient().send(command);
     console.log("putTagGames:", response);
-    return item;
+    return response;
   } catch (error) {
     console.error("putTagGames:", error);
     throw error;

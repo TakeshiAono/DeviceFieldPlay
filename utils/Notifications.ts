@@ -332,6 +332,36 @@ export const updateStoreOnPoliceUser = async (
   }
 };
 
+export const abilitySettingNotificationHandler = async (
+  notification: Notification,
+  gameId: string,
+  tagGameStore: TagGameStore,
+) => {
+  if (notification.request.content.data.notification_type !== "abilitySetting")
+    return;
+  console.log("アビリティpush通知", notification.request.content);
+
+  Toast.show({
+    type: "success",
+    text1: notification.request.content.title as string,
+    text2: notification.request.content.body as string,
+  });
+
+  await updateStoreOnAbilitySetting(gameId, tagGameStore);
+};
+
+export const updateStoreOnAbilitySetting = async (
+  gameId: string,
+  tagGameStore: TagGameStore,
+) => {
+  try {
+    const tagGame = await fetchTagGames(gameId);
+    tagGameStore.putAbilityList(tagGame.abilityList);
+  } catch (error) {
+    console.error("Error: ", error);
+  }
+};
+
 const asyncDynamoTagGameAllProperties = (
   tagGameStore: TagGameStore,
   tagGame: DynamoTagGame,
@@ -353,6 +383,7 @@ const asyncDynamoTagGameAllProperties = (
   tagGameStore.getTagGame().setGameMasterId(tagGame.gameMasterId);
   tagGameStore.getTagGame().setGameTimeLimit(dayjs(tagGame.gameTimeLimit));
   tagGameStore.getTagGame().setIsGameStarted(tagGame.isGameStarted);
+  tagGameStore.getTagGame().setAbilityList(tagGame.abilityList);
 };
 
 const asyncDynamoTagGameUsers = (

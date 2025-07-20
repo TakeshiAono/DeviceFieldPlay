@@ -34,6 +34,8 @@ import {
   updateStoreOnRejectUser,
   updateStoreOnReviveUser,
   updateStoreOnPoliceUser,
+  abilitySettingNotificationHandler,
+  updateStoreOnAbilitySetting,
 } from "@/utils/Notifications";
 import { Text } from "react-native";
 import { Colors, getPlayerRoleColor } from "@/constants/Colors";
@@ -127,6 +129,9 @@ function ShowMap({
               break;
             case "policeUser":
               await updateStoreOnPoliceUser(gameId, tagGameStore);
+              break;
+            case "abilitySetting":
+              await updateStoreOnAbilitySetting(gameId, tagGameStore);
               break;
             default:
               break;
@@ -224,6 +229,11 @@ function ShowMap({
         },
       );
 
+      const abilitySettingNotificationListener =
+        addNotificationReceivedListener((event) => {
+          abilitySettingNotificationHandler(event, gameId, tagGameStore);
+        });
+
       // gameIdが変わるたびに別のゲームのエリアで更新されてしまわないよう、イベントリスナーを削除し新規のイベントリスナーを生成する。
       return () => {
         joinUserNotificationListener.remove();
@@ -236,6 +246,7 @@ function ShowMap({
         gameStartNotificationListener.remove();
         gameTimeUpNotificationListener.remove();
         gameStopNotificationListener.remove();
+        abilitySettingNotificationListener.remove();
       };
     }
   }, [tagGameStore.getTagGame().getId()]);

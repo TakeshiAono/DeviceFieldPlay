@@ -1,3 +1,6 @@
+import { PutCommandInput, PutCommandOutput } from "@aws-sdk/lib-dynamodb";
+import { AbilityList } from "./abilities";
+
 type GameId = string;
 
 export type Marker = {
@@ -19,6 +22,7 @@ export type DynamoTagGame = {
   gameMasterId: string;
   gameTimeLimit: string | null;
   isGameStarted: boolean | null; // NOTE: ゲームが始まっていない状態はnullとなる
+  abilityList: AbilityList;
 } & UserLists;
 
 export type DynamoUser = {
@@ -32,3 +36,7 @@ export type DynamoDevice = {
   deviceId: string;
   deviceType: "ios" | "android";
 };
+
+export type PutDynamoTagGame = (
+  item: DynamoTagGame,
+) => Promise<PutCommandOutput>;

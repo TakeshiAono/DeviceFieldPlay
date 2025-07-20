@@ -20,9 +20,6 @@ export default class TagGameStore implements interfaces {
   @observable.deep
   private currentTagGame!: TagGameModel;
 
-  @observable.deep
-  private abilityList!: AbilityList;
-
   @observable
   private isEditTeams!: boolean;
 
@@ -64,6 +61,7 @@ export default class TagGameStore implements interfaces {
       gameMasterId: "",
       gameTimeLimit: null,
       isGameStarted: null,
+      abilityList: [],
     });
     this.isEditTeams = false;
     this.isGameTimeUp = false;
@@ -205,6 +203,11 @@ export default class TagGameStore implements interfaces {
   @action
   public putPoliceUsers(policeUsers: UserModel[]) {
     this.currentTagGame.setPoliceUsers(policeUsers);
+  }
+
+  @action
+  public putAbilityList(abilityList: AbilityList) {
+    this.currentTagGame.setAbilityList(abilityList);
   }
 
   public getLiveUsers() {
@@ -450,7 +453,7 @@ export default class TagGameStore implements interfaces {
     changeTo: "toValid" | "toInvalid",
   ): void {
     const [targetAbilities, otherAbilities] = _.partition(
-      this.abilityList,
+      this.currentTagGame.getAbilityList(),
       (ability) => targetAbilityNames.includes(ability.abilityName),
     );
     const updatedAbilities =
@@ -466,9 +469,8 @@ export default class TagGameStore implements interfaces {
 
     const joinedAbilities = [...otherAbilities, ...updatedAbilities];
 
-    this.abilityList = _.sortBy(
-      joinedAbilities,
-      (ability) => ability.abilityName,
+    this.currentTagGame.setAbilityList(
+      _.sortBy(joinedAbilities, (ability) => ability.abilityName),
     );
     return;
   }
@@ -479,7 +481,7 @@ export default class TagGameStore implements interfaces {
     changeTo: "toValid" | "toInvalid",
   ): void {
     const [targetAbilities, otherAbilities] = _.partition(
-      this.abilityList,
+      this.currentTagGame.getAbilityList(),
       (ability) => targetAbilityNames.includes(ability.abilityName),
     );
     const updatedAbilities =
@@ -495,16 +497,15 @@ export default class TagGameStore implements interfaces {
 
     const joinedAbilities = [...otherAbilities, ...updatedAbilities];
 
-    this.abilityList = _.sortBy(
-      joinedAbilities,
-      (ability) => ability.abilityName,
+    this.currentTagGame.setAbilityList(
+      _.sortBy(joinedAbilities, (ability) => ability.abilityName),
     );
     return;
   }
 
   @computed
   public get getAbilityList() {
-    return this.abilityList;
+    return this.currentTagGame.getAbilityList();
   }
 
   public isUserInPrisonArea(userLocation: {
