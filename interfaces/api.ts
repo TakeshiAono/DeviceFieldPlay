@@ -49,15 +49,13 @@ export type PutDynamoTagGame = (
  *
  * @param gameId: lambdaにてsubユーザーのpush通知トークンをDynamoのusersテーブルから検索するために使用する。
  * @param currentPosition: push通知先のデバイスにてpublisherの位置情報、subscriber側で距離を算出し自分がレーダー範囲内(50m以内)に該当するか計算する際に使用する。
- * @param publishId: push通知先のデバイスを経てDynamoのRadarlocationsテーブルに保存する際に使用する、後からpubがポーリングした際の検索キーとして使用する。
+ * @param publisherId: push通知先のデバイスを経てDynamoのRadarlocationsテーブルに保存する際に使用する、後からpubがポーリングした際の検索キーとして使用する。
  */
-export interface ExecDistanceForRadarRequest {
-  (
-    gameId: DynamoTagGame["id"],
-    currentPosition: LatLng,
-    publishId: UserProps["id"],
-  ): Promise<void>;
-}
+export type ExecDistanceForRadarRequest = (
+  gameId: DynamoTagGame["id"],
+  currentPosition: LatLng,
+  publisherId: UserProps["id"],
+) => Promise<void>;
 
 /**
  * レーダー範囲内に該当するsubscriberがRaderLocationsテーブルに情報をAPIリクエストにて保存するインターフェース
