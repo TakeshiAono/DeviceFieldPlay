@@ -60,23 +60,24 @@ export type ExecDistanceForRadarRequest = (
 /**
  * レーダー範囲内に該当するsubscriberがRaderLocationsテーブルに情報をAPIリクエストにて保存するインターフェース
  */
-export interface PostRadarLocation {
+export type PostRadarLocation = {
   (args: DynamoRadarLocation): Promise<void>;
-}
+};
 
 /**
  * RaderLocationsテーブルの定義
  *
  * @param id: プライマリキー
- * @param publishId: pubがポーリングの時に使用し、自分のuserIdとpublishIdのレコードを取得する際に使用する検索キー
+ * @param publisherId: pubがポーリングの時に使用し、自分のuserIdとpublisherIdのレコードを取得する際に使用する検索キー
  * @param location: 現在は使い道はないが、今後詳細な位置を割り出したいなどのアビリティのために保存しておく
  * @param expiresAt: 同じアビリティが実行された場合に古いアビリティの結果が新しいアビリティと混ざらないようにするための値、有効期限が古いものは取得しないようにするための値
  */
 export type DynamoRadarLocation = {
-  id: number;
-  publishId: UserProps["id"];
+  id: string;
+  publisherId: UserProps["id"];
   location: LatLng;
-  expiresAt: Date;
+  userId: string;
+  expiresAt: string;
 };
 
 /**

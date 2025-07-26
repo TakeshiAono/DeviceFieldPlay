@@ -14,9 +14,11 @@ import Constants from "expo-constants";
 import UserModel from "@/models/UserModel";
 import {
   DynamoDevice,
+  DynamoRadarLocation,
   DynamoTagGame,
   DynamoUser,
   GetLocationsByUserId,
+  PostRadarLocation,
   PutDynamoTagGame,
 } from "@/interfaces/api";
 
@@ -91,6 +93,24 @@ export const getLocationsByPublisherId: GetLocationsByUserId = async (
 
     const response = await generateDocClient().send(command);
     return response;
+  } catch (error) {
+    console.error("locations:", error);
+    throw error;
+  }
+};
+
+export const putLocation: PostRadarLocation = async (
+  item: DynamoRadarLocation,
+) => {
+  try {
+    const command = new PutCommand({
+      TableName: "locations",
+      Item: item,
+    });
+
+    const response = await generateDocClient().send(command);
+    console.log("locations:", response);
+    return;
   } catch (error) {
     console.error("locations:", error);
     throw error;
