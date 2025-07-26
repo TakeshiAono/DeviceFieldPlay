@@ -7,14 +7,16 @@ import {
   PutCommandInput,
 } from "@aws-sdk/lib-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
+import dayjs from "dayjs";
+import { Platform } from "react-native";
 
 import Constants from "expo-constants";
-import { Platform } from "react-native";
 import UserModel from "@/models/UserModel";
 import {
   DynamoDevice,
   DynamoTagGame,
   DynamoUser,
+  GetLocationsByUserId,
   PutDynamoTagGame,
 } from "@/interfaces/api";
 
@@ -67,6 +69,30 @@ export const putTagGames: PutDynamoTagGame = async (item: DynamoTagGame) => {
     return response;
   } catch (error) {
     console.error("putTagGames:", error);
+    throw error;
+  }
+};
+
+export const getLocationsByPublisherId: GetLocationsByUserId = async (
+  publisherId: string,
+  abilityName: string,
+) => {
+  try {
+    const command = new ScanCommand({
+      TableName: "locations",
+      FilterExpression:
+        "publisherId = :publisherId AND abilityName = :abilityName AND expiresAt >= :currentDataUNIXTime",
+      ExpressionAttributeValues: {
+        ":publisherId": { S: publisherId },
+        ":abilityName": { S: abilityName },
+        ":currentDataUNIXTime": { N: String(dayjs().unix()) },
+      },
+    });
+
+    const response = await generateDocClient().send(command);
+    return response;
+  } catch (error) {
+    console.error("locations:", error);
     throw error;
   }
 };
