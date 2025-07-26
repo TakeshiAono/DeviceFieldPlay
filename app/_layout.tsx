@@ -23,6 +23,8 @@ import {
   requestPermissionsAsync,
   setNotificationChannelAsync,
 } from "expo-notifications";
+import axios from "axios";
+import Constants from "expo-constants";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import UserStore from "@/stores/UserStore";
@@ -33,6 +35,8 @@ import { CopilotProvider } from "react-native-copilot";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+axios.defaults.headers.common["X-API-KEY"] =
+  Constants.expoConfig?.extra?.awsApiKey;
 
 const RootLayout = observer(() => {
   const colorScheme = useColorScheme();

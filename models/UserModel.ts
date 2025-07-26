@@ -3,7 +3,7 @@ import { makeAutoObservable } from "mobx";
 import TagGameModel from "./TagGameModel";
 import { UserTypeForList } from "@/components/UserCheckList";
 
-type Props = {
+export type Props = {
   id: string;
   name: string;
   // TODO: deviceIdはデバイス側では使わないので削除する

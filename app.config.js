@@ -40,6 +40,7 @@ export default {
       awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID,
       awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
       awsRegion: process.env.AWS_REGION,
+      awsApiKey: process.env.AWS_API_KEY,
       eas: {
         projectId: process.env.PROJECT_ID,
       },

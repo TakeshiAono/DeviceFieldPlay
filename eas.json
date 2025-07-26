@@ -12,11 +12,20 @@
         "GOOGLE_SERVICES_JSON": "@project/DEV_GOOGLE_SERVICES_JSON",
         "AWS_ACCESS_KEY_ID": "@project/DEV_AWS_ACCESS_KEY_ID",
         "AWS_SECRET_ACCESS_KEY": "@project/DEV_AWS_SECRET_ACCESS_KEY",
-        "AWS_REGION": "@project/DEV_AWS_REGION"
+        "AWS_REGION": "@project/DEV_AWS_REGION",
+        "AWS_API_KEY": "@project/AWS_API_KEY"
       }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "GOOGLE_MAPS_API_KEY": "@project/DEV_GOOGLE_MAPS_API_KEY",
+        "GOOGLE_SERVICES_JSON": "@project/DEV_GOOGLE_SERVICES_JSON",
+        "AWS_ACCESS_KEY_ID": "@project/DEV_AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY": "@project/DEV_AWS_SECRET_ACCESS_KEY",
+        "AWS_REGION": "@project/DEV_AWS_REGION",
+        "AWS_API_KEY": "@project/AWS_API_KEY"
+      }
     },
     "production": {
       "autoIncrement": true,
@@ -27,7 +36,8 @@
         "GOOGLE_SERVICES_JSON": "@project/GOOGLE_SERVICES_JSON",
         "AWS_ACCESS_KEY_ID": "@project/AWS_ACCESS_KEY_ID",
         "AWS_SECRET_ACCESS_KEY": "@project/AWS_SECRET_ACCESS_KEY",
-        "AWS_REGION": "@project/AWS_REGION"
+        "AWS_REGION": "@project/AWS_REGION",
+        "AWS_API_KEY": "@project/AWS_API_KEY"
       }
     }
   },
