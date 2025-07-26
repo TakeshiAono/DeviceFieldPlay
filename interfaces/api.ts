@@ -83,9 +83,12 @@ export type DynamoRadarLocation = {
 /**
  * ExecDistanceForRadarRequestが発火して10秒後にポーリング(1回)をする時のインターフェース
  *
- * @param publishId: 自分のユーザーIdにてDynamoのRadarLocationsテーブルから検索するために使用する。
+ * @param publisherId: 自分のユーザーIdにてDynamoのRadarLocationsテーブルから検索するために使用する。
  * @returns レーダーに該当した人数分のlocation情報
  */
 export interface GetLocationsByUserId {
-  (publishId: UserProps["id"]): Promise<DynamoRadarLocation[]>;
+  (
+    publisherId: UserProps["id"],
+    abilityName: AbilityObject["abilityName"],
+  ): Promise<ScanCommandOutput>;
 }
