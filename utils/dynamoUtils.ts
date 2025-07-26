@@ -13,8 +13,10 @@ import { Platform } from "react-native";
 import UserModel from "@/models/UserModel";
 import {
   DynamoDevice,
+  DynamoRadarLocation,
   DynamoTagGame,
   DynamoUser,
+  PostRadarLocation,
   PutDynamoTagGame,
 } from "@/interfaces/api";
 
@@ -67,6 +69,24 @@ export const putTagGames: PutDynamoTagGame = async (item: DynamoTagGame) => {
     return response;
   } catch (error) {
     console.error("putTagGames:", error);
+    throw error;
+  }
+};
+
+export const putLocation: PostRadarLocation = async (
+  item: DynamoRadarLocation,
+) => {
+  try {
+    const command = new PutCommand({
+      TableName: "locations",
+      Item: item,
+    });
+
+    const response = await generateDocClient().send(command);
+    console.log("locations:", response);
+    return;
+  } catch (error) {
+    console.error("locations:", error);
     throw error;
   }
 };
