@@ -36,14 +36,11 @@ export interface UpdateAbilityUsedParams {
 
 export type ChangeToType = "toValid" | "toInvalid";
 
-export type UpdateAbilityIsSettingParams = {
-  updateAbilityIsSettingParams(
-    targetAbilityNames: string[],
-    changeTo: ChangeToType,
-    tagGameStore: TagGameStore,
-  ): void;
-};
-
+export type UpdateAbilityIsSettingParams = (
+  targetAbility: string,
+  changeTo: ChangeToType,
+  tagGameStore: TagGameStore,
+) => void;
 /**
  * tagGameStoreでの定義
  * SettingScreenおよびAbilityScreenでの使用を想定
