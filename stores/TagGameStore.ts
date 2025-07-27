@@ -82,7 +82,7 @@ export default class TagGameStore implements interfaces {
           abilityName: "radar",
           isSetting: true,
           changeToCanUsedRuleMethod: canUsedRuleOfRadarAbility,
-          targetRole: "thief",
+          targetRole: "police",
         },
       ],
     });
