@@ -80,11 +80,15 @@ export const handler = async (event) => {
     let androidMessages = [];
     let iosMessages = [];
 
+    const pushMessageTitle = "アビリティ使用通知";
+    const pushMessageBody = "ユーザーによってアビリティが使用されました";
+    const notificationType = "execAbility";
+
     const getIosMessage = (
       token,
       pushMessageTitle,
       pushMessageBody,
-      notification_type,
+      notificationType,
     ) => ({
       to: token,
       sound: "default",
@@ -94,11 +98,10 @@ export const handler = async (event) => {
         notification_type: notificationType,
         currentPosition: JSON.stringify(event.currentPosition),
         publisherId: event.publisherId,
+        abilityType: event.abilityType,
       },
     });
-    const pushMessageTitle = "アビリティ使用通知";
-    const pushMessageBody = "ユーザーによってアビリティが使用されました";
-    const notificationType = event.abilityType;
+
     androidMessages = androidDeviceIds.map((token) => {
       return {
         message: {
@@ -111,6 +114,7 @@ export const handler = async (event) => {
             notification_type: notificationType,
             currentPosition: JSON.stringify(event.currentPosition),
             publisherId: event.publisherId,
+            abilityType: event.abilityType,
           },
           android: {
             priority: "high",
