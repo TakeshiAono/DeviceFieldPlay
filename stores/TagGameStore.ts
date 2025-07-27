@@ -47,6 +47,9 @@ export default class TagGameStore implements interfaces {
   @observable
   private explainedTeamEditScreen!: boolean;
 
+  @observable
+  public isLoading!: boolean;
+
   constructor() {
     makeObservable(this);
     this.initialize();
@@ -73,6 +76,7 @@ export default class TagGameStore implements interfaces {
     this.explainedPrisonAreaScreen = false;
     this.explainedGameTimeScreen = false;
     this.explainedTeamEditScreen = false;
+    this.isLoading = false;
   }
 
   @action
