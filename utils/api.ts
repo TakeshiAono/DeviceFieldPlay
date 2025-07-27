@@ -3,9 +3,11 @@ import axios from "axios";
 
 import { DynamoTagGame, ExecDistanceForRadarRequest } from "@/interfaces/api";
 import { Props as UserProps } from "@/models/UserModel";
+import { AbilityObject } from "@/interfaces/abilities";
 
 export const publishRequestForRadarRequest: ExecDistanceForRadarRequest =
   async (
+    abilityName: AbilityObject["abilityName"],
     gameId: DynamoTagGame["id"],
     currentPosition: LatLng,
     publisherId: UserProps["id"],
@@ -15,7 +17,7 @@ export const publishRequestForRadarRequest: ExecDistanceForRadarRequest =
         gameId: gameId,
         currentPosition: currentPosition,
         publisherId: publisherId,
-        abilityType: "radar",
+        abilityType: abilityName,
       })
       .catch((e) => {
         console.log("Error: ", e);
