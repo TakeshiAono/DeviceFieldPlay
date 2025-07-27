@@ -133,6 +133,14 @@ function ShowMap({
             case "abilitySetting":
               await updateStoreOnAbilitySetting(gameId, tagGameStore);
               break;
+            case "execAbility":
+              tagGameStore.isLoading = false;
+              await abilityNotificationHandler(
+                response,
+                userStore.getCurrentUser().getId(),
+                userStore.getPlayerRoleName(tagGameStore) as RoleName,
+              );
+              break;
             default:
               break;
           }
@@ -234,6 +242,23 @@ function ShowMap({
           abilitySettingNotificationHandler(event, gameId, tagGameStore);
         });
 
+      const abilityNotificationListener = addNotificationReceivedListener(
+        async (event) => {
+          // publisherにもpush通知が来るため、自分に来たものは握り潰す。
+          if (
+            event.request.content.data.publisherId !==
+            userStore.getCurrentUser().getId()
+          ) {
+            await abilityNotificationHandler(
+              event,
+              userStore.getCurrentUser().getId(),
+              userStore.getPlayerRoleName(tagGameStore) as RoleName,
+            );
+            tagGameStore.isLoading = false;
+          }
+        },
+      );
+
       // gameIdが変わるたびに別のゲームのエリアで更新されてしまわないよう、イベントリスナーを削除し新規のイベントリスナーを生成する。
       return () => {
         joinUserNotificationListener.remove();
@@ -247,6 +272,7 @@ function ShowMap({
         gameTimeUpNotificationListener.remove();
         gameStopNotificationListener.remove();
         abilitySettingNotificationListener.remove();
+        abilityNotificationListener.remove();
       };
     }
   }, [tagGameStore.getTagGame().getId()]);
