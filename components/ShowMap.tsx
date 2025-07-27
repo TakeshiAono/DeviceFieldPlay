@@ -10,7 +10,7 @@ import * as Location from "expo-location";
 
 import { rejectUser, reviveUser } from "@/utils/dynamoUtils";
 import { IconSymbol } from "@/components/ui/IconSymbol";
-import UserStore from "@/stores/UserStore";
+import UserStore, { RoleName } from "@/stores/UserStore";
 import TagGameStore from "@/stores/TagGameStore";
 import { initialJapanRegion } from "./EditMap";
 import {
@@ -36,6 +36,7 @@ import {
   updateStoreOnPoliceUser,
   abilitySettingNotificationHandler,
   updateStoreOnAbilitySetting,
+  abilityNotificationHandler,
 } from "@/utils/Notifications";
 import { Text } from "react-native";
 import { Colors, getPlayerRoleColor } from "@/constants/Colors";
