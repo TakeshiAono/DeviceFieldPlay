@@ -8,13 +8,15 @@ import { DynamoTagGame, DynamoUser } from "@/interfaces/api";
 import {
   AbilityList,
   GetAbilityList,
-  UpdateAbilityIsSettingParams,
   UpdateAbilityUsedParams,
 } from "@/interfaces/abilities";
+import {
+  canUsedRuleOfRadarAbility,
+  triggerRadarAbility,
+} from "@/utils/abilities";
+import { Dayjs } from "dayjs";
 
-type interfaces = UpdateAbilityUsedParams &
-  GetAbilityList &
-  UpdateAbilityIsSettingParams;
+type interfaces = UpdateAbilityUsedParams & GetAbilityList;
 
 export default class TagGameStore implements interfaces {
   @observable.deep
@@ -470,6 +472,28 @@ export default class TagGameStore implements interfaces {
             ...targetAbility,
             canUsed: false,
           }));
+
+    const joinedAbilities = [...otherAbilities, ...updatedAbilities];
+
+    this.currentTagGame.setAbilityList(
+      _.sortBy(joinedAbilities, (ability) => ability.abilityName),
+    );
+    return;
+  }
+
+  @action
+  public updateAbilityReviveTimeParams(
+    targetAbilityNames: string,
+    targetDateTime: Dayjs | null,
+  ): void {
+    const [targetAbilities, otherAbilities] = _.partition(
+      this.currentTagGame.getAbilityList(),
+      (ability) => targetAbilityNames.includes(ability.abilityName),
+    );
+    const updatedAbilities = targetAbilities.map((targetAbility) => ({
+      ...targetAbility,
+      reviveTime: targetDateTime,
+    }));
 
     const joinedAbilities = [...otherAbilities, ...updatedAbilities];
 

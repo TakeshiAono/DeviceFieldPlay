@@ -1,11 +1,18 @@
 import { Colors } from "@/constants/Colors";
-import { AbilityList, ChangeToType } from "@/interfaces/abilities";
+import {
+  AbilityList,
+  AbilityObject,
+  ChangeToType,
+} from "@/interfaces/abilities";
 import TagGameStore from "@/stores/TagGameStore";
 import UserStore, { RoleDisplayString } from "@/stores/UserStore";
+import { getLocationsByPublisherId } from "@/utils/dynamoUtils";
+import { getCurrentPositionAsync } from "expo-location";
 import _ from "lodash";
 import { inject, observer } from "mobx-react";
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import "dayjs/locale/ja";
 
 type Props = {
   _userStore?: UserStore;
@@ -13,7 +20,11 @@ type Props = {
 };
 
 export interface UpdateAbilityIsSettingParams {
-  (abilityName: string, changeTo: ChangeToType): void;
+  (
+    abilityName: string,
+    changeTo: ChangeToType,
+    tagGameStore: TagGameStore,
+  ): void;
 }
 
 const AbilityScreen: React.FC<Props> = ({ _userStore, _tagGameStore }) => {
@@ -25,11 +36,47 @@ const AbilityScreen: React.FC<Props> = ({ _userStore, _tagGameStore }) => {
     (abilityObject) => abilityObject.targetRole === "police",
   );
 
-  const changeAbilityCanUsed: UpdateAbilityIsSettingParams = (
-    targetAbility: string,
-    changeTo: ChangeToType,
-  ) => {
-    tagGameStore.updateAbilityUsedParams(targetAbility, changeTo);
+  const execRadarAbility = async (abilityObject: AbilityObject) => {
+    abilityObject.changeToCanUsedRuleMethod(abilityObject, tagGameStore);
+
+    const location = await getCurrentPositionAsync({});
+    const userLocation = {
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+    };
+
+    const publishId = userStore.getCurrentUser().getId();
+    // ability()は戻り値がPromiseの場合とPromiseではない場合両方の可能性がある
+    await abilityObject.ability(
+      abilityObject.abilityName,
+      tagGameStore.getTagGame().getId(),
+      userLocation,
+      publishId,
+    );
+
+    // push通知が来たら各デバイスで自分の座標を取得してDynamoに保存する。
+    // その際に時間がかかってしまうため、全ユーザー分の座標がDynamoに保存されるよう
+    // 取得する処理発火までにバッファ時間を設けている。
+    const bufferTime = 10000; // 10秒
+    setTimeout(async () => {
+      const locations = await getLocationsByPublisherId(
+        publishId,
+        abilityObject.abilityName,
+      );
+      const alertTitle = "レーダー検出結果";
+      if ((locations.Count as number) > 0) {
+        Alert.alert(
+          alertTitle,
+          `${locations.Count}人の捕まっていない泥棒が50m圏内に存在しているようです`,
+        );
+      } else {
+        Alert.alert(
+          alertTitle,
+          `捕まっていない泥棒は50m圏内に存在していません`,
+        );
+      }
+      tagGameStore.isLoading = false;
+    }, bufferTime);
   };
 
   const renderButtons = () => {
@@ -50,12 +97,29 @@ const AbilityScreen: React.FC<Props> = ({ _userStore, _tagGameStore }) => {
           }
           disabled={!abilityObject.canUsed}
           onPress={async () => {
-            // ability()は戻り値がPromiseの場合とPromiseではない場合両方の可能性がある
-            await abilityObject.ability();
-            changeAbilityCanUsed(abilityObject.abilityName, "toInvalid");
+            try {
+              switch (abilityObject.abilityName) {
+                case "radar":
+                  tagGameStore.isLoading = true;
+                  await execRadarAbility(abilityObject);
+                  break;
+                default:
+                  break;
+              }
+            } catch (error) {
+              console.log(`Error: ${error}`);
+            }
           }}
         >
-          <Text style={styles.buttonText}>{abilityObject.abilityName}</Text>
+          <Text style={styles.buttonText}>レーダー</Text>
+          {abilityObject.reviveTime ? (
+            <Text style={styles.buttonText}>
+              {abilityObject.reviveTime?.add(1, "minutes").format("HH:mm")}
+              以降に復活
+            </Text>
+          ) : (
+            <></>
+          )}
         </TouchableOpacity>
       );
     });
