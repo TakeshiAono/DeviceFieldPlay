@@ -66,7 +66,17 @@ export default class TagGameStore implements interfaces {
       gameMasterId: "",
       gameTimeLimit: null,
       isGameStarted: null,
-      abilityList: [],
+      abilityList: [
+        {
+          ability: triggerRadarAbility,
+          abilityName: "radar",
+          isSetting: true,
+          canUsed: true,
+          changeToCanUsedRuleMethod: canUsedRuleOfRadarAbility,
+          reviveTime: null,
+          targetRole: "police",
+        },
+      ],
     });
     this.isEditTeams = false;
     this.isGameTimeUp = false;
