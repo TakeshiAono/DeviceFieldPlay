@@ -7,7 +7,10 @@ export const RoleDisplayString = {
   policeUser: "警察",
   liveUser: "泥(生)",
   rejectUser: "泥(捕)",
-};
+} as const;
+
+export type RoleName =
+  (typeof RoleDisplayString)[keyof typeof RoleDisplayString];
 
 export default class UserStore {
   @observable.deep
@@ -36,7 +39,9 @@ export default class UserStore {
     return this.getCurrentUser().isCurrentGameMaster(targetTagGame);
   }
 
-  public getPlayerRoleName(tagGameStore: TagGameStore) {
+  public getPlayerRoleName(
+    tagGameStore: TagGameStore,
+  ): (typeof RoleDisplayString)[keyof typeof RoleDisplayString] | "" {
     if (tagGameStore.isCurrentUserPolice(this.getCurrentUser()))
       return RoleDisplayString.policeUser;
     if (tagGameStore.isCurrentUserLive(this.getCurrentUser()))
