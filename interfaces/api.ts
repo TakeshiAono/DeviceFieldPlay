@@ -1,7 +1,7 @@
 import { LatLng } from "react-native-maps";
-import { PutCommandOutput } from "@aws-sdk/lib-dynamodb";
+import { PutCommandOutput, ScanCommandOutput } from "@aws-sdk/lib-dynamodb";
 
-import { AbilityList } from "./abilities";
+import { AbilityList, AbilityObject } from "./abilities";
 import { Props as UserProps } from "@/models/UserModel";
 
 type GameId = string;
@@ -52,6 +52,7 @@ export type PutDynamoTagGame = (
  * @param publisherId: push通知先のデバイスを経てDynamoのRadarlocationsテーブルに保存する際に使用する、後からpubがポーリングした際の検索キーとして使用する。
  */
 export type ExecDistanceForRadarRequest = (
+  abilityName: AbilityObject["abilityName"],
   gameId: DynamoTagGame["id"],
   currentPosition: LatLng,
   publisherId: UserProps["id"],
@@ -77,7 +78,8 @@ export type DynamoRadarLocation = {
   publisherId: UserProps["id"];
   location: LatLng;
   userId: string;
-  expiresAt: string;
+  abilityName: string;
+  expiresAt: number;
 };
 
 /**

@@ -1,9 +1,12 @@
+import TagGameStore from "@/stores/TagGameStore";
+import { Dayjs } from "dayjs";
+
 export interface AbilityMethod {
-  (args?: unknown[]): Promise<void> | void;
+  (...args: unknown[]): Promise<void> | void;
 }
 
 export interface ChangeToCanUsedRuleMethod {
-  (args?: unknown[]): Promise<void> | void;
+  (...args: unknown[]): Promise<void> | void;
 }
 
 export type AbilityObject = {
@@ -12,6 +15,7 @@ export type AbilityObject = {
   isSetting: boolean;
   canUsed: boolean; // trueの場合だけabilityが使用でき、falseの際は使用できない想定
   changeToCanUsedRuleMethod: ChangeToCanUsedRuleMethod;
+  reviveTime: Dayjs | null;
   targetRole: "thief" | "police";
 };
 
@@ -32,12 +36,13 @@ export interface UpdateAbilityUsedParams {
 
 export type ChangeToType = "toValid" | "toInvalid";
 
-export interface UpdateAbilityIsSettingParams {
+export type UpdateAbilityIsSettingParams = {
   updateAbilityIsSettingParams(
     targetAbilityNames: string[],
     changeTo: ChangeToType,
+    tagGameStore: TagGameStore,
   ): void;
-}
+};
 
 /**
  * tagGameStoreでの定義
