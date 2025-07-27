@@ -93,11 +93,16 @@ const AbilityScreen: React.FC<Props> = ({ _userStore, _tagGameStore }) => {
         <TouchableOpacity
           key={abilityObject.abilityName}
           style={
-            abilityObject.canUsed ? styles.validButton : styles.invalidButton
+            tagGameStore.getAbilityState(abilityObject.abilityName).canUsed
+              ? styles.validButton
+              : styles.invalidButton
           }
-          disabled={!abilityObject.canUsed}
+          disabled={
+            !tagGameStore.getAbilityState(abilityObject.abilityName).canUsed
+          }
           onPress={async () => {
             try {
+              // TODO: このswitch文いらないかも
               switch (abilityObject.abilityName) {
                 case "radar":
                   tagGameStore.isLoading = true;
@@ -112,9 +117,12 @@ const AbilityScreen: React.FC<Props> = ({ _userStore, _tagGameStore }) => {
           }}
         >
           <Text style={styles.buttonText}>レーダー</Text>
-          {abilityObject.reviveTime ? (
+          {tagGameStore.getAbilityState("radar").reviveTime ? (
             <Text style={styles.buttonText}>
-              {abilityObject.reviveTime?.add(1, "minutes").format("HH:mm")}
+              {tagGameStore
+                .getAbilityState("radar")
+                .reviveTime?.add(1, "minutes")
+                .format("HH:mm")}
               以降に復活
             </Text>
           ) : (

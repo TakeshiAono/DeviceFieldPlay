@@ -135,12 +135,18 @@ function ShowMap({
               await updateStoreOnAbilitySetting(gameId, tagGameStore);
               break;
             case "execAbility":
-              tagGameStore.isLoading = false;
-              await abilityNotificationHandler(
-                response,
-                userStore.getCurrentUser().getId(),
-                userStore.getPlayerRoleName(tagGameStore) as RoleName,
-              );
+              // publisherにもpush通知が来るため、自分に来たものは握り潰す。
+              if (
+                response.request.content.data.publisherId !==
+                userStore.getCurrentUser().getId()
+              ) {
+                await abilityNotificationHandler(
+                  response,
+                  userStore.getCurrentUser().getId(),
+                  userStore.getPlayerRoleName(tagGameStore) as RoleName,
+                );
+                tagGameStore.isLoading = false;
+              }
               break;
             default:
               break;

@@ -7,7 +7,7 @@ import {
 } from "@/interfaces/abilities";
 import { publishRequestForRadarRequest } from "./api";
 import { LatLng } from "react-native-maps";
-import TagGameStore from "@/stores/TagGameStore";
+import TagGameStore, { AbilityNames } from "@/stores/TagGameStore";
 import dayjs from "dayjs";
 
 export const triggerRadarAbility: AbilityMethod = async (
@@ -17,7 +17,7 @@ export const triggerRadarAbility: AbilityMethod = async (
   publisherId,
 ) => {
   await publishRequestForRadarRequest(
-    abilityName as string,
+    abilityName as AbilityNames,
     gameId as string,
     currentPosition as LatLng,
     publisherId as string,
@@ -35,14 +35,14 @@ export const canUsedRuleOfRadarAbility: ChangeToCanUsedRuleMethod = async (
   changeAbilityCanUsed(abilityObject.abilityName, "toInvalid", tagGameStore);
 
   const reviveMinutes = 1; //1分
-  tagGameStore.updateAbilityReviveTimeParams(
+  tagGameStore.updateReviveTimeOfAbilityState(
     abilityObject.abilityName,
     dayjs().add(reviveMinutes, "minute"),
   );
   setTimeout(
     () => {
       changeAbilityCanUsed(abilityObject.abilityName, "toValid", tagGameStore);
-      tagGameStore.updateAbilityReviveTimeParams(
+      tagGameStore.updateReviveTimeOfAbilityState(
         abilityObject.abilityName,
         null,
       );
@@ -52,10 +52,10 @@ export const canUsedRuleOfRadarAbility: ChangeToCanUsedRuleMethod = async (
 };
 
 export const changeAbilityCanUsed: UpdateAbilityIsSettingParams = (
-  targetAbility: string,
+  targetAbilityName: AbilityNames,
   changeTo: ChangeToType,
   tagGameStore: TagGameStore,
 ) => {
-  tagGameStore.updateAbilityUsedParams(targetAbility, changeTo);
+  tagGameStore.updateCanUsedOfAbilityState(targetAbilityName, changeTo);
   return;
 };

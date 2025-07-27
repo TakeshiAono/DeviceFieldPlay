@@ -18,9 +18,16 @@ import { Dayjs } from "dayjs";
 
 type interfaces = UpdateAbilityUsedParams & GetAbilityList;
 
+type AbilityStateType = { reviveTime: Dayjs | null; canUsed: Boolean };
+type AbilityStatesByCurrentUser = { radar: AbilityStateType };
+export type AbilityNames = keyof AbilityStatesByCurrentUser;
+
 export default class TagGameStore implements interfaces {
   @observable.deep
   private currentTagGame!: TagGameModel;
+
+  @observable.deep
+  private abilityStatesByCurrentUser!: AbilityStatesByCurrentUser;
 
   @observable
   private isEditTeams!: boolean;
@@ -59,6 +66,9 @@ export default class TagGameStore implements interfaces {
 
   @action
   public initialize() {
+    this.abilityStatesByCurrentUser = {
+      radar: { reviveTime: null, canUsed: true },
+    };
     this.currentTagGame = new TagGameModel({
       id: "",
       validAreas: [],
@@ -71,10 +81,8 @@ export default class TagGameStore implements interfaces {
           ability: triggerRadarAbility,
           abilityName: "radar",
           isSetting: true,
-          canUsed: true,
           changeToCanUsedRuleMethod: canUsedRuleOfRadarAbility,
-          reviveTime: null,
-          targetRole: "police",
+          targetRole: "thief",
         },
       ],
     });
@@ -464,53 +472,29 @@ export default class TagGameStore implements interfaces {
   }
 
   @action
-  public updateAbilityUsedParams(
-    targetAbilityNames: string,
+  public updateCanUsedOfAbilityState(
+    targetAbilityNames: AbilityNames,
     changeTo: "toValid" | "toInvalid",
   ): void {
-    const [targetAbilities, otherAbilities] = _.partition(
-      this.currentTagGame.getAbilityList(),
-      (ability) => targetAbilityNames.includes(ability.abilityName),
-    );
-    const updatedAbilities =
-      changeTo === "toValid"
-        ? targetAbilities.map((targetAbility) => ({
-            ...targetAbility,
-            canUsed: true,
-          }))
-        : targetAbilities.map((targetAbility) => ({
-            ...targetAbility,
-            canUsed: false,
-          }));
-
-    const joinedAbilities = [...otherAbilities, ...updatedAbilities];
-
-    this.currentTagGame.setAbilityList(
-      _.sortBy(joinedAbilities, (ability) => ability.abilityName),
-    );
+    if (changeTo === "toValid") {
+      this.abilityStatesByCurrentUser[targetAbilityNames].canUsed = true;
+    } else {
+      this.abilityStatesByCurrentUser[targetAbilityNames].canUsed = false;
+    }
     return;
   }
 
   @action
-  public updateAbilityReviveTimeParams(
-    targetAbilityNames: string,
+  public updateReviveTimeOfAbilityState(
+    targetAbilityName: AbilityNames,
     targetDateTime: Dayjs | null,
   ): void {
-    const [targetAbilities, otherAbilities] = _.partition(
-      this.currentTagGame.getAbilityList(),
-      (ability) => targetAbilityNames.includes(ability.abilityName),
-    );
-    const updatedAbilities = targetAbilities.map((targetAbility) => ({
-      ...targetAbility,
-      reviveTime: targetDateTime,
-    }));
+    this.abilityStatesByCurrentUser[targetAbilityName].reviveTime =
+      targetDateTime;
+  }
 
-    const joinedAbilities = [...otherAbilities, ...updatedAbilities];
-
-    this.currentTagGame.setAbilityList(
-      _.sortBy(joinedAbilities, (ability) => ability.abilityName),
-    );
-    return;
+  public getAbilityState(targetAbilityName: AbilityNames) {
+    return this.abilityStatesByCurrentUser[targetAbilityName];
   }
 
   @action
