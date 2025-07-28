@@ -531,6 +531,26 @@ function ShowMap({
               />
             )}
           </MapView>
+          {tagGameStore.getTagGame().getGameTimeLimit() ? (
+            <View
+              style={{
+                backgroundColor: "white",
+                width: "auto",
+                position: "absolute",
+                bottom: 0,
+                right: 0,
+                borderColor: Colors.error,
+                borderWidth: 5,
+                padding: 5,
+              }}
+            >
+              <Text>
+                {`終了時間: ${tagGameStore.getTagGame().getGameTimeLimit()?.format("HH:mm")}`}
+              </Text>
+            </View>
+          ) : (
+            <></>
+          )}
           <CopilotStep
             text={roleDisplayExplanation}
             order={1}
