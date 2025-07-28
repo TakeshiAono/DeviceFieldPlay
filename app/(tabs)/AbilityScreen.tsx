@@ -75,7 +75,7 @@ const AbilityScreen: React.FC<Props> = ({ _userStore, _tagGameStore }) => {
       } else {
         Alert.alert(
           alertTitle,
-          `捕まっていない泥棒は50m圏内に存在していません`,
+          `捕まっていない泥棒は半径50m圏内に存在していません`,
         );
       }
       tagGameStore.isLoading = false;
@@ -119,7 +119,7 @@ const AbilityScreen: React.FC<Props> = ({ _userStore, _tagGameStore }) => {
             }
           }}
         >
-          <Text style={styles.buttonText}>レーダー</Text>
+          <Text style={styles.buttonText}>50mスキャン</Text>
           {tagGameStore.getAbilityState("radar").reviveTime ? (
             <Text style={styles.buttonText}>
               {tagGameStore
