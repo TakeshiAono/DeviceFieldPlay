@@ -37,7 +37,9 @@ const AbilityScreen: React.FC<Props> = ({ _userStore, _tagGameStore }) => {
   );
 
   const execRadarAbility = async (abilityObject: AbilityObject) => {
-    abilityObject.changeToCanUsedRuleMethod(abilityObject, tagGameStore);
+    const changeToCanUsedRuleMethod =
+      tagGameStore.getExecChangeToCanUsedRuleMethod(abilityObject.abilityName);
+    changeToCanUsedRuleMethod(abilityObject, tagGameStore);
 
     const location = await getCurrentPositionAsync({});
     const userLocation = {
@@ -47,7 +49,8 @@ const AbilityScreen: React.FC<Props> = ({ _userStore, _tagGameStore }) => {
 
     const publishId = userStore.getCurrentUser().getId();
     // ability()は戻り値がPromiseの場合とPromiseではない場合両方の可能性がある
-    await abilityObject.ability(
+    const ability = tagGameStore.getExecAbility(abilityObject.abilityName);
+    await ability(
       abilityObject.abilityName,
       tagGameStore.getTagGame().getId(),
       userLocation,

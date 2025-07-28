@@ -9,10 +9,8 @@ export interface ChangeToCanUsedRuleMethod {
 }
 
 export type AbilityObject = {
-  ability: AbilityMethod;
   abilityName: AbilityNames;
   isSetting: boolean;
-  changeToCanUsedRuleMethod: ChangeToCanUsedRuleMethod;
   targetRole: "thief" | "police";
 };
 

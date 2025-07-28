@@ -22,6 +22,13 @@ type AbilityStateType = { reviveTime: Dayjs | null; canUsed: Boolean };
 type AbilityStatesByCurrentUser = { radar: AbilityStateType };
 export type AbilityNames = keyof AbilityStatesByCurrentUser;
 
+const AbilityMap = {
+  radar: {
+    ability: triggerRadarAbility,
+    changeToCanUsedRuleMethod: canUsedRuleOfRadarAbility,
+  },
+} as const;
+
 export default class TagGameStore implements interfaces {
   @observable.deep
   private currentTagGame!: TagGameModel;
@@ -76,12 +83,11 @@ export default class TagGameStore implements interfaces {
       gameMasterId: "",
       gameTimeLimit: null,
       isGameStarted: null,
+      // TODO: 将来的にabilityListはAbilityMapからmap関数で生成するようにする。
       abilityList: [
         {
-          ability: triggerRadarAbility,
           abilityName: "radar",
           isSetting: true,
-          changeToCanUsedRuleMethod: canUsedRuleOfRadarAbility,
           targetRole: "police",
         },
       ],
@@ -546,5 +552,15 @@ export default class TagGameStore implements interfaces {
       [userLocation.longitude, userLocation.latitude],
       prisonPolygon,
     );
+  }
+
+  public getExecAbility(abilityName: AbilityNames) {
+    return AbilityMap[abilityName].ability;
+  }
+
+  public getExecChangeToCanUsedRuleMethod<T extends keyof typeof AbilityMap>(
+    abilityName: AbilityNames,
+  ): (typeof AbilityMap)[T]["changeToCanUsedRuleMethod"] {
+    return AbilityMap[abilityName].changeToCanUsedRuleMethod;
   }
 }
