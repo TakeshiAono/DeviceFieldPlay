@@ -3,9 +3,16 @@ import Toast from "react-native-toast-message";
 import dayjs from "dayjs";
 import { Alert } from "react-native";
 import { Notification } from "expo-notifications";
+import { randomUUID } from "expo-crypto";
 
-import { fetchCurrentGameUsersInfo, fetchTagGames } from "./dynamoUtils";
+import {
+  fetchCurrentGameUsersInfo,
+  fetchTagGames,
+  putLocation,
+} from "./dynamoUtils";
 import { DynamoTagGame, DynamoUser } from "@/interfaces/api";
+import { getCurrentLocation, isWithinDistance } from "./locations";
+import { RoleName } from "@/stores/UserStore";
 
 export const prisonAreaNotificationHandler = async (
   notification: Notification,
@@ -332,6 +339,80 @@ export const updateStoreOnPoliceUser = async (
   }
 };
 
+export const abilitySettingNotificationHandler = async (
+  notification: Notification,
+  gameId: string,
+  tagGameStore: TagGameStore,
+) => {
+  if (notification.request.content.data.notification_type !== "abilitySetting")
+    return;
+  console.log("アビリティpush通知", notification.request.content);
+
+  Toast.show({
+    type: "success",
+    text1: notification.request.content.title as string,
+    text2: notification.request.content.body as string,
+  });
+
+  await updateStoreOnAbilitySetting(gameId, tagGameStore);
+};
+
+export const abilityNotificationHandler = async (
+  notification: Notification,
+  userId: string,
+  userRoleName: RoleName,
+) => {
+  if (notification.request.content.data.notification_type !== "execAbility")
+    return;
+
+  switch (notification.request.content.data.abilityType) {
+    case "radar":
+      if (userRoleName !== "泥(生)") return;
+
+      const currentLocation = await getCurrentLocation();
+      const publisherLocation = JSON.parse(
+        notification.request.content.data.currentPosition,
+      );
+      const upperLimitDistance = 50; //単位[m]
+      if (
+        isWithinDistance(currentLocation, publisherLocation, upperLimitDistance)
+      ) {
+        try {
+          await putLocation({
+            id: randomUUID(),
+            publisherId: notification.request.content.data.publisherId,
+            location: currentLocation,
+            userId: userId,
+            abilityName: notification.request.content.data.abilityType,
+            expiresAt: dayjs().add(30, "second").unix(),
+          });
+
+          Alert.alert(
+            "アビリティ使用検知",
+            `レーダーアビリティによって、${upperLimitDistance}m以内にいる事を\n警察に検知されました。`,
+          );
+        } catch (error) {
+          console.log(`Error: ${error}`);
+        }
+      }
+      break;
+    default:
+      break;
+  }
+};
+
+export const updateStoreOnAbilitySetting = async (
+  gameId: string,
+  tagGameStore: TagGameStore,
+) => {
+  try {
+    const tagGame = await fetchTagGames(gameId);
+    tagGameStore.putAbilityList(tagGame.abilityList);
+  } catch (error) {
+    console.error("Error: ", error);
+  }
+};
+
 const asyncDynamoTagGameAllProperties = (
   tagGameStore: TagGameStore,
   tagGame: DynamoTagGame,
@@ -353,6 +434,7 @@ const asyncDynamoTagGameAllProperties = (
   tagGameStore.getTagGame().setGameMasterId(tagGame.gameMasterId);
   tagGameStore.getTagGame().setGameTimeLimit(dayjs(tagGame.gameTimeLimit));
   tagGameStore.getTagGame().setIsGameStarted(tagGame.isGameStarted);
+  tagGameStore.getTagGame().setAbilityList(tagGame.abilityList);
 };
 
 const asyncDynamoTagGameUsers = (

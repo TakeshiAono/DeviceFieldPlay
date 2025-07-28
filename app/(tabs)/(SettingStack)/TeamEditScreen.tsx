@@ -21,10 +21,8 @@ import ReactNativeModal from "react-native-modal";
 import QRCode from "react-native-qrcode-svg";
 import UserModel from "@/models/UserModel";
 import { router } from "expo-router";
-import {
-  getCurrentPositionAsync,
-  requestForegroundPermissionsAsync,
-} from "expo-location";
+import { getCurrentPositionAsync } from "expo-location";
+import { getLocationPermissionStatus } from "@/utils/Policies";
 
 interface Props {
   _userStore?: UserStore;
@@ -80,12 +78,7 @@ function TeamEditScreen({ _userStore, _tagGameStore }: Props) {
   }, []);
 
   useEffect(() => {
-    async function getCurrentLocation() {
-      const { status } = await requestForegroundPermissionsAsync();
-      return status;
-    }
-
-    getCurrentLocation().then(async (status) => {
+    getLocationPermissionStatus().then(async (status) => {
       setLocationPermissionStatus(status);
     });
   }, []);

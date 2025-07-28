@@ -8,20 +8,33 @@ import { DynamoTagGame, DynamoUser } from "@/interfaces/api";
 import {
   AbilityList,
   GetAbilityList,
-  UpdateAbilityIsSettingParams,
   UpdateAbilityUsedParams,
 } from "@/interfaces/abilities";
+import {
+  canUsedRuleOfRadarAbility,
+  triggerRadarAbility,
+} from "@/utils/abilities";
+import { Dayjs } from "dayjs";
 
-type interfaces = UpdateAbilityUsedParams &
-  GetAbilityList &
-  UpdateAbilityIsSettingParams;
+type interfaces = UpdateAbilityUsedParams & GetAbilityList;
+
+type AbilityStateType = { reviveTime: Dayjs | null; canUsed: Boolean };
+type AbilityStatesByCurrentUser = { radar: AbilityStateType };
+export type AbilityNames = keyof AbilityStatesByCurrentUser;
+
+const AbilityMap = {
+  radar: {
+    ability: triggerRadarAbility,
+    changeToCanUsedRuleMethod: canUsedRuleOfRadarAbility,
+  },
+} as const;
 
 export default class TagGameStore implements interfaces {
   @observable.deep
   private currentTagGame!: TagGameModel;
 
   @observable.deep
-  private abilityList!: AbilityList;
+  private abilityStatesByCurrentUser!: AbilityStatesByCurrentUser;
 
   @observable
   private isEditTeams!: boolean;
@@ -50,6 +63,9 @@ export default class TagGameStore implements interfaces {
   @observable
   private explainedTeamEditScreen!: boolean;
 
+  @observable
+  public isLoading!: boolean;
+
   constructor() {
     makeObservable(this);
     this.initialize();
@@ -57,6 +73,9 @@ export default class TagGameStore implements interfaces {
 
   @action
   public initialize() {
+    this.abilityStatesByCurrentUser = {
+      radar: { reviveTime: null, canUsed: true },
+    };
     this.currentTagGame = new TagGameModel({
       id: "",
       validAreas: [],
@@ -64,6 +83,14 @@ export default class TagGameStore implements interfaces {
       gameMasterId: "",
       gameTimeLimit: null,
       isGameStarted: null,
+      // TODO: 将来的にabilityListはAbilityMapからmap関数で生成するようにする。
+      abilityList: [
+        {
+          abilityName: "radar",
+          isSetting: true,
+          targetRole: "police",
+        },
+      ],
     });
     this.isEditTeams = false;
     this.isGameTimeUp = false;
@@ -75,6 +102,7 @@ export default class TagGameStore implements interfaces {
     this.explainedPrisonAreaScreen = false;
     this.explainedGameTimeScreen = false;
     this.explainedTeamEditScreen = false;
+    this.isLoading = false;
   }
 
   @action
@@ -205,6 +233,11 @@ export default class TagGameStore implements interfaces {
   @action
   public putPoliceUsers(policeUsers: UserModel[]) {
     this.currentTagGame.setPoliceUsers(policeUsers);
+  }
+
+  @action
+  public putAbilityList(abilityList: AbilityList) {
+    this.currentTagGame.setAbilityList(abilityList);
   }
 
   public getLiveUsers() {
@@ -445,32 +478,29 @@ export default class TagGameStore implements interfaces {
   }
 
   @action
-  public updateAbilityUsedParams(
-    targetAbilityNames: string,
+  public updateCanUsedOfAbilityState(
+    targetAbilityNames: AbilityNames,
     changeTo: "toValid" | "toInvalid",
   ): void {
-    const [targetAbilities, otherAbilities] = _.partition(
-      this.abilityList,
-      (ability) => targetAbilityNames.includes(ability.abilityName),
-    );
-    const updatedAbilities =
-      changeTo === "toValid"
-        ? targetAbilities.map((targetAbility) => ({
-            ...targetAbility,
-            canUsed: true,
-          }))
-        : targetAbilities.map((targetAbility) => ({
-            ...targetAbility,
-            canUsed: false,
-          }));
-
-    const joinedAbilities = [...otherAbilities, ...updatedAbilities];
-
-    this.abilityList = _.sortBy(
-      joinedAbilities,
-      (ability) => ability.abilityName,
-    );
+    if (changeTo === "toValid") {
+      this.abilityStatesByCurrentUser[targetAbilityNames].canUsed = true;
+    } else {
+      this.abilityStatesByCurrentUser[targetAbilityNames].canUsed = false;
+    }
     return;
+  }
+
+  @action
+  public updateReviveTimeOfAbilityState(
+    targetAbilityName: AbilityNames,
+    targetDateTime: Dayjs | null,
+  ): void {
+    this.abilityStatesByCurrentUser[targetAbilityName].reviveTime =
+      targetDateTime;
+  }
+
+  public getAbilityState(targetAbilityName: AbilityNames) {
+    return this.abilityStatesByCurrentUser[targetAbilityName];
   }
 
   @action
@@ -479,7 +509,7 @@ export default class TagGameStore implements interfaces {
     changeTo: "toValid" | "toInvalid",
   ): void {
     const [targetAbilities, otherAbilities] = _.partition(
-      this.abilityList,
+      this.currentTagGame.getAbilityList(),
       (ability) => targetAbilityNames.includes(ability.abilityName),
     );
     const updatedAbilities =
@@ -495,16 +525,15 @@ export default class TagGameStore implements interfaces {
 
     const joinedAbilities = [...otherAbilities, ...updatedAbilities];
 
-    this.abilityList = _.sortBy(
-      joinedAbilities,
-      (ability) => ability.abilityName,
+    this.currentTagGame.setAbilityList(
+      _.sortBy(joinedAbilities, (ability) => ability.abilityName),
     );
     return;
   }
 
   @computed
   public get getAbilityList() {
-    return this.abilityList;
+    return this.currentTagGame.getAbilityList();
   }
 
   public isUserInPrisonArea(userLocation: {
@@ -523,5 +552,15 @@ export default class TagGameStore implements interfaces {
       [userLocation.longitude, userLocation.latitude],
       prisonPolygon,
     );
+  }
+
+  public getExecAbility(abilityName: AbilityNames) {
+    return AbilityMap[abilityName].ability;
+  }
+
+  public getExecChangeToCanUsedRuleMethod<T extends keyof typeof AbilityMap>(
+    abilityName: AbilityNames,
+  ): (typeof AbilityMap)[T]["changeToCanUsedRuleMethod"] {
+    return AbilityMap[abilityName].changeToCanUsedRuleMethod;
   }
 }

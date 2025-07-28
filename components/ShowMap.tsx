@@ -10,7 +10,7 @@ import * as Location from "expo-location";
 
 import { rejectUser, reviveUser } from "@/utils/dynamoUtils";
 import { IconSymbol } from "@/components/ui/IconSymbol";
-import UserStore from "@/stores/UserStore";
+import UserStore, { RoleName } from "@/stores/UserStore";
 import TagGameStore from "@/stores/TagGameStore";
 import { initialJapanRegion } from "./EditMap";
 import {
@@ -34,6 +34,9 @@ import {
   updateStoreOnRejectUser,
   updateStoreOnReviveUser,
   updateStoreOnPoliceUser,
+  abilitySettingNotificationHandler,
+  updateStoreOnAbilitySetting,
+  abilityNotificationHandler,
 } from "@/utils/Notifications";
 import { Text } from "react-native";
 import { Colors, getPlayerRoleColor } from "@/constants/Colors";
@@ -127,6 +130,23 @@ function ShowMap({
               break;
             case "policeUser":
               await updateStoreOnPoliceUser(gameId, tagGameStore);
+              break;
+            case "abilitySetting":
+              await updateStoreOnAbilitySetting(gameId, tagGameStore);
+              break;
+            case "execAbility":
+              // publisherにもpush通知が来るため、自分に来たものは握り潰す。
+              if (
+                response.request.content.data.publisherId !==
+                userStore.getCurrentUser().getId()
+              ) {
+                await abilityNotificationHandler(
+                  response,
+                  userStore.getCurrentUser().getId(),
+                  userStore.getPlayerRoleName(tagGameStore) as RoleName,
+                );
+                tagGameStore.isLoading = false;
+              }
               break;
             default:
               break;
@@ -224,6 +244,28 @@ function ShowMap({
         },
       );
 
+      const abilitySettingNotificationListener =
+        addNotificationReceivedListener((event) => {
+          abilitySettingNotificationHandler(event, gameId, tagGameStore);
+        });
+
+      const abilityNotificationListener = addNotificationReceivedListener(
+        async (event) => {
+          // publisherにもpush通知が来るため、自分に来たものは握り潰す。
+          if (
+            event.request.content.data.publisherId !==
+            userStore.getCurrentUser().getId()
+          ) {
+            await abilityNotificationHandler(
+              event,
+              userStore.getCurrentUser().getId(),
+              userStore.getPlayerRoleName(tagGameStore) as RoleName,
+            );
+            tagGameStore.isLoading = false;
+          }
+        },
+      );
+
       // gameIdが変わるたびに別のゲームのエリアで更新されてしまわないよう、イベントリスナーを削除し新規のイベントリスナーを生成する。
       return () => {
         joinUserNotificationListener.remove();
@@ -236,6 +278,8 @@ function ShowMap({
         gameStartNotificationListener.remove();
         gameTimeUpNotificationListener.remove();
         gameStopNotificationListener.remove();
+        abilitySettingNotificationListener.remove();
+        abilityNotificationListener.remove();
       };
     }
   }, [tagGameStore.getTagGame().getId()]);

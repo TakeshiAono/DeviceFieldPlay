@@ -30,7 +30,7 @@ export default {
   expo: {
     name: appName,
     slug: "DeviceFieldPlay",
-    version: "1.0.0",
+    version: "1.1.0",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
     scheme: "keidoro",
@@ -40,6 +40,7 @@ export default {
       awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID,
       awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
       awsRegion: process.env.AWS_REGION,
+      awsApiKey: process.env.AWS_API_KEY,
       eas: {
         projectId: process.env.PROJECT_ID,
       },
