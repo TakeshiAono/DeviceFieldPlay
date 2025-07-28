@@ -4,13 +4,23 @@ import {
   DynamoDBDocumentClient,
   GetCommand,
   UpdateCommand,
+  PutCommandInput,
 } from "@aws-sdk/lib-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
+import dayjs from "dayjs";
+import { Platform } from "react-native";
 
 import Constants from "expo-constants";
-import { Platform } from "react-native";
 import UserModel from "@/models/UserModel";
-import { DynamoDevice, DynamoTagGame, DynamoUser } from "@/interfaces/api";
+import {
+  DynamoDevice,
+  DynamoRadarLocation,
+  DynamoTagGame,
+  DynamoUser,
+  GetLocationsByUserId,
+  PostRadarLocation,
+  PutDynamoTagGame,
+} from "@/interfaces/api";
 
 const AWS_ACCESS_KEY_ID = Constants.expoConfig?.extra?.awsAccessKeyId;
 const AWS_SECRET_ACCESS_KEY = Constants.expoConfig?.extra?.awsSecretAccessKey;
@@ -49,9 +59,7 @@ export const fetchTagGames = async <T extends DynamoTagGame>(
   }
 };
 
-export const putTagGames = async <T extends DynamoTagGame>(
-  item: T,
-): Promise<T> => {
+export const putTagGames: PutDynamoTagGame = async (item: DynamoTagGame) => {
   try {
     const command = new PutCommand({
       TableName: "tagGames",
@@ -60,9 +68,51 @@ export const putTagGames = async <T extends DynamoTagGame>(
 
     const response = await generateDocClient().send(command);
     console.log("putTagGames:", response);
-    return item;
+    return response;
   } catch (error) {
     console.error("putTagGames:", error);
+    throw error;
+  }
+};
+
+export const getLocationsByPublisherId: GetLocationsByUserId = async (
+  publisherId: string,
+  abilityName: string,
+) => {
+  try {
+    const command = new ScanCommand({
+      TableName: "locations",
+      FilterExpression:
+        "publisherId = :publisherId AND abilityName = :abilityName AND expiresAt >= :currentDataUNIXTime",
+      ExpressionAttributeValues: {
+        ":publisherId": { S: publisherId },
+        ":abilityName": { S: abilityName },
+        ":currentDataUNIXTime": { N: String(dayjs().unix()) },
+      },
+    });
+
+    const response = await generateDocClient().send(command);
+    return response;
+  } catch (error) {
+    console.error("locations:", error);
+    throw error;
+  }
+};
+
+export const putLocation: PostRadarLocation = async (
+  item: DynamoRadarLocation,
+) => {
+  try {
+    const command = new PutCommand({
+      TableName: "locations",
+      Item: item,
+    });
+
+    const response = await generateDocClient().send(command);
+    console.log("locations:", response);
+    return;
+  } catch (error) {
+    console.error("locations:", error);
     throw error;
   }
 };

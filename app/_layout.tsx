@@ -23,6 +23,8 @@ import {
   requestPermissionsAsync,
   setNotificationChannelAsync,
 } from "expo-notifications";
+import axios from "axios";
+import Constants from "expo-constants";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import UserStore from "@/stores/UserStore";
@@ -30,9 +32,21 @@ import TagGameStore from "@/stores/TagGameStore";
 import { joinUser, putDevice, putTagGames, putUser } from "@/utils/dynamoUtils";
 import { observer } from "mobx-react-lite";
 import { CopilotProvider } from "react-native-copilot";
+import Spinner from "react-native-loading-spinner-overlay";
+import dayjs from "dayjs";
+import "dayjs/locale/ja";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+dayjs.tz.setDefault("Asia/Tokyo");
+dayjs.locale("ja");
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+axios.defaults.headers.common["X-API-KEY"] =
+  Constants.expoConfig?.extra?.awsApiKey;
 
 const RootLayout = observer(() => {
   const colorScheme = useColorScheme();
@@ -103,6 +117,10 @@ const RootLayout = observer(() => {
         <ThemeProvider
           value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
         >
+          <Spinner
+            visible={stores._tagGameStore.isLoading}
+            textContent={"ロード中..."}
+          />
           <ReactNativeModal style={{ margin: "auto" }} isVisible={modalView}>
             <View style={{ backgroundColor: "white", width: 330, padding: 20 }}>
               <Text

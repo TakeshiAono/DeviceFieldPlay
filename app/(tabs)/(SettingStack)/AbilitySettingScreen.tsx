@@ -8,6 +8,7 @@ import AbilityCheckList, {
 import _ from "lodash";
 import { AbilityObject } from "@/interfaces/abilities";
 import { Colors } from "@/constants/Colors";
+import { putTagGames } from "@/utils/dynamoUtils";
 
 interface Props {
   _tagGameStore?: TagGameStore;
@@ -24,9 +25,8 @@ const AbilitySettingScreen: React.FC<Props> = ({ _tagGameStore }) => {
   >([]);
 
   useEffect(() => {
-    const abilityList = tagGameStore.getAbilityList;
     const [policeAbilities, thiefAbilities] = _.partition(
-      abilityList,
+      tagGameStore.getTagGame().getAbilityList(),
       (abilityObject) => abilityObject.targetRole === "police",
     );
     setPoliceAbilitiesForList(transformToAbilitiesForList(policeAbilities));
@@ -174,8 +174,9 @@ const AbilitySettingScreen: React.FC<Props> = ({ _tagGameStore }) => {
               ? Colors.success
               : Colors.error,
           }}
-          onPress={() => {
+          onPress={async () => {
             updateAbilityList();
+            await putTagGames(tagGameStore.getTagGame().toObject());
             tagGameStore.setIsSetAbilityDone(true);
           }}
         >

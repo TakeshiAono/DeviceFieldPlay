@@ -5,7 +5,7 @@ import {
   setNotificationChannelAsync,
 } from "expo-notifications";
 
-export async function getCurrentLocation() {
+export async function getLocationPermissionStatus() {
   const { status } = await requestForegroundPermissionsAsync();
 
   return status;
