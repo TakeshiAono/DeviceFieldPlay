@@ -1,17 +1,16 @@
+import TagGameStore, { AbilityNames } from "@/stores/TagGameStore";
+
 export interface AbilityMethod {
-  (args?: unknown[]): Promise<void> | void;
+  (...args: unknown[]): Promise<void> | void;
 }
 
 export interface ChangeToCanUsedRuleMethod {
-  (args?: unknown[]): Promise<void> | void;
+  (...args: unknown[]): Promise<void> | void;
 }
 
 export type AbilityObject = {
-  ability: AbilityMethod;
-  abilityName: string;
+  abilityName: AbilityNames;
   isSetting: boolean;
-  canUsed: boolean; // trueの場合だけabilityが使用でき、falseの際は使用できない想定
-  changeToCanUsedRuleMethod: ChangeToCanUsedRuleMethod;
   targetRole: "thief" | "police";
 };
 
@@ -24,7 +23,7 @@ export type AbilityList = AbilityObject[];
  * AbilityScreen画面にてアビリティを実行した際の使用を想定
  */
 export interface UpdateAbilityUsedParams {
-  updateAbilityUsedParams(
+  updateCanUsedOfAbilityState(
     targetAbilityName: string,
     changeTo: ChangeToType,
   ): void;
@@ -32,13 +31,11 @@ export interface UpdateAbilityUsedParams {
 
 export type ChangeToType = "toValid" | "toInvalid";
 
-export interface UpdateAbilityIsSettingParams {
-  updateAbilityIsSettingParams(
-    targetAbilityNames: string[],
-    changeTo: ChangeToType,
-  ): void;
-}
-
+export type UpdateAbilityIsSettingParams = (
+  targetAbilityName: AbilityNames,
+  changeTo: ChangeToType,
+  tagGameStore: TagGameStore,
+) => void;
 /**
  * tagGameStoreでの定義
  * SettingScreenおよびAbilityScreenでの使用を想定
