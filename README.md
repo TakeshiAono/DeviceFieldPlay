@@ -1,5 +1,13 @@
 # デプロイ
 
+## bare workflowの開発用アプリをデバイスにインストールする方法
+
+### android
+
+1. androidディレクトリ直下にlocal.propertiesファイルを作成
+2. 作ったファイルにsdk.dir=/Users/ユーザー名/Library/Android/sdkをコピー
+3. PCとデバイスをケーブルで繋いでnpm run androidで開発用アプリをデバイスにインストール可能
+
 ## lambdaへのデプロイ方法
 
 <!-- TODO: 将来的にはCloudFormationで行う -->
@@ -50,3 +58,11 @@ AWS access portalで`DeviceFieldPlayDev`にログインする
 `eas build --profile production --platform ios`コマンドでeas上で本番環境ビルドを行う。
 ビルド完了後.ipaファイルがダウンロードできるようになる。
 macPCにて`Transporter`というアプリをインストールして、そこで.ipaがデプロイできるようになる。
+
+# 開発
+
+## Android
+
+### Androidネイティブコードのデバッグ方法
+
+`adb logcat | grep [検索したいログ文言]`でリアルタイムのAndroidのログを表示することができる。これでLog.d()のログ出力結果を確認することができる。
